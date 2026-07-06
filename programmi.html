@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Programmi e Curva Termica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #f5f6f8;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #888888;
+            --accent-color: #007bff;
+            --accent-light: #e6f2ff;
+            --error-color: #dc3545;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        /* Intestazione */
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background-color: var(--card-bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 20px;
+            margin-right: 20px;
+            cursor: pointer;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Menu a Tab (Programmi, Pianificato, Curva) */
+        .tabs {
+            display: flex;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--accent-color);
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        /* Contenitore Pagine */
+        .tab-content {
+            display: none;
+            padding: 15px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Stile Liste Programmi */
+        .program-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .program-info {
+            flex: 1;
+        }
+
+        .program-title {
+            font-weight: 500;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .program-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .program-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f0f4f8;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 15px;
+        }
+
+        /* Stile Curva Termica (Speciale) */
+        .curve-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 10px 20px;
+            margin-bottom: 15px;
+        }
+
+        .hour-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .hour-row:last-child {
+            border-bottom: none;
+        }
+
+        .hour-label {
+            font-weight: 500;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .temp-stepper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--bg-color);
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+
+        .temp-stepper button {
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: var(--accent-color);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .temp-stepper span {
+            font-weight: 500;
+            font-size: 16px;
+            width: 25px;
+            text-align: center;
+        }
+
+        .add-curve-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            border: 2px dashed var(--accent-color);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="dettaglio.html" class="back-btn"><i class="fas fa-chevron-left"></i></a>
+        <h1>Cameretta - Programmi</h1>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="cambiaTab('programmi', this)">PROGRAMMI</div>
+        <div class="tab" onclick="cambiaTab('pianificato', this)">PIANIFICATO</div>
+        <div class="tab" onclick="cambiaTab('curva', this)"><i class="fas fa-chart-line"></i> CURVA</div>
+    </div>
+
+    <div id="programmi" class="tab-content active">
+        <div class="program-card">
+            <div class="program-icon" style="color: #dc3545; background-color: #f8d7da;"><i class="fas fa-sun"></i></div>
+            <div class="program-info">
+                <div class="program-title">Caldo</div>
+                <div class="program-desc">Aria condizionata calda (massimo 30 °C) per tenerti al caldo quando fa freddo.</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+        </div>
+
+        <div class="program-card">
+            <div class="program-icon" style="color: #007bff; background-color: #e6f2ff;"><i class="fas fa-snowflake"></i></div>
+            <div class="program-info">
+                <div class="program-title">Freddo</div>
+                <div class="program-desc">Aria condizionata fresca (minima 16 °C) per mantenerti fresco quando fa caldo.</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+        </div>
+
+        <div class="program-card">
+            <div class="program-icon" style="color: #17a2b8; background-color: #d1ecf1;"><i class="fas fa-tint"></i></div>
+            <div class="program-info">
+                <div class="program-title">Deumidificazione</div>
+                <div class="program-desc">Mantenere l'aria asciutta e ridurre l'umidità all'interno.</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+        </div>
+
+        <div class="program-card">
+            <div class="program-icon" style="color: #6f42c1; background-color: #e2d9f3;"><i class="fas fa-thermometer-half"></i></div>
+            <div class="program-info">
+                <div class="program-title">Funzione 10°C Heating</div>
+                <div class="program-desc">Evita shock termici mantenendo una temperatura minima in casa.</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+        </div>
+    </div>
+
+    <div id="pianificato" class="tab-content">
+        <h3 style="font-size: 14px; color: var(--text-muted); text-transform: uppercase;">Le tue pianificazioni</h3>
+        
+        <div class="program-card" style="border-left: 4px solid var(--accent-color);">
+            <div class="program-info">
+                <div class="program-title">Mattina Inverno</div>
+                <div class="program-desc">Lun, Mar, Mer, Gio, Ven - 06:30</div>
+                <div style="font-size: 12px; color: var(--accent-color); margin-top: 5px;"><i class="fas fa-sun"></i> Caldo 24°C</div>
+            </div>
+            <label class="switch" style="position: relative; display: inline-block; width: 46px; height: 24px;">
+                <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+                <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #28a745; border-radius: 24px;">
+                    <span style="position: absolute; height: 18px; width: 18px; left: 25px; bottom: 3px; background-color: white; border-radius: 50%;"></span>
+                </span>
+            </label>
+        </div>
+
+        <button class="save-btn" style="background-color: #f0f4f8; color: var(--accent-color); margin-top: 20px;">
+            <i class="fas fa-plus"></i> Aggiungi Pianificazione
+        </button>
+    </div>
+
+    <div id="curva" class="tab-content">
+        <div style="margin-bottom: 15px; font-size: 14px; color: var(--text-muted); line-height: 1.5;">
+            Imposta una temperatura diversa per ogni fascia oraria notturna. Aggiungi tutti gli step che desideri.
+        </div>
+
+        <div class="curve-container" id="contenitore-curva">
+            
+            <div class="hour-row">
+                <div class="hour-label"><i class="far fa-clock"></i> 23:00</div>
+                <div class="temp-stepper">
+                    <button onclick="cambiaCurva('t23', -1)"><i class="fas fa-minus"></i></button>
+                    <span id="t23">24°</span>
+                    <button onclick="cambiaCurva('t23', 1)"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+
+            <div class="hour-row">
+                <div class="hour-label"><i class="far fa-clock"></i> 06:00</div>
+                <div class="temp-stepper">
+                    <button onclick="cambiaCurva('t06', -1)"><i class="fas fa-minus"></i></button>
+                    <span id="t06">27°</span>
+                    <button onclick="cambiaCurva('t06', 1)"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+
+        </div>
+
+        <button class="add-curve-btn" onclick="aggiungiPuntoCurva()">
+            <i class="fas fa-plus"></i> Aggiungi Orario
+        </button>
+
+        <button class="save-btn" onclick="alert('Curva Termica salvata! Le temperature cambieranno automaticamente in queste ore.')">
+            Salva Curva Termica
+        </button>
+    </div>
+
+    <script>
+        // Gestione Menu a Schede
+        function cambiaTab(idTab, elementoCliccato) {
+            const contenuti = document.querySelectorAll('.tab-content');
+            contenuti.forEach(cont => cont.classList.remove('active'));
+            
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+
+            document.getElementById(idTab).classList.add('active');
+            elementoCliccato.classList.add('active');
+        }
+
+        // Modifica dei gradi
+        function cambiaCurva(idTemp, delta) {
+            let elemento = document.getElementById(idTemp);
+            let gradi = parseInt(elemento.innerText.replace('°', '')); 
+            gradi += delta;
+            
+            if(gradi < 16) gradi = 16;
+            if(gradi > 30) gradi = 30;
+            
+            elemento.innerText = gradi + "°";
+        }
+
+        // Variabile per creare ID sempre diversi
+        let contatoreFasce = 1;
+
+        // Funzione per inserire una nuova riga dinamica
+        function aggiungiPuntoCurva() {
+            let nuovoId = 't_custom_' + contatoreFasce;
+            contatoreFasce++;
+            
+            // Creiamo il pezzo di HTML con un input per l'ora e il tasto cestino
+            let nuovaRiga = `
+            <div class="hour-row">
+                <div class="hour-label">
+                    <i class="far fa-clock"></i> 
+                    <input type="time" value="00:00" style="border: none; background: transparent; font-family: inherit; font-size: 16px; font-weight: 500; color: var(--text-main); outline: none; width: 70px;">
+                </div>
+                <div class="temp-stepper">
+                    <button onclick="cambiaCurva('${nuovoId}', -1)"><i class="fas fa-minus"></i></button>
+                    <span id="${nuovoId}">25°</span>
+                    <button onclick="cambiaCurva('${nuovoId}', 1)"><i class="fas fa-plus"></i></button>
+                    <button onclick="eliminaRiga(this)" style="color: var(--error-color); margin-left: 5px;"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+            `;
+            
+            // Incolliamo la nuova riga alla fine del contenitore bianco
+            document.getElementById('contenitore-curva').insertAdjacentHTML('beforeend', nuovaRiga);
+        }
+
+        // Funzione per cancellare la riga selezionata
+        function eliminaRiga(bottoneCliccato) {
+            bottoneCliccato.closest('.hour-row').remove();
+        }
+    </script>
+</body>
+</html>

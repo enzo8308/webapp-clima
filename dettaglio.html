@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dettaglio Climatizzatore</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #f5f6f8;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #888888;
+            --accent-color: #007bff;
+            --accent-light: #e6f2ff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 30px;
+        }
+
+        /* Intestazione con pulsante Indietro */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Stato Principale (Temp e Power) */
+        .main-status {
+            text-align: center;
+            padding: 30px 20px;
+            background-color: var(--card-bg);
+            margin-bottom: 15px;
+        }
+
+        .temperature-display {
+            font-size: 64px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .temperature-display span {
+            font-size: 32px;
+            margin-top: 10px;
+        }
+
+        .power-big-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 24px;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,123,255,0.3);
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        /* Sezioni di controllo (Card) */
+        .control-section {
+            background-color: var(--card-bg);
+            margin: 0 15px 15px 15px;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .section-header {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Griglia Pulsanti (Modalità, Ventola, ecc) */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            gap: 10px;
+        }
+
+        .control-btn {
+            background-color: var(--bg-color);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            padding: 12px 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-main);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn i {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        .control-btn.active {
+            background-color: var(--accent-light);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .control-btn.active i {
+            color: var(--accent-color);
+        }
+
+        /* Regolazione Temperatura */
+        .temp-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-color);
+            border-radius: 12px;
+            padding: 10px;
+        }
+
+        .temp-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: white;
+            border: 1px solid #ddd;
+            font-size: 20px;
+            color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        /* Lista Funzioni Speciali (Switch) */
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .feature-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .feature-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .feature-text div:first-child {
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .feature-text div:last-child {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* Switch Toggle stile iOS */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--success-color, #28a745);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="index.html" class="back-btn" style="text-decoration: none;"><i class="fas fa-chevron-left"></i></a>
+        <h1>Cameretta</h1>
+        <i class="fas fa-cog" style="color: var(--text-muted);"></i>
+    </div>
+
+    <div class="main-status">
+        <div id="main-mode-text" style="color: var(--text-muted); font-weight: 500;">FREDDO</div>
+        <div class="temperature-display">
+            <span id="temp-display-main" style="margin-top: 0; font-size: 64px;">24</span>
+            <span style="font-size: 32px; margin-top: 10px;">°C</span>
+        </div>
+        <button class="power-big-btn"><i class="fas fa-power-off"></i></button>
+    </div>
+
+    <div class="control-section">
+        <div class="section-header">Modalità</div>
+        <div class="btn-grid" id="mode-buttons">
+            <div class="control-btn active" onclick="cambiaModalita('Freddo', this)"><i class="fas fa-snowflake"></i> Freddo</div>
+            <div class="control-btn" onclick="cambiaModalita('Caldo', this)"><i class="fas fa-sun"></i> Caldo</div>
+            <div class="control-btn" onclick="cambiaModalita('Deumid.', this)"><i class="fas fa-tint"></i> Deumid.</div>
+            <div class="control-btn" onclick="cambiaModalita('Ventola', this)"><i class="fas fa-fan"></i> Ventola</div>
+            <div class="control-btn" onclick="cambiaModalita('Auto', this)"><i class="fas fa-magic"></i> Auto</div>
+        </div>
+    </div>
+
+    <div class="control-section">
+        <div class="section-header">Temperatura</div>
+        <div class="temp-controls">
+            <button class="temp-btn" onclick="cambiaTemperatura(-1)"><i class="fas fa-minus"></i></button>
+            <span id="temp-display-control" style="font-size: 20px; font-weight: 500;">24 °C</span>
+            <button class="temp-btn" onclick="cambiaTemperatura(1)"><i class="fas fa-plus"></i></button>
+        </div>
+    </div>
+
+    <div class="control-section">
+        <div class="section-header">Velocità Ventola</div>
+        <div class="btn-grid" id="fan-buttons">
+            <div class="control-btn active" onclick="cambiaVentola(this)"><i class="fas fa-signal" style="font-size: 14px;"></i> Bassa</div>
+            <div class="control-btn" onclick="cambiaVentola(this)"><i class="fas fa-signal" style="font-size: 18px;"></i> Media</div>
+            <div class="control-btn" onclick="cambiaVentola(this)"><i class="fas fa-signal"></i> Alta</div>
+            <div class="control-btn" onclick="cambiaVentola(this)"><i class="fas fa-sync"></i> Auto</div>
+        </div>
+    </div>
+
+    <div class="control-section">
+        <div class="section-header">Direzione Palette</div>
+        <div class="btn-grid" id="vane-buttons" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="control-btn" onclick="cambiaDirezione(this)"><i class="fas fa-arrows-alt-v"></i> Oscilla Vert.</div>
+            <div class="control-btn" onclick="cambiaDirezione(this)"><i class="fas fa-arrows-alt-h"></i> Oscilla Orizz.</div>
+            <div class="control-btn active" onclick="cambiaDirezione(this)"><i class="fas fa-stop"></i> Ferma</div>
+            <div class="control-btn" onclick="cambiaDirezione(this)"><i class="fas fa-chevron-up"></i> Extra Su</div>
+            <div class="control-btn" onclick="cambiaDirezione(this)"><i class="fas fa-chevron-down"></i> Extra Giù</div>
+        </div>
+    </div>
+
+    <div class="control-section">
+        <div class="section-header">Funzioni Speciali</div>
+        <div class="feature-list">
+            
+         <div class="feature-item">
+             <div class="feature-info" onclick="window.location.href='programmi.html'" style="cursor: pointer;">
+                 <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                 <div class="feature-text">
+                     <div>Curva Termica</div>
+                     <div style="color: var(--accent-color);">Tocca per configurare <i class="fas fa-arrow-right" style="font-size: 10px;"></i></div>
+                 </div>
+             </div>
+             <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+         </div>
+
+            <div class="feature-item">
+                <div class="feature-info">
+                    <div class="feature-icon" style="background-color: #fff3cd; color: #ffc107;"><i class="fas fa-lightbulb"></i></div>
+                    <div class="feature-text">
+                        <div>Display LED</div>
+                        <div>Accende/Spegne lo schermo sul clima</div>
+                    </div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-info">
+                    <div class="feature-icon" style="background-color: #e2d9f3; color: #6f42c1;"><i class="fas fa-moon"></i></div>
+                    <div class="feature-text">
+                        <div>Modalità Notte</div>
+                        <div>Regolazione per il sonno</div>
+                    </div>
+                </div>
+                <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-info">
+                    <div class="feature-icon" style="background-color: #f8d7da; color: #dc3545;"><i class="fas fa-thermometer-half"></i></div>
+                    <div class="feature-text">
+                        <div>10°C Heating</div>
+                        <div>Mantiene la temperatura minima</div>
+                    </div>
+                </div>
+                <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- LOGICA MODALITÀ ---
+        function cambiaModalita(modalita, elementoCliccato) {
+            const bottoni = document.querySelectorAll('#mode-buttons .control-btn');
+            bottoni.forEach(btn => btn.classList.remove('active'));
+            elementoCliccato.classList.add('active');
+            
+            document.getElementById('main-mode-text').innerText = modalita.toUpperCase();
+
+            let colorePrincipale = '#007bff'; 
+            let coloreSfondo = '#e6f2ff';
+
+            if (modalita === 'Caldo') {
+                colorePrincipale = '#dc3545';
+                coloreSfondo = '#f8d7da';
+            } else if (modalita === 'Deumid.') {
+                colorePrincipale = '#17a2b8';
+                coloreSfondo = '#d1ecf1';
+            } else if (modalita === 'Ventola') {
+                colorePrincipale = '#6c757d';
+                coloreSfondo = '#e2e3e5';
+            } else if (modalita === 'Auto') {
+                colorePrincipale = '#28a745';
+                coloreSfondo = '#d4edda';
+            }
+
+            document.documentElement.style.setProperty('--accent-color', colorePrincipale);
+            document.documentElement.style.setProperty('--accent-light', coloreSfondo);
+        }
+
+        // --- LOGICA TEMPERATURA ---
+        let gradiAttuali = 24; 
+
+        function cambiaTemperatura(delta) {
+            gradiAttuali += delta;
+            
+            // Limiti fisici (16 - 30)
+            if(gradiAttuali < 16) gradiAttuali = 16;
+            if(gradiAttuali > 30) gradiAttuali = 30;
+
+            document.getElementById('temp-display-main').innerText = gradiAttuali;
+            document.getElementById('temp-display-control').innerText = gradiAttuali + " °C";
+        }
+
+        // --- LOGICA VELOCITÀ VENTOLA ---
+        function cambiaVentola(elementoCliccato) {
+            const bottoni = document.querySelectorAll('#fan-buttons .control-btn');
+            bottoni.forEach(btn => btn.classList.remove('active'));
+            elementoCliccato.classList.add('active');
+        }
+
+        // --- LOGICA DIREZIONE PALETTE ---
+        function cambiaDirezione(elementoCliccato) {
+            const bottoni = document.querySelectorAll('#vane-buttons .control-btn');
+            bottoni.forEach(btn => btn.classList.remove('active'));
+            elementoCliccato.classList.add('active');
+        }
+    </script>
+</body>
+</html>
