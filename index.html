@@ -274,7 +274,8 @@
         }
 
         // --- COLLEGAMENTO AL SERVER HIVEMQ ---
-        const indirizzoServer = "wss://2c168e0c5ebc4e5a8cac9e67a335b928.s1.eu.hivemq.cloud:8884/mqtt";
+        alert("🚀 Il codice JavaScript si è svegliato!");
+	const indirizzoServer = "wss://2c168e0c5ebc4e5a8cac9e67a335b928.s1.eu.hivemq.cloud:8884/mqtt";
         const opzioniConnessione = {
             clientId: "webapp_" + Math.random().toString(16).substring(2, 10),
             username: "vincenzo_clima",
@@ -285,8 +286,9 @@
         const clientMQTT = mqtt.connect(indirizzoServer, opzioniConnessione);
 
         clientMQTT.on('connect', function () {
-            console.log("✅ Connessione al Server MQTT riuscita con successo!");
-        });
+    	alert("✅ Connessione al Server MQTT riuscita con successo!");
+   	console.log("✅ Connessione al Server MQTT riuscita con successo!");
+	});
 
         clientMQTT.on('error', function (errore) {
             console.error("❌ Errore di connessione MQTT: ", errore);
