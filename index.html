@@ -292,7 +292,7 @@
         };
     </script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
     <script>
         function apriDettagli(stanza) {
             if(stanza === 'camera_letto') {
@@ -302,18 +302,18 @@
             }
         }
 
-        const indirizzoServer = "wss://2c168e0c5ebc4e5a8cac9e67a335b928.s1.eu.hivemq.cloud:8884/mqtt";
+        // --- NUOVA CONNESSIONE AL SERVER PUBBLICO ---
+        const indirizzoServer = "wss://broker.hivemq.com:8884/mqtt";
         const opzioniConnessione = {
-            clientId: "webapp_" + Math.random().toString(16).substring(2, 10),
-            username: "vincenzo_clima",
-            password: "123456789",
+            clientId: "webapp_index_" + Math.random().toString(16).substring(2, 10),
             clean: true
+            // Username e password rimossi perché usiamo il server pubblico
         };
 
         const clientMQTT = mqtt.connect(indirizzoServer, opzioniConnessione);
 
         clientMQTT.on('connect', function () {
-            console.log("✅ Connessione al Server MQTT riuscita con successo!");
+            console.log("✅ Connessione al Server MQTT riuscita con successo dalla Home!");
         });
 
         clientMQTT.on('error', function (errore) {
