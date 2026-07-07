@@ -27,7 +27,6 @@
             padding-bottom: 70px;
         }
 
-        /* Intestazione */
         .header {
             display: flex;
             justify-content: space-between;
@@ -54,7 +53,6 @@
             cursor: pointer;
         }
 
-        /* Sezione Titolo Dispositivi */
         .section-title {
             display: flex;
             justify-content: space-between;
@@ -69,7 +67,6 @@
             font-size: 14px;
         }
 
-        /* Griglia Condizionatori */
         .device-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -77,7 +74,6 @@
             padding: 0 20px;
         }
 
-        /* Stile delle Card */
         .card {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -140,7 +136,6 @@
             font-weight: 500;
         }
 
-        /* Barra di navigazione inferiore */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -172,7 +167,6 @@
             margin-bottom: 4px;
         }
 
-        /* Pulsante OFF Centrale */
         .nav-off-btn {
             position: relative;
             top: -20px;
@@ -262,36 +256,22 @@
         </a>
     </div>
 
-
-
-	<script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        // ==========================================
-	// Import the functions you need from the SDKs you need
-	import { initializeApp } from "firebase/app";
-	// TODO: Add SDKs for Firebase products that you want to use
-	// https://firebase.google.com/docs/web/setup#available-libraries
-
-	// Your web app's Firebase configuration
-	const firebaseConfig = {
-  	apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo",
-  	authDomain: "smartclima-casa.firebaseapp.com",
-  	projectId: "smartclima-casa",
-  	storageBucket: "smartclima-casa.firebasestorage.app",
-  	messagingSenderId: "1075389846823",
-  	appId: "1:1075389846823:web:02fbdc2d55fdbddde84502"
-	};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo",
+            authDomain: "smartclima-casa.firebaseapp.com",
+            projectId: "smartclima-casa",
+            storageBucket: "smartclima-casa.firebasestorage.app",
+            messagingSenderId: "1075389846823",
+            appId: "1:1075389846823:web:02fbdc2d55fdbddde84502"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // Il Buttafuori controlla chi entra
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 console.log("✅ Utente riconosciuto: " + user.email);
@@ -302,11 +282,8 @@ const app = initializeApp(firebaseConfig);
         });
     </script>
 
-
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
     <script>
-        // Funzione per navigare ai dettagli
         function apriDettagli(stanza) {
             if(stanza === 'camera_letto') {
                 alert("Il condizionatore in Camera Letto non è attualmente connesso alla rete.");
@@ -315,9 +292,7 @@ const app = initializeApp(firebaseConfig);
             }
         }
 
-        // --- COLLEGAMENTO AL SERVER HIVEMQ ---
-        // serviva per capire se funzionava ->   alert("🚀 Il codice JavaScript si è svegliato!");
-	const indirizzoServer = "wss://2c168e0c5ebc4e5a8cac9e67a335b928.s1.eu.hivemq.cloud:8884/mqtt";
+        const indirizzoServer = "wss://2c168e0c5ebc4e5a8cac9e67a335b928.s1.eu.hivemq.cloud:8884/mqtt";
         const opzioniConnessione = {
             clientId: "webapp_" + Math.random().toString(16).substring(2, 10),
             username: "vincenzo_clima",
@@ -328,9 +303,8 @@ const app = initializeApp(firebaseConfig);
         const clientMQTT = mqtt.connect(indirizzoServer, opzioniConnessione);
 
         clientMQTT.on('connect', function () {
-    	// serviva per capre se funzionava -> alert("✅ Connessione al Server MQTT riuscita con successo!");
-   	console.log("✅ Connessione al Server MQTT riuscita con successo!");
-	});
+            console.log("✅ Connessione al Server MQTT riuscita con successo!");
+        });
 
         clientMQTT.on('error', function (errore) {
             console.error("❌ Errore di connessione MQTT: ", errore);
