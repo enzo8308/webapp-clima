@@ -235,9 +235,9 @@
     </div>
 
     <div class="bottom-nav">
-	<a href="#" class="nav-item" onclick="esci()">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Esci</span>
+        <a href="#" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
         </a>
         <a href="programmi.html" class="nav-item">
             <i class="fas fa-list"></i>
@@ -250,15 +250,15 @@
             <i class="fas fa-compass"></i>
             <span>Scopri</span>
         </a>
-        <a href="#" class="nav-item">
-            <i class="fas fa-ellipsis-h"></i>
-            <span>Altro</span>
+        <a href="#" class="nav-item" onclick="esci()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Esci</span>
         </a>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo",
@@ -272,14 +272,24 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
+        // Controllo se l'utente è loggato
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 console.log("✅ Utente riconosciuto: " + user.email);
             } else {
                 console.log("❌ Utente non autorizzato! Espulsione in corso...");
-                window.location.href = "login.html"; // Ti butta fuori
+                window.location.href = "login.html";
             }
         });
+
+        // Funzione per il pulsante Esci
+        window.esci = function() {
+            signOut(auth).then(() => {
+                console.log("Uscita effettuata!");
+            }).catch((error) => {
+                console.error("Errore durante l'uscita: ", error);
+            });
+        };
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
