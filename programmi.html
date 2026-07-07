@@ -94,6 +94,13 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .program-card:active {
+            transform: scale(0.98);
+            background-color: #f8f9fa;
         }
 
         .program-info {
@@ -222,38 +229,38 @@
     </div>
 
     <div id="programmi" class="tab-content active">
-        <div class="program-card">
+        <div class="program-card" onclick="avviaProgrammaRapido('HEAT', 30)">
             <div class="program-icon" style="color: #dc3545; background-color: #f8d7da;"><i class="fas fa-sun"></i></div>
             <div class="program-info">
                 <div class="program-title">Caldo</div>
-                <div class="program-desc">Aria condizionata calda (massimo 30 °C) per tenerti al caldo quando fa freddo.</div>
+                <div class="program-desc">Aria condizionata calda (imposta a 30 °C) per tenerti al caldo quando fa freddo.</div>
             </div>
             <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
         </div>
 
-        <div class="program-card">
+        <div class="program-card" onclick="avviaProgrammaRapido('COOL', 16)">
             <div class="program-icon" style="color: #007bff; background-color: #e6f2ff;"><i class="fas fa-snowflake"></i></div>
             <div class="program-info">
                 <div class="program-title">Freddo</div>
-                <div class="program-desc">Aria condizionata fresca (minima 16 °C) per mantenerti fresco quando fa caldo.</div>
+                <div class="program-desc">Aria condizionata fresca (imposta a 16 °C) per mantenerti fresco quando fa caldo.</div>
             </div>
             <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
         </div>
 
-        <div class="program-card">
+        <div class="program-card" onclick="avviaProgrammaRapido('DRY', 24)">
             <div class="program-icon" style="color: #17a2b8; background-color: #d1ecf1;"><i class="fas fa-tint"></i></div>
             <div class="program-info">
                 <div class="program-title">Deumidificazione</div>
-                <div class="program-desc">Mantenere l'aria asciutta e ridurre l'umidità all'interno.</div>
+                <div class="program-desc">Mantiene l'aria asciutta e riduce l'umidità all'interno.</div>
             </div>
             <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
         </div>
 
-        <div class="program-card">
+        <div class="program-card" onclick="avviaProgrammaRapido('HEAT', 16)">
             <div class="program-icon" style="color: #6f42c1; background-color: #e2d9f3;"><i class="fas fa-thermometer-half"></i></div>
             <div class="program-info">
                 <div class="program-title">Funzione 10°C Heating</div>
-                <div class="program-desc">Evita shock termici mantenendo una temperatura minima in casa.</div>
+                <div class="program-desc">Evita shock termici mantenendo una temperatura minima in casa (imposta Caldo al minimo).</div>
             </div>
             <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
         </div>
@@ -262,7 +269,7 @@
     <div id="pianificato" class="tab-content">
         <h3 style="font-size: 14px; color: var(--text-muted); text-transform: uppercase;">Le tue pianificazioni</h3>
         
-        <div class="program-card" style="border-left: 4px solid var(--accent-color);">
+        <div class="program-card" style="border-left: 4px solid var(--accent-color); cursor: default;">
             <div class="program-info">
                 <div class="program-title">Mattina Inverno</div>
                 <div class="program-desc">Lun, Mar, Mer, Gio, Ven - 06:30</div>
@@ -287,7 +294,6 @@
         </div>
 
         <div class="curve-container" id="contenitore-curva">
-            
             <div class="hour-row">
                 <div class="hour-label"><i class="far fa-clock"></i> 23:00</div>
                 <div class="temp-stepper">
@@ -305,20 +311,77 @@
                     <button onclick="cambiaCurva('t06', 1)"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
-
         </div>
 
         <button class="add-curve-btn" onclick="aggiungiPuntoCurva()">
             <i class="fas fa-plus"></i> Aggiungi Orario
         </button>
 
-        <button class="save-btn" onclick="alert('Curva Termica salvata! Le temperature cambieranno automaticamente in queste ore.')">
+        <button class="save-btn" onclick="alert('Curva Termica salvata graficamente! (L\'esecuzione automatica richiede un Server Domotico)')">
             Salva Curva Termica
         </button>
     </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo",
+            authDomain: "smartclima-casa.firebaseapp.com",
+            projectId: "smartclima-casa",
+            storageBucket: "smartclima-casa.firebasestorage.app",
+            messagingSenderId: "1075389846823",
+            appId: "1:1075389846823:web:02fbdc2d55fdbddde84502"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "login.html"; 
+            }
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
     <script>
-        // Gestione Menu a Schede
+        // Connessione al Server HiveMQ
+        const indirizzoServer = "wss://broker.hivemq.com:8884/mqtt";
+        const opzioniConnessione = {
+            clientId: "webapp_programmi_" + Math.random().toString(16).substring(2, 10),
+            clean: true
+        };
+
+        const clientMQTT = mqtt.connect(indirizzoServer, opzioniConnessione);
+
+        clientMQTT.on('connect', function () {
+            console.log("✅ Connessione MQTT riuscita sui Programmi!");
+        });
+
+        // Funzione per l'invio fisico dei comandi
+        function inviaComando(topic, messaggio) {
+            if (clientMQTT && clientMQTT.connected) {
+                clientMQTT.publish(topic, messaggio.toString());
+                console.log(`📤 INVIATO: [${topic}] -> ${messaggio}`);
+            } else {
+                console.warn("⚠️ MQTT non connesso. Impossibile inviare:", messaggio);
+            }
+        }
+
+        // Funzione attivata dai bottoni dei Programmi
+        function avviaProgrammaRapido(modo, temperatura) {
+            // Invia prima la modalità (Es. HEAT, COOL, DRY)
+            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", modo);
+            // Mezzo secondo dopo invia la temperatura target
+            setTimeout(() => {
+                inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/command", temperatura);
+                alert(`Programma attivato con successo!\nModalità: ${modo}\nTemperatura: ${temperatura}°C`);
+            }, 500);
+        }
+
+        // --- GESTIONE GRAFICA DELLE SCHEDE ---
         function cambiaTab(idTab, elementoCliccato) {
             const contenuti = document.querySelectorAll('.tab-content');
             contenuti.forEach(cont => cont.classList.remove('active'));
@@ -330,7 +393,7 @@
             elementoCliccato.classList.add('active');
         }
 
-        // Modifica dei gradi
+        // Modifica dei gradi per la Curva
         function cambiaCurva(idTemp, delta) {
             let elemento = document.getElementById(idTemp);
             let gradi = parseInt(elemento.innerText.replace('°', '')); 
@@ -342,15 +405,13 @@
             elemento.innerText = gradi + "°";
         }
 
-        // Variabile per creare ID sempre diversi
         let contatoreFasce = 1;
 
-        // Funzione per inserire una nuova riga dinamica
+        // Funzione per inserire una nuova riga oraria
         function aggiungiPuntoCurva() {
             let nuovoId = 't_custom_' + contatoreFasce;
             contatoreFasce++;
             
-            // Creiamo il pezzo di HTML con un input per l'ora e il tasto cestino
             let nuovaRiga = `
             <div class="hour-row">
                 <div class="hour-label">
@@ -366,11 +427,10 @@
             </div>
             `;
             
-            // Incolliamo la nuova riga alla fine del contenitore bianco
             document.getElementById('contenitore-curva').insertAdjacentHTML('beforeend', nuovaRiga);
         }
 
-        // Funzione per cancellare la riga selezionata
+        // Funzione per cancellare la riga oraria
         function eliminaRiga(bottoneCliccato) {
             bottoneCliccato.closest('.hour-row').remove();
         }
