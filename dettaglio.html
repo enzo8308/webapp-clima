@@ -350,13 +350,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
     
     <script>
-        // CONNESSIONE AL SERVER
-        const indirizzoServer = "wss://2c168e0c5ebc4e5a8cac9e67a335b928.s1.eu.hivemq.cloud:8884/mqtt";
+        // CONNESSIONE AL SERVER PUBBLICO HIVEMQ
+        const indirizzoServer = "wss://broker.hivemq.com:8884/mqtt";
         const opzioniConnessione = {
             clientId: "webapp_dettaglio_" + Math.random().toString(16).substring(2, 10),
-            username: "vincenzo_clima",
-            password: "123456789",
             clean: true
+            // Username e password rimossi perché usiamo il server pubblico col prefisso segreto
         };
 
         const clientMQTT = mqtt.connect(indirizzoServer, opzioniConnessione);
@@ -383,10 +382,19 @@
             
             if (climaAcceso) {
                 btn.classList.remove('off');
-                inviaComando("casa/cameretta/accensione", "ON");
+                // Se accendiamo, guardiamo in che modalità siamo e inviamo quella
+                let modoAttuale = document.getElementById('main-mode-text').innerText;
+                let payloadModo = "COOL"; // default
+                if(modoAttuale === "CALDO") payloadModo = "HEAT";
+                else if(modoAttuale === "DEUMID.") payloadModo = "DRY";
+                else if(modoAttuale === "VENTOLA") payloadModo = "FAN_ONLY";
+                else if(modoAttuale === "AUTO") payloadModo = "AUTO";
+                
+                inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", payloadModo);
             } else {
                 btn.classList.add('off');
-                inviaComando("casa/cameretta/accensione", "OFF");
+                // Per spegnere ESPHome usa semplicemente il comando OFF sul canale modalità
+                inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", "OFF");
             }
         }
 
@@ -400,22 +408,27 @@
 
             let colorePrincipale = '#007bff'; 
             let coloreSfondo = '#e6f2ff';
+            let payloadESPHome = 'COOL'; // Traduzione per la Wemos
 
             if (modalita === 'Caldo') {
                 colorePrincipale = '#dc3545'; coloreSfondo = '#f8d7da';
+                payloadESPHome = 'HEAT';
             } else if (modalita === 'Deumid.') {
                 colorePrincipale = '#17a2b8'; coloreSfondo = '#d1ecf1';
+                payloadESPHome = 'DRY';
             } else if (modalita === 'Ventola') {
                 colorePrincipale = '#6c757d'; coloreSfondo = '#e2e3e5';
+                payloadESPHome = 'FAN_ONLY';
             } else if (modalita === 'Auto') {
                 colorePrincipale = '#28a745'; coloreSfondo = '#d4edda';
+                payloadESPHome = 'AUTO';
             }
 
             document.documentElement.style.setProperty('--accent-color', colorePrincipale);
             document.documentElement.style.setProperty('--accent-light', coloreSfondo);
             
-            // Invia comando MQTT
-            inviaComando("casa/cameretta/modalita", modalita);
+            // Invia comando modalità tradotto in inglese al canale esatto
+            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", payloadESPHome);
         }
 
         // --- LOGICA TEMPERATURA ---
@@ -429,8 +442,8 @@
             document.getElementById('temp-display-main').innerText = gradiAttuali;
             document.getElementById('temp-display-control').innerText = gradiAttuali + " °C";
             
-            // Invia comando MQTT
-            inviaComando("casa/cameretta/temperatura", gradiAttuali);
+            // Invia numero puro al canale temperatura
+            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/command", gradiAttuali);
         }
 
         // --- LOGICA VELOCITÀ VENTOLA ---
@@ -439,8 +452,13 @@
             bottoni.forEach(btn => btn.classList.remove('active'));
             elementoCliccato.classList.add('active');
             
-            // Invia comando MQTT
-            inviaComando("casa/cameretta/ventola", velocita);
+            let payloadFan = 'AUTO';
+            if (velocita === 'Bassa') payloadFan = 'LOW';
+            if (velocita === 'Media') payloadFan = 'MEDIUM';
+            if (velocita === 'Alta') payloadFan = 'HIGH';
+
+            // Invia comando ventola tradotto
+            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/fan_mode/command", payloadFan);
         }
 
         // --- LOGICA DIREZIONE PALETTE ---
@@ -449,8 +467,14 @@
             bottoni.forEach(btn => btn.classList.remove('active'));
             elementoCliccato.classList.add('active');
             
-            // Invia comando MQTT
-            inviaComando("casa/cameretta/palette", direzione);
+            let payloadSwing = 'OFF';
+            if (direzione === 'Oscilla Vert.') payloadSwing = 'VERTICAL';
+            if (direzione === 'Oscilla Orizz.') payloadSwing = 'HORIZONTAL';
+            if (direzione === 'Ferma') payloadSwing = 'OFF';
+            
+            // Nota: I comandi "Extra Su" ed "Extra Giù" dipendono dal modello esatto, 
+            // per ora teniamo quelli standard supportati da ESPHome
+            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/swing_mode/command", payloadSwing);
         }
     </script>
 </body>
