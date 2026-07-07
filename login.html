@@ -1,0 +1,27 @@
+<script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        // Le tue chiavi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo",
+            authDomain: "smartclima-casa.firebaseapp.com",
+            projectId: "smartclima-casa",
+            storageBucket: "smartclima-casa.firebasestorage.app",
+            messagingSenderId: "1075389846823",
+            appId: "1:1075389846823:web:02fbdc2d55fdbddde84502"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Il Buttafuori controlla chi entra
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("✅ Utente riconosciuto: " + user.email);
+            } else {
+                console.log("❌ Utente non autorizzato! Espulsione in corso...");
+                window.location.href = "login.html"; // Ti butta fuori
+            }
+        });
+    </script>
