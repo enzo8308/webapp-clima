@@ -35,19 +35,16 @@
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .card-icon { font-size: 24px; color: var(--accent-color); }
         
-        /* Tasto Accensione Home */
         .power-btn { width: 34px; height: 34px; border-radius: 50%; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: 0.3s; z-index: 10; }
         .power-btn.on { background-color: var(--success-color); color: white; box-shadow: 0 2px 5px rgba(40,167,69,0.3); }
         
         .card-title { font-weight: 500; margin-top: 15px; font-size: 15px; }
         .card-status { font-size: 12px; color: var(--text-muted); margin-top: 5px; font-weight: 500; }
         
-        /* Badge Online/Offline */
         .status-badge { font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 8px; display: inline-block; }
         .status-badge.online { background-color: #d4edda; color: var(--success-color); }
         .status-badge.offline { background-color: #f8d7da; color: var(--error-color); }
         
-        /* Indicatore WiFi */
         .wifi-indicator { position: absolute; bottom: 15px; right: 15px; font-size: 14px; color: #ccc; }
         .wifi-excellent { color: var(--success-color); }
         .wifi-good { color: var(--warning-color); }
@@ -73,14 +70,12 @@
     </div>
 
     <div class="device-grid">
-        <!-- SCHEDA CAMERETTA DINAMICA -->
         <div class="card" onclick="apriDettagli('cameretta')" id="card-cameretta">
             <div class="card-header">
                 <div style="display: flex; align-items: center;">
                     <i class="fas fa-wind card-icon"></i>
                     <span id="badge-cameretta" class="status-badge offline">Offline</span>
                 </div>
-                <!-- Cliccando qui si accende/spegne senza cambiare pagina -->
                 <div class="power-btn" id="btn-power-cameretta" onclick="event.stopPropagation(); togglePowerHome()">
                     <i class="fas fa-power-off"></i>
                 </div>
@@ -90,7 +85,6 @@
             <div class="wifi-indicator" id="wifi-cameretta"><i class="fas fa-wifi"></i></div>
         </div>
 
-        <!-- SCHEDA CUCINA (Placeholder Statico) -->
         <div class="card" onclick="apriDettagli('cucina')">
             <div class="card-header">
                 <div style="display: flex; align-items: center;">
@@ -106,7 +100,6 @@
 
     <div class="bottom-nav">
         <a href="#" class="nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="programmi.html" class="nav-item"><i class="fas fa-list"></i><span>Programmi</span></a>
         <a href="#" class="nav-off-btn"><i class="fas fa-power-off"></i></a>
         <a href="#" class="nav-item"><i class="fas fa-compass"></i><span>Scopri</span></a>
         <a href="#" class="nav-item" onclick="esci()"><i class="fas fa-sign-out-alt"></i><span>Esci</span></a>
@@ -118,10 +111,7 @@
         const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        
-        onAuthStateChanged(auth, (user) => {
-            if (!user) window.location.href = "login.html";
-        });
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
         window.esci = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); };
     </script>
 
@@ -132,22 +122,11 @@
             else window.location.href = "dettaglio.html";
         }
 
-        const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", {
-            clientId: "webapp_index_" + Math.random().toString(16).substring(2, 10),
-            clean: true
-        });
-
-        // Variabili per salvare lo stato
-        let statoAttuale = {
-            online: false,
-            mode: "OFF",
-            temp: 24
-        };
+        const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_index_" + Math.random().toString(16).substring(2, 10), clean: true });
+        let statoAttuale = { online: false, mode: "OFF", temp: 24 };
 
         clientMQTT.on('connect', function () {
-            console.log("✅ Connessione MQTT Home!");
-            // Iscrizione ai canali di stato
-            clientMQTT.subscribe("vincenzo_clima_segreto_7788/status"); // Stato Online/Offline Wemos
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/state");
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/state");
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/sensor/segnale_wifi_cameretta/state");
@@ -155,84 +134,38 @@
 
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();
-            
-            // 1. ONLINE / OFFLINE
             if (topic.includes("/status")) {
                 const badge = document.getElementById('badge-cameretta');
                 if (payload === "online") {
-                    statoAttuale.online = true;
-                    badge.innerText = "Online";
-                    badge.className = "status-badge online";
+                    statoAttuale.online = true; badge.innerText = "Online"; badge.className = "status-badge online";
                 } else {
-                    statoAttuale.online = false;
-                    badge.innerText = "Offline";
-                    badge.className = "status-badge offline";
-                    document.getElementById('wifi-cameretta').className = "wifi-indicator"; // Resetta wifi
+                    statoAttuale.online = false; badge.innerText = "Offline"; badge.className = "status-badge offline";
+                    document.getElementById('wifi-cameretta').className = "wifi-indicator";
                 }
             }
-
-            // 2. MODALITÀ & ACCENSIONE
-            if (topic.includes("/mode/state")) {
-                statoAttuale.mode = payload;
-                aggiornaInterfaccia();
-            }
-
-            // 3. TEMPERATURA
-            if (topic.includes("/target_temperature/state")) {
-                const t = parseFloat(payload);
-                if(!isNaN(t)) statoAttuale.temp = t;
-                aggiornaInterfaccia();
-            }
-
-            // 4. POTENZA SEGNALE WIFI (dBm)
+            if (topic.includes("/mode/state")) { statoAttuale.mode = payload; aggiornaInterfaccia(); }
+            if (topic.includes("/target_temperature/state")) { const t = parseFloat(payload); if(!isNaN(t)) statoAttuale.temp = t; aggiornaInterfaccia(); }
             if (topic.includes("/segnale_wifi_cameretta/state") && statoAttuale.online) {
-                const dbm = parseInt(payload);
-                const wifiIcon = document.getElementById('wifi-cameretta');
-                // La potenza varia circa da -40 (Perfetto) a -90 (Pessimo)
-                if (dbm > -65) {
-                    wifiIcon.className = "wifi-indicator wifi-excellent"; // Verde
-                } else if (dbm > -80) {
-                    wifiIcon.className = "wifi-indicator wifi-good"; // Giallo
-                } else {
-                    wifiIcon.className = "wifi-indicator wifi-poor"; // Rosso
-                }
+                const dbm = parseInt(payload); const wifiIcon = document.getElementById('wifi-cameretta');
+                if (dbm > -65) wifiIcon.className = "wifi-indicator wifi-excellent";
+                else if (dbm > -80) wifiIcon.className = "wifi-indicator wifi-good";
+                else wifiIcon.className = "wifi-indicator wifi-poor";
             }
         });
 
-        // Funzione che disegna i colori in base ai dati
         function aggiornaInterfaccia() {
-            const btn = document.getElementById('btn-power-cameretta');
-            const testo = document.getElementById('status-text-cameretta');
-            const card = document.getElementById('card-cameretta');
-
-            if (statoAttuale.mode === "off") {
-                btn.classList.remove('on');
-                card.classList.remove('active');
-                testo.innerText = "Spento";
-            } else {
-                btn.classList.add('on');
-                card.classList.add('active'); // Evidenzia leggermente la scheda
-                
-                let modeIta = "Freddo";
-                if(statoAttuale.mode === "heat") modeIta = "Caldo";
-                if(statoAttuale.mode === "dry") modeIta = "Deumid.";
-                if(statoAttuale.mode === "fan_only") modeIta = "Ventola";
-                if(statoAttuale.mode === "auto") modeIta = "Auto";
-                
+            const btn = document.getElementById('btn-power-cameretta'); const testo = document.getElementById('status-text-cameretta'); const card = document.getElementById('card-cameretta');
+            if (statoAttuale.mode === "off") { btn.classList.remove('on'); card.classList.remove('active'); testo.innerText = "Spento"; }
+            else {
+                btn.classList.add('on'); card.classList.add('active');
+                let modeIta = "Freddo"; if(statoAttuale.mode === "heat") modeIta = "Caldo"; if(statoActuale.mode === "dry") modeIta = "Deumid."; if(statoAttuale.mode === "fan_only") modeIta = "Ventola"; if(statoAttuale.mode === "auto") modeIta = "Auto";
                 testo.innerText = `${modeIta} | ${statoAttuale.temp}°C`;
             }
         }
 
-        // Funzione per accendere/spegnere senza cambiare pagina
         window.togglePowerHome = function() {
-            if(!statoAttuale.online) {
-                alert("Il condizionatore è offline!");
-                return;
-            }
-            const comando = (statoAttuale.mode === "off") ? "COOL" : "OFF";
-            clientMQTT.publish("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", comando);
-            
-            // Diamo un feedback visivo istantaneo in attesa della conferma dalla Wemos
+            if(!statoAttuale.online) { alert("Il condizionatore è offline!"); return; }
+            clientMQTT.publish("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", (statoAttuale.mode === "off") ? "COOL" : "OFF");
             document.getElementById('status-text-cameretta').innerText = "Invio comando...";
         };
     </script>
