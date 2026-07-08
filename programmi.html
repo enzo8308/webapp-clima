@@ -389,9 +389,9 @@
             setTimeout(() => {
                 inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/command", 25);
                 inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/fan_mode/command", "LOW");
-                inviaComando("vincenzo_clima_segreto_7788/switch/salute_cameretta/command", "ON");
-                inviaComando("vincenzo_clima_segreto_7788/switch/silenzioso_cameretta/command", "ON");
-                alert("Programma Notte attivato!\nModalità: Freddo 25°C\nVentola: Bassa\nSalute & Silenzioso: ON");
+                // Spegne il display per la notte
+                inviaComando("vincenzo_clima_segreto_7788/switch/luce_display/command", "OFF");
+                alert("Programma Notte attivato!\nModalità: Freddo 25°C\nVentola: Bassa\nDisplay: Spento");
             }, 500);
         };
 
