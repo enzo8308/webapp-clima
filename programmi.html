@@ -24,6 +24,7 @@
             font-family: 'Roboto', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
+            padding-bottom: 30px;
         }
 
         /* Intestazione */
@@ -35,6 +36,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .back-btn {
@@ -51,7 +53,7 @@
             font-weight: 500;
         }
 
-        /* Menu a Tab (Programmi, Pianificato, Curva) */
+        /* Menu a Tab */
         .tabs {
             display: flex;
             background-color: var(--card-bg);
@@ -132,7 +134,7 @@
             margin-right: 15px;
         }
 
-        /* Stile Curva Termica (Speciale) */
+        /* Stile Curva Termica */
         .curve-container {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -229,6 +231,16 @@
     </div>
 
     <div id="programmi" class="tab-content active">
+
+        <div class="program-card" onclick="avviaProgrammaNotte()">
+            <div class="program-icon" style="color: #20c997; background-color: #d4edda;"><i class="fas fa-moon"></i></div>
+            <div class="program-info">
+                <div class="program-title">Notte Serena</div>
+                <div class="program-desc">Freddo 25°C, ventola minima, funzioni Salute e Silenzioso attive. Ideale per dormire.</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+        </div>
+
         <div class="program-card" onclick="avviaProgrammaRapido('HEAT', 30)">
             <div class="program-icon" style="color: #dc3545; background-color: #f8d7da;"><i class="fas fa-sun"></i></div>
             <div class="program-info">
@@ -251,7 +263,7 @@
             <div class="program-icon" style="color: #17a2b8; background-color: #d1ecf1;"><i class="fas fa-tint"></i></div>
             <div class="program-info">
                 <div class="program-title">Deumidificazione</div>
-                <div class="program-desc">Mantiene l'aria asciutta e riduce l'umidità all'interno.</div>
+                <div class="program-desc">Mantiene l'aria asciutta e riduce l'umidità all'interno (24°C).</div>
             </div>
             <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
         </div>
@@ -260,7 +272,7 @@
             <div class="program-icon" style="color: #6f42c1; background-color: #e2d9f3;"><i class="fas fa-thermometer-half"></i></div>
             <div class="program-info">
                 <div class="program-title">Funzione 10°C Heating</div>
-                <div class="program-desc">Evita shock termici mantenendo una temperatura minima in casa (imposta Caldo al minimo).</div>
+                <div class="program-desc">Mantiene una temperatura minima in casa (imposta Caldo a 16°C).</div>
             </div>
             <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
         </div>
@@ -317,7 +329,7 @@
             <i class="fas fa-plus"></i> Aggiungi Orario
         </button>
 
-        <button class="save-btn" onclick="alert('Curva Termica salvata graficamente! (L\'esecuzione automatica richiede un Server Domotico)')">
+        <button class="save-btn" onclick="alert('Curva Termica salvata graficamente!\nL\'esecuzione automatica richiede un Server Domotico centrale (es. Home Assistant).')">
             Salva Curva Termica
         </button>
     </div>
@@ -347,71 +359,63 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
     <script>
-        // Connessione al Server HiveMQ
-        const indirizzoServer = "wss://broker.hivemq.com:8884/mqtt";
-        const opzioniConnessione = {
+        const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", {
             clientId: "webapp_programmi_" + Math.random().toString(16).substring(2, 10),
             clean: true
-        };
-
-        const clientMQTT = mqtt.connect(indirizzoServer, opzioniConnessione);
+        });
 
         clientMQTT.on('connect', function () {
             console.log("✅ Connessione MQTT riuscita sui Programmi!");
         });
 
-        // Funzione per l'invio fisico dei comandi
         function inviaComando(topic, messaggio) {
             if (clientMQTT && clientMQTT.connected) {
                 clientMQTT.publish(topic, messaggio.toString());
                 console.log(`📤 INVIATO: [${topic}] -> ${messaggio}`);
-            } else {
-                console.warn("⚠️ MQTT non connesso. Impossibile inviare:", messaggio);
             }
         }
 
-        // Funzione attivata dai bottoni dei Programmi
-        function avviaProgrammaRapido(modo, temperatura) {
-            // Invia prima la modalità (Es. HEAT, COOL, DRY)
+        // --- PROGRAMMI RAPIDI ---
+        window.avviaProgrammaRapido = function(modo, temperatura) {
             inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", modo);
-            // Mezzo secondo dopo invia la temperatura target
             setTimeout(() => {
                 inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/command", temperatura);
-                alert(`Programma attivato con successo!\nModalità: ${modo}\nTemperatura: ${temperatura}°C`);
+                alert(`Programma attivato!\nModalità: ${modo}\nTemperatura: ${temperatura}°C`);
             }, 500);
-        }
+        };
+
+        window.avviaProgrammaNotte = function() {
+            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", "COOL");
+            setTimeout(() => {
+                inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/command", 25);
+                inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/fan_mode/command", "LOW");
+                inviaComando("vincenzo_clima_segreto_7788/switch/salute_cameretta/command", "ON");
+                inviaComando("vincenzo_clima_segreto_7788/switch/silenzioso_cameretta/command", "ON");
+                alert("Programma Notte attivato!\nModalità: Freddo 25°C\nVentola: Bassa\nSalute & Silenzioso: ON");
+            }, 500);
+        };
 
         // --- GESTIONE GRAFICA DELLE SCHEDE ---
-        function cambiaTab(idTab, elementoCliccato) {
-            const contenuti = document.querySelectorAll('.tab-content');
-            contenuti.forEach(cont => cont.classList.remove('active'));
-            
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(t => t.classList.remove('active'));
-
+        window.cambiaTab = function(idTab, elementoCliccato) {
+            document.querySelectorAll('.tab-content').forEach(cont => cont.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById(idTab).classList.add('active');
             elementoCliccato.classList.add('active');
-        }
+        };
 
-        // Modifica dei gradi per la Curva
-        function cambiaCurva(idTemp, delta) {
+        window.cambiaCurva = function(idTemp, delta) {
             let elemento = document.getElementById(idTemp);
             let gradi = parseInt(elemento.innerText.replace('°', '')); 
             gradi += delta;
-            
             if(gradi < 16) gradi = 16;
             if(gradi > 30) gradi = 30;
-            
             elemento.innerText = gradi + "°";
-        }
+        };
 
         let contatoreFasce = 1;
-
-        // Funzione per inserire una nuova riga oraria
-        function aggiungiPuntoCurva() {
+        window.aggiungiPuntoCurva = function() {
             let nuovoId = 't_custom_' + contatoreFasce;
             contatoreFasce++;
-            
             let nuovaRiga = `
             <div class="hour-row">
                 <div class="hour-label">
@@ -424,16 +428,13 @@
                     <button onclick="cambiaCurva('${nuovoId}', 1)"><i class="fas fa-plus"></i></button>
                     <button onclick="eliminaRiga(this)" style="color: var(--error-color); margin-left: 5px;"><i class="fas fa-trash"></i></button>
                 </div>
-            </div>
-            `;
-            
+            </div>`;
             document.getElementById('contenitore-curva').insertAdjacentHTML('beforeend', nuovaRiga);
-        }
+        };
 
-        // Funzione per cancellare la riga oraria
-        function eliminaRiga(bottoneCliccato) {
+        window.eliminaRiga = function(bottoneCliccato) {
             bottoneCliccato.closest('.hour-row').remove();
-        }
+        };
     </script>
 </body>
 </html>
