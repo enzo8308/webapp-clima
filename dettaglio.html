@@ -296,46 +296,39 @@
             const payload = message.toString();
             console.log(`📥 RICEVUTO: [${topic}] -> ${payload}`);
 
+            // --- RICEZIONE DEI MESSAGGI (Aggiornamento Grafica) ---
+        clientMQTT.on('message', function (topic, message) {
+            const payload = message.toString().toLowerCase(); // Trasformiamo tutto in minuscolo
+            console.log(`📥 RICEVUTO: [${topic}] -> ${payload}`);
+
             // Aggiorna Accensione e Modalità
             if (topic === `${baseTopic}/mode/state`) {
-                if (payload === "OFF") {
+                if (payload === "off") {
                     climaAcceso = false;
                     document.getElementById('power-btn').classList.add('off');
                     document.getElementById('main-mode-text').innerText = "SPENTO";
                     document.documentElement.style.setProperty('--accent-color', '#6c757d');
-                    document.documentElement.style.setProperty('--accent-light', '#e2e3e5');
                 } else {
                     climaAcceso = true;
                     document.getElementById('power-btn').classList.remove('off');
                     
-                    let colorePrincipale = '#007bff'; let coloreSfondo = '#e6f2ff'; let testo = 'FREDDO';
-                    if (payload === 'HEAT') { colorePrincipale = '#dc3545'; coloreSfondo = '#f8d7da'; testo = 'CALDO'; }
-                    if (payload === 'DRY') { colorePrincipale = '#17a2b8'; coloreSfondo = '#d1ecf1'; testo = 'DEUMID.'; }
-                    if (payload === 'FAN_ONLY') { colorePrincipale = '#6c757d'; coloreSfondo = '#e2e3e5'; testo = 'VENTOLA'; }
-                    if (payload === 'AUTO') { colorePrincipale = '#28a745'; coloreSfondo = '#d4edda'; testo = 'AUTO'; }
+                    let colorePrincipale = '#007bff'; let testo = 'FREDDO';
+                    if (payload === 'heat') { colorePrincipale = '#dc3545'; testo = 'CALDO'; }
+                    if (payload === 'dry') { colorePrincipale = '#17a2b8'; testo = 'DEUMID.'; }
+                    if (payload === 'fan_only') { colorePrincipale = '#6c757d'; testo = 'VENTOLA'; }
+                    if (payload === 'auto') { colorePrincipale = '#28a745'; testo = 'AUTO'; }
                     
                     document.getElementById('main-mode-text').innerText = testo;
                     document.documentElement.style.setProperty('--accent-color', colorePrincipale);
-                    document.documentElement.style.setProperty('--accent-light', coloreSfondo);
                 }
             } 
             // Aggiorna Gradi
             else if (topic === `${baseTopic}/target_temperature/state`) {
                 const tempVal = parseFloat(payload);
-                // Se il valore non è un numero valido (NaN), impostiamo 24 come default
+                // Se arriva "nan", usiamo 24 come valore di sicurezza
                 gradiAttuali = isNaN(tempVal) ? 24 : tempVal;
-                
                 document.getElementById('temp-display-main').innerText = gradiAttuali;
                 document.getElementById('temp-display-control').innerText = gradiAttuali + " °C";
-            }
-            // Aggiorna Bottoni Speciali
-            else if (topic === `${baseSwitchTopic}/salute_cameretta/state`) {
-                if(payload === "ON") document.getElementById('btn-health').classList.add('active');
-                else document.getElementById('btn-health').classList.remove('active');
-            }
-            else if (topic === `${baseSwitchTopic}/silenzioso_cameretta/state`) {
-                if(payload === "ON") document.getElementById('btn-quiet').classList.add('active');
-                else document.getElementById('btn-quiet').classList.remove('active');
             }
         });
 
