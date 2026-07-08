@@ -8,15 +8,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --bg-color: #f5f6f8; --card-bg: #ffffff; --text-main: #333333; --text-muted: #888888; --accent-color: #007bff; --accent-light: #e6f2ff; --success-color: #28a745; }
+        :root { --bg-color: #f5f6f8; --card-bg: #ffffff; --text-main: #333333; --text-muted: #888888; --accent-color: #007bff; --accent-light: #e6f2ff; --success-color: #28a745; --warning-color: #ffc107; --error-color: #dc3545; }
         body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 30px; }
+        
         .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background-color: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .back-btn { color: var(--text-main); text-decoration: none; font-size: 20px; cursor: pointer; }
+        
+        .header-title { display: flex; align-items: center; margin: 0; font-size: 18px; font-weight: 500; }
+        
+        /* Stili Badge Status e WiFi */
+        .status-badge { font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 10px; }
+        .status-badge.online { background-color: #d4edda; color: var(--success-color); }
+        .status-badge.offline { background-color: #f8d7da; color: var(--error-color); }
+        
+        .header-actions { display: flex; align-items: center; }
+        .wifi-indicator { font-size: 16px; color: #ccc; margin-right: 15px; }
+        .wifi-excellent { color: var(--success-color); }
+        .wifi-good { color: var(--warning-color); }
+        .wifi-poor { color: var(--error-color); }
+
         .main-status { text-align: center; padding: 30px 20px; background-color: var(--card-bg); margin-bottom: 15px; }
         .temperature-display { font-size: 64px; font-weight: 700; color: var(--accent-color); margin: 10px 0; display: flex; justify-content: center; align-items: flex-start; }
         .temperature-display span { font-size: 32px; margin-top: 10px; }
         .power-big-btn { width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-color); color: white; font-size: 24px; border: none; box-shadow: 0 4px 10px rgba(0,123,255,0.3); margin-top: 15px; cursor: pointer; transition: all 0.3s; }
         .power-big-btn.off { background-color: #e2e3e5; color: #6c757d; box-shadow: none; }
+        
         .control-section { background-color: var(--card-bg); margin: 0 15px 15px 15px; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .section-header { font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 10px; }
@@ -32,8 +48,14 @@
 
     <div class="header">
         <a href="index.html" class="back-btn"><i class="fas fa-chevron-left"></i></a>
-        <h1>Cameretta</h1>
-        <i class="fas fa-cog" style="color: var(--text-muted);"></i>
+        <h1 class="header-title">
+            Cameretta 
+            <span id="status-badge" class="status-badge offline">Offline</span>
+        </h1>
+        <div class="header-actions">
+            <i class="fas fa-wifi wifi-indicator" id="wifi-icon"></i>
+            <i class="fas fa-cog" style="color: var(--text-muted);"></i>
+        </div>
     </div>
 
     <div class="main-status" id="main-status-bg">
@@ -102,11 +124,16 @@
         const clientMQTT = mqtt.connect(indirizzoServer, opzioniConnessione);
         const baseTopic = "vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta";
         
-        let climaAcceso = false; let gradiAttuali = 24; 
+        let climaAcceso = false; 
+        let gradiAttuali = 24; 
+        let isOnline = false; // Variabile di sicurezza
+
         document.documentElement.style.setProperty('--accent-color', '#6c757d');
         document.documentElement.style.setProperty('--accent-light', '#e2e3e5');
 
         clientMQTT.on('connect', function () {
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/sensor/segnale_wifi_cameretta/state");
             clientMQTT.subscribe(baseTopic + "/mode/state");
             clientMQTT.subscribe(baseTopic + "/target_temperature/state");
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/switch/luce_display/state");
@@ -115,6 +142,31 @@
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();
             
+            // 1. ONLINE / OFFLINE
+            if (topic.includes("/status")) {
+                const badge = document.getElementById('status-badge');
+                if (payload === "online") {
+                    isOnline = true;
+                    badge.innerText = "Online";
+                    badge.className = "status-badge online";
+                } else {
+                    isOnline = false;
+                    badge.innerText = "Offline";
+                    badge.className = "status-badge offline";
+                    document.getElementById('wifi-icon').className = "fas fa-wifi wifi-indicator"; // Resetta colore wifi
+                }
+            }
+
+            // 2. SEGNALE WIFI
+            if (topic.includes("/segnale_wifi_cameretta/state") && isOnline) {
+                const dbm = parseInt(payload);
+                const wifiIcon = document.getElementById('wifi-icon');
+                if (dbm > -65) wifiIcon.className = "fas fa-wifi wifi-indicator wifi-excellent";
+                else if (dbm > -80) wifiIcon.className = "fas fa-wifi wifi-indicator wifi-good";
+                else wifiIcon.className = "fas fa-wifi wifi-indicator wifi-poor";
+            }
+
+            // 3. STATO CLIMA
             if (topic.includes("/mode/state")) {
                 const btn = document.getElementById('power-btn');
                 if (payload === "off") {
@@ -146,13 +198,21 @@
             }
         });
 
+        // 4. INVIO COMANDI (Con blocco di sicurezza)
         function inviaComando(topic, messaggio) {
-            if (clientMQTT && clientMQTT.connected) { clientMQTT.publish(topic, messaggio.toString()); }
+            if (!isOnline) {
+                alert("Il condizionatore è Offline! Impossibile inviare il comando.");
+                return; // Ferma il comando prima che parta
+            }
+            if (clientMQTT && clientMQTT.connected) { 
+                clientMQTT.publish(topic, messaggio.toString()); 
+            }
         }
 
         function toggleAccensione() { inviaComando(baseTopic + "/mode/command", climaAcceso ? "OFF" : "COOL"); }
         
         function cambiaModalita(modalita, elementoCliccato) {
+            if (!isOnline) return inviaComando('', ''); // Mostra l'avviso e si ferma
             document.querySelectorAll('#mode-buttons .control-btn').forEach(btn => btn.classList.remove('active'));
             elementoCliccato.classList.add('active');
             let p = 'COOL'; if (modalita === 'Caldo') p = 'HEAT'; if (modalita === 'Deumid.') p = 'DRY'; if (modalita === 'Ventola') p = 'FAN_ONLY'; if (modalita === 'Auto') p = 'AUTO';
@@ -160,6 +220,7 @@
         }
 
         function cambiaTemperatura(delta) {
+            if (!isOnline) return inviaComando('', '');
             gradiAttuali += delta; if(gradiAttuali < 16) gradiAttuali = 16; if(gradiAttuali > 30) gradiAttuali = 30;
             document.getElementById('temp-display-main').innerText = gradiAttuali;
             document.getElementById('temp-display-control').innerText = gradiAttuali + " °C";
@@ -167,6 +228,7 @@
         }
 
         function cambiaVentola(velocita, elementoCliccato) {
+            if (!isOnline) return inviaComando('', '');
             document.querySelectorAll('#fan-buttons .control-btn').forEach(btn => btn.classList.remove('active'));
             elementoCliccato.classList.add('active');
             let p = 'AUTO'; if (velocita === 'Bassa') p = 'LOW'; if (velocita === 'Media') p = 'MEDIUM'; if (velocita === 'Alta') p = 'HIGH';
@@ -174,8 +236,8 @@
         }
 
         function cambiaDirezione(direzione, elementoCliccato) {
+            if (!isOnline) return inviaComando('', '');
             document.querySelectorAll('#vane-buttons .control-btn').forEach(btn => {
-                // Non togliere la selezione al tasto della luce
                 if(btn.id !== 'btn-light') btn.classList.remove('active');
             });
             elementoCliccato.classList.add('active');
@@ -185,11 +247,11 @@
             if (direzione === 'Extra Su') p = 'HORIZONTAL'; 
             if (direzione === 'Extra Giù') p = 'VERTICAL'; 
             if (direzione === 'Ferma') p = 'OFF';
-            
             inviaComando(baseTopic + "/swing_mode/command", p);
         }
 
         function toggleSpeciale(funzione, elementoCliccato) {
+            if (!isOnline) return inviaComando('', '');
             const eraAttivo = elementoCliccato.classList.contains('active');
             inviaComando(`vincenzo_clima_segreto_7788/switch/${funzione}/command`, eraAttivo ? "OFF" : "ON");
         }
