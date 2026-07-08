@@ -321,7 +321,10 @@
             } 
             // Aggiorna Gradi
             else if (topic === `${baseTopic}/target_temperature/state`) {
-                gradiAttuali = parseFloat(payload);
+                const tempVal = parseFloat(payload);
+                // Se il valore non è un numero valido (NaN), impostiamo 24 come default
+                gradiAttuali = isNaN(tempVal) ? 24 : tempVal;
+                
                 document.getElementById('temp-display-main').innerText = gradiAttuali;
                 document.getElementById('temp-display-control').innerText = gradiAttuali + " °C";
             }
