@@ -6,77 +6,476 @@
     <title>Dettaglio Climatizzatore</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        :root { --bg-color: #f5f6f8; --card-bg: #ffffff; --text-main: #333333; --text-muted: #888888; --accent-color: #007bff; --accent-light: #e6f2ff; }
-        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 30px; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background-color: var(--card-bg); position: sticky; top: 0; z-index: 100; }
-        .back-btn { color: var(--text-main); text-decoration: none; font-size: 20px; cursor: pointer; }
-        .main-status { text-align: center; padding: 30px 20px; background-color: var(--card-bg); margin-bottom: 15px; }
-        .temperature-display { font-size: 64px; font-weight: 700; color: var(--accent-color); margin: 10px 0; display: flex; justify-content: center; }
-        .power-big-btn { width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-color); color: white; border: none; cursor: pointer; }
-        .power-big-btn.off { background-color: #e2e3e5; color: #6c757d; }
-        .control-section { background-color: var(--card-bg); margin: 0 15px 15px 15px; padding: 15px; border-radius: 12px; }
-        .section-header { font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; }
-        .btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 10px; }
-        .control-btn { background-color: var(--bg-color); border: 1px solid transparent; border-radius: 8px; padding: 12px 5px; display: flex; flex-direction: column; align-items: center; color: var(--text-main); cursor: pointer; }
-        .control-btn.active { background-color: var(--accent-light); border-color: var(--accent-color); color: var(--accent-color); }
-        .temp-controls { display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-color); border-radius: 12px; padding: 10px; }
-        .temp-btn { width: 40px; height: 40px; border-radius: 8px; background-color: white; border: 1px solid #ddd; cursor: pointer; }
+        :root {
+            --bg-color: #f5f6f8;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #888888;
+            --accent-color: #007bff;
+            --accent-light: #e6f2ff;
+            --success-color: #28a745;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 30px;
+        }
+
+        /* Intestazione */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Stato Principale */
+        .main-status {
+            text-align: center;
+            padding: 30px 20px;
+            background-color: var(--card-bg);
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .temperature-display {
+            font-size: 64px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .temperature-display span {
+            font-size: 32px;
+            margin-top: 10px;
+        }
+
+        .power-big-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 24px;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,123,255,0.3);
+            margin-top: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .power-big-btn.off {
+            background-color: #e2e3e5;
+            color: #6c757d;
+            box-shadow: none;
+        }
+
+        /* Sezioni di controllo */
+        .control-section {
+            background-color: var(--card-bg);
+            margin: 0 15px 15px 15px;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .section-header {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Griglia Pulsanti */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            gap: 10px;
+        }
+
+        .control-btn {
+            background-color: var(--bg-color);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            padding: 12px 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-main);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn i {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        .control-btn.active {
+            background-color: var(--accent-light);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .control-btn.active i {
+            color: var(--accent-color);
+        }
+
+        /* Regolazione Temperatura */
+        .temp-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-color);
+            border-radius: 12px;
+            padding: 10px;
+        }
+
+        .temp-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: white;
+            border: 1px solid #ddd;
+            font-size: 20px;
+            color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        /* Funzioni Speciali */
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .feature-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .feature-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .feature-text div:first-child {
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .feature-text div:last-child {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* Switch Toggle */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--success-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
     </style>
 </head>
 <body>
+
     <div class="header">
         <a href="index.html" class="back-btn"><i class="fas fa-chevron-left"></i></a>
         <h1>Cameretta</h1>
+        <i class="fas fa-cog" style="color: var(--text-muted);"></i>
     </div>
-    <div class="main-status">
-        <div id="main-mode-text">FREDDO</div>
-        <div class="temperature-display"><span id="temp-display-main">24</span><span>°C</span></div>
+
+    <div class="main-status" id="main-status-bg">
+        <div id="main-mode-text" style="color: var(--text-muted); font-weight: 500;">FREDDO</div>
+        <div class="temperature-display">
+            <span id="temp-display-main" style="margin-top: 0; font-size: 64px;">24</span>
+            <span style="font-size: 32px; margin-top: 10px;">°C</span>
+        </div>
         <button class="power-big-btn" id="power-btn" onclick="toggleAccensione()"><i class="fas fa-power-off"></i></button>
     </div>
+
     <div class="control-section">
         <div class="section-header">Modalità</div>
         <div class="btn-grid" id="mode-buttons">
-            <div class="control-btn" onclick="cambiaModalita('Caldo', this)">Caldo</div>
-            <div class="control-btn" onclick="cambiaModalita('Freddo', this)">Freddo</div>
+            <div class="control-btn active" onclick="cambiaModalita('Freddo', this)"><i class="fas fa-snowflake"></i> Freddo</div>
+            <div class="control-btn" onclick="cambiaModalita('Caldo', this)"><i class="fas fa-sun"></i> Caldo</div>
+            <div class="control-btn" onclick="cambiaModalita('Deumid.', this)"><i class="fas fa-tint"></i> Deumid.</div>
+            <div class="control-btn" onclick="cambiaModalita('Ventola', this)"><i class="fas fa-fan"></i> Ventola</div>
+            <div class="control-btn" onclick="cambiaModalita('Auto', this)"><i class="fas fa-magic"></i> Auto</div>
         </div>
     </div>
+
     <div class="control-section">
         <div class="section-header">Temperatura</div>
         <div class="temp-controls">
             <button class="temp-btn" onclick="cambiaTemperatura(-1)"><i class="fas fa-minus"></i></button>
-            <span id="temp-display-control">24 °C</span>
+            <span id="temp-display-control" style="font-size: 20px; font-weight: 500;">24 °C</span>
             <button class="temp-btn" onclick="cambiaTemperatura(1)"><i class="fas fa-plus"></i></button>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
-    <script>
-        const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
-        const baseTopic = "vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta";
-        let gradiAttuali = 24;
+    <div class="control-section">
+        <div class="section-header">Velocità Ventola</div>
+        <div class="btn-grid" id="fan-buttons">
+            <div class="control-btn active" onclick="cambiaVentola('Bassa', this)"><i class="fas fa-signal" style="font-size: 14px;"></i> Bassa</div>
+            <div class="control-btn" onclick="cambiaVentola('Media', this)"><i class="fas fa-signal" style="font-size: 18px;"></i> Media</div>
+            <div class="control-btn" onclick="cambiaVentola('Alta', this)"><i class="fas fa-signal"></i> Alta</div>
+            <div class="control-btn" onclick="cambiaVentola('Auto', this)"><i class="fas fa-sync"></i> Auto</div>
+        </div>
+    </div>
 
-        client.on('connect', () => {
-            console.log("Connesso!");
-            client.subscribe(baseTopic + "/mode/state");
-            client.subscribe(baseTopic + "/target_temperature/state");
-        });
+    <div class="control-section">
+        <div class="section-header">Direzione Palette</div>
+        <div class="btn-grid" id="vane-buttons" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="control-btn" onclick="cambiaDirezione('Oscilla Vert.', this)"><i class="fas fa-arrows-alt-v"></i> Oscilla Vert.</div>
+            <div class="control-btn" onclick="cambiaDirezione('Oscilla Orizz.', this)"><i class="fas fa-arrows-alt-h"></i> Oscilla Orizz.</div>
+            <div class="control-btn active" onclick="cambiaDirezione('Ferma', this)"><i class="fas fa-stop"></i> Ferma</div>
+            <div class="control-btn" onclick="cambiaDirezione('Extra Su', this)"><i class="fas fa-chevron-up"></i> Extra Su</div>
+            <div class="control-btn" onclick="cambiaDirezione('Extra Giù', this)"><i class="fas fa-chevron-down"></i> Extra Giù</div>
+        </div>
+    </div>
 
-        client.on('message', (topic, message) => {
-            const payload = message.toString().toLowerCase();
-            if(topic.includes("mode")) {
-                document.getElementById('main-mode-text').innerText = payload.toUpperCase();
-            } else if(topic.includes("target")) {
-                gradiAttuali = parseInt(payload);
-                document.getElementById('temp-display-main').innerText = gradiAttuali;
-                document.getElementById('temp-display-control').innerText = gradiAttuali + " °C";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo",
+            authDomain: "smartclima-casa.firebaseapp.com",
+            projectId: "smartclima-casa",
+            storageBucket: "smartclima-casa.firebasestorage.app",
+            messagingSenderId: "1075389846823",
+            appId: "1:1075389846823:web:02fbdc2d55fdbddde84502"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "login.html"; 
             }
         });
+    </script>
 
-        function invia(topic, msg) { client.publish(topic, msg); }
-        window.toggleAccensione = () => invia(baseTopic + "/mode/command", "COOL");
-        window.cambiaModalita = (m, el) => invia(baseTopic + "/mode/command", m.toUpperCase());
-        window.cambiaTemperatura = (d) => { gradiAttuali += d; invia(baseTopic + "/target_temperature/command", gradiAttuali.toString()); };
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
+    
+    <script>
+        // CONNESSIONE AL SERVER PUBBLICO HIVEMQ
+        const indirizzoServer = "wss://broker.hivemq.com:8884/mqtt";
+        const opzioniConnessione = {
+            clientId: "webapp_dettaglio_" + Math.random().toString(16).substring(2, 10),
+            clean: true
+            // Username e password rimossi perché usiamo il server pubblico col prefisso segreto
+        };
+
+        const clientMQTT = mqtt.connect(indirizzoServer, opzioniConnessione);
+
+        clientMQTT.on('connect', function () {
+            console.log("✅ Connessione MQTT riuscita sul Dettaglio!");
+        });
+
+        // FUNZIONE JOLLY PER INVIARE I COMANDI
+        function inviaComando(topic, messaggio) {
+            if (clientMQTT && clientMQTT.connected) {
+                clientMQTT.publish(topic, messaggio.toString());
+                console.log(`📤 INVIATO: [${topic}] -> ${messaggio}`);
+            } else {
+                console.warn("⚠️ MQTT non connesso. Impossibile inviare:", messaggio);
+            }
+        }
+
+        // --- LOGICA ACCENSIONE ---
+        let climaAcceso = true;
+        function toggleAccensione() {
+            climaAcceso = !climaAcceso;
+            const btn = document.getElementById('power-btn');
+            
+            if (climaAcceso) {
+                btn.classList.remove('off');
+                // Se accendiamo, guardiamo in che modalità siamo e inviamo quella
+                let modoAttuale = document.getElementById('main-mode-text').innerText;
+                let payloadModo = "COOL"; // default
+                if(modoAttuale === "CALDO") payloadModo = "HEAT";
+                else if(modoAttuale === "DEUMID.") payloadModo = "DRY";
+                else if(modoAttuale === "VENTOLA") payloadModo = "FAN_ONLY";
+                else if(modoAttuale === "AUTO") payloadModo = "AUTO";
+                
+                inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", payloadModo);
+            } else {
+                btn.classList.add('off');
+                // Per spegnere ESPHome usa semplicemente il comando OFF sul canale modalità
+                inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", "OFF");
+            }
+        }
+
+        // --- LOGICA MODALITÀ ---
+        function cambiaModalita(modalita, elementoCliccato) {
+            const bottoni = document.querySelectorAll('#mode-buttons .control-btn');
+            bottoni.forEach(btn => btn.classList.remove('active'));
+            elementoCliccato.classList.add('active');
+            
+            document.getElementById('main-mode-text').innerText = modalita.toUpperCase();
+
+            let colorePrincipale = '#007bff'; 
+            let coloreSfondo = '#e6f2ff';
+            let payloadESPHome = 'COOL'; // Traduzione per la Wemos
+
+            if (modalita === 'Caldo') {
+                colorePrincipale = '#dc3545'; coloreSfondo = '#f8d7da';
+                payloadESPHome = 'HEAT';
+            } else if (modalita === 'Deumid.') {
+                colorePrincipale = '#17a2b8'; coloreSfondo = '#d1ecf1';
+                payloadESPHome = 'DRY';
+            } else if (modalita === 'Ventola') {
+                colorePrincipale = '#6c757d'; coloreSfondo = '#e2e3e5';
+                payloadESPHome = 'FAN_ONLY';
+            } else if (modalita === 'Auto') {
+                colorePrincipale = '#28a745'; coloreSfondo = '#d4edda';
+                payloadESPHome = 'AUTO';
+            }
+
+            document.documentElement.style.setProperty('--accent-color', colorePrincipale);
+            document.documentElement.style.setProperty('--accent-light', coloreSfondo);
+            
+            // Invia comando modalità tradotto in inglese al canale esatto
+            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", payloadESPHome);
+        }
+
+        // --- LOGICA TEMPERATURA ---
+        let gradiAttuali = 24; 
+        function cambiaTemperatura(delta) {
+            gradiAttuali += delta;
+            
+            if(gradiAttuali < 16) gradiAttuali = 16;
+            if(gradiAttuali > 30) gradiAttuali = 30;
+
+            document.getElementById('temp-display-main').innerText = gradiAttuali;
+            document.getElementById('temp-display-control').innerText = gradiAttuali + " °C";
+            
+            // Invia numero puro al canale temperatura
+            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/command", gradiAttuali);
+        }
+
+        // --- LOGICA VELOCITÀ VENTOLA ---
+        function cambiaVentola(velocita, elementoCliccato) {
+            const bottoni = document.querySelectorAll('#fan-buttons .control-btn');
+            bottoni.forEach(btn => btn.classList.remove('active'));
+            elementoCliccato.classList.add('active');
+            
+            let payloadFan = 'AUTO';
+            if (velocita === 'Bassa') payloadFan = 'LOW';
+            if (velocita === 'Media') payloadFan = 'MEDIUM';
+            if (velocita === 'Alta') payloadFan = 'HIGH';
+
+            // Invia comando ventola tradotto
+            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/fan_mode/command", payloadFan);
+        }
+
+        // --- LOGICA DIREZIONE PALETTE ---
+        function cambiaDirezione(direzione, elementoCliccato) {
+            const bottoni = document.querySelectorAll('#vane-buttons .control-btn');
+            bottoni.forEach(btn => btn.classList.remove('active'));
+            elementoCliccato.classList.add('active');
+            
+            let payloadSwing = 'OFF';
+            if (direzione === 'Oscilla Vert.') payloadSwing = 'VERTICAL';
+            if (direzione === 'Oscilla Orizz.') payloadSwing = 'HORIZONTAL';
+            if (direzione === 'Ferma') payloadSwing = 'OFF';
+            
+            // Nota: I comandi "Extra Su" ed "Extra Giù" dipendono dal modello esatto, 
+            // per ora teniamo quelli standard supportati da ESPHome
+            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/swing_mode/command", payloadSwing);
+        }
     </script>
 </body>
 </html>
