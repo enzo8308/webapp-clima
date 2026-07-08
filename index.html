@@ -14,174 +14,50 @@
             --text-main: #333333;
             --text-muted: #888888;
             --accent-color: #007bff;
-            --error-color: #ff4d4f;
+            --error-color: #dc3545;
             --success-color: #28a745;
+            --warning-color: #ffc107;
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding-bottom: 70px;
-        }
+        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background-color: var(--bg-color); }
+        .header h1 { font-size: 22px; margin: 0; }
+        .header .add-btn { background-color: #0056b3; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
+        
+        .section-title { display: flex; justify-content: space-between; padding: 0 20px; margin-bottom: 10px; font-weight: 500; }
+        .section-title a { color: var(--accent-color); text-decoration: none; font-size: 14px; }
+        
+        .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
+        
+        .card { background-color: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; position: relative; }
+        .card.active { border: 2px solid #d0d7de; }
+        
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-icon { font-size: 24px; color: var(--accent-color); }
+        
+        /* Tasto Accensione Home */
+        .power-btn { width: 34px; height: 34px; border-radius: 50%; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: 0.3s; z-index: 10; }
+        .power-btn.on { background-color: var(--success-color); color: white; box-shadow: 0 2px 5px rgba(40,167,69,0.3); }
+        
+        .card-title { font-weight: 500; margin-top: 15px; font-size: 15px; }
+        .card-status { font-size: 12px; color: var(--text-muted); margin-top: 5px; font-weight: 500; }
+        
+        /* Badge Online/Offline */
+        .status-badge { font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 8px; display: inline-block; }
+        .status-badge.online { background-color: #d4edda; color: var(--success-color); }
+        .status-badge.offline { background-color: #f8d7da; color: var(--error-color); }
+        
+        /* Indicatore WiFi */
+        .wifi-indicator { position: absolute; bottom: 15px; right: 15px; font-size: 14px; color: #ccc; }
+        .wifi-excellent { color: var(--success-color); }
+        .wifi-good { color: var(--warning-color); }
+        .wifi-poor { color: var(--error-color); }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background-color: var(--bg-color);
-        }
-
-        .header h1 {
-            font-size: 22px;
-            margin: 0;
-        }
-
-        .header .add-btn {
-            background-color: #0056b3;
-            color: white;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .section-title {
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            margin-bottom: 10px;
-            font-weight: 500;
-        }
-
-        .section-title a {
-            color: var(--accent-color);
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .device-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            padding: 0 20px;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 100px;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .card.active {
-            background-color: #eef2f5;
-            border: 2px solid #d0d7de;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .card-icon {
-            font-size: 24px;
-            color: var(--accent-color);
-        }
-
-        .power-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-        }
-
-        .power-btn.on {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .card-title {
-            font-weight: 500;
-            margin-top: 15px;
-            font-size: 15px;
-        }
-
-        .card-status {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 5px;
-        }
-
-        .status-error {
-            color: var(--error-color);
-            font-weight: 500;
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-muted);
-            font-size: 11px;
-            text-decoration: none;
-        }
-
-        .nav-item.active {
-            color: var(--accent-color);
-        }
-
-        .nav-item i {
-            font-size: 20px;
-            margin-bottom: 4px;
-        }
-
-        .nav-off-btn {
-            position: relative;
-            top: -20px;
-            background-color: white;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            font-size: 24px;
-            color: var(--text-main);
-            border: 1px solid #eee;
-        }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 11px; text-decoration: none; }
+        .nav-item.active { color: var(--accent-color); }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-off-btn { position: relative; top: -20px; background-color: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 24px; color: var(--text-main); border: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -192,133 +68,173 @@
     </div>
 
     <div class="section-title">
-        <span>I tuoi elettrodomestici (4)</span>
+        <span>I tuoi elettrodomestici</span>
         <a href="#">Gestisci</a>
     </div>
 
     <div class="device-grid">
-        <div class="card active" onclick="apriDettagli('cameretta')">
+        <!-- SCHEDA CAMERETTA DINAMICA -->
+        <div class="card" onclick="apriDettagli('cameretta')" id="card-cameretta">
             <div class="card-header">
-                <i class="fas fa-wind card-icon"></i>
-                <div class="power-btn on"><i class="fas fa-power-off"></i></div>
+                <div style="display: flex; align-items: center;">
+                    <i class="fas fa-wind card-icon"></i>
+                    <span id="badge-cameretta" class="status-badge offline">Offline</span>
+                </div>
+                <!-- Cliccando qui si accende/spegne senza cambiare pagina -->
+                <div class="power-btn" id="btn-power-cameretta" onclick="event.stopPropagation(); togglePowerHome()">
+                    <i class="fas fa-power-off"></i>
+                </div>
             </div>
             <div class="card-title">Cameretta</div>
-            <div class="card-status">Freddo | 24°C</div>
+            <div class="card-status" id="status-text-cameretta">Attesa dati...</div>
+            <div class="wifi-indicator" id="wifi-cameretta"><i class="fas fa-wifi"></i></div>
         </div>
 
+        <!-- SCHEDA CUCINA (Placeholder Statico) -->
         <div class="card" onclick="apriDettagli('cucina')">
             <div class="card-header">
-                <i class="fas fa-wind card-icon"></i>
+                <div style="display: flex; align-items: center;">
+                    <i class="fas fa-wind card-icon" style="color: #ccc;"></i>
+                    <span class="status-badge offline">Offline</span>
+                </div>
                 <div class="power-btn"><i class="fas fa-power-off"></i></div>
             </div>
             <div class="card-title">Cucina</div>
-            <div class="card-status">Nessuna attività</div>
-        </div>
-
-        <div class="card" onclick="apriDettagli('soggiorno')">
-            <div class="card-header">
-                <i class="fas fa-wind card-icon"></i>
-                <div class="power-btn"><i class="fas fa-power-off"></i></div>
-            </div>
-            <div class="card-title">Soggiorno</div>
-            <div class="card-status">Nessuna attività</div>
-        </div>
-
-        <div class="card" onclick="apriDettagli('camera_letto')">
-            <div class="card-header">
-                <i class="fas fa-wind card-icon" style="color: #ccc;"></i>
-                <i class="fas fa-wifi-slash" style="color: var(--error-color);"></i>
-            </div>
-            <div class="card-title">Camera Letto</div>
-            <div class="card-status status-error">Non connesso</div>
+            <div class="card-status">Non connesso</div>
         </div>
     </div>
 
     <div class="bottom-nav">
-        <a href="#" class="nav-item active">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-        </a>
-        <a href="programmi.html" class="nav-item">
-            <i class="fas fa-list"></i>
-            <span>Programmi</span>
-        </a>
-        <a href="#" class="nav-off-btn">
-            <i class="fas fa-power-off"></i>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fas fa-compass"></i>
-            <span>Scopri</span>
-        </a>
-        <a href="#" class="nav-item" onclick="esci()">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Esci</span>
-        </a>
+        <a href="#" class="nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="programmi.html" class="nav-item"><i class="fas fa-list"></i><span>Programmi</span></a>
+        <a href="#" class="nav-off-btn"><i class="fas fa-power-off"></i></a>
+        <a href="#" class="nav-item"><i class="fas fa-compass"></i><span>Scopri</span></a>
+        <a href="#" class="nav-item" onclick="esci()"><i class="fas fa-sign-out-alt"></i><span>Esci</span></a>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo",
-            authDomain: "smartclima-casa.firebaseapp.com",
-            projectId: "smartclima-casa",
-            storageBucket: "smartclima-casa.firebasestorage.app",
-            messagingSenderId: "1075389846823",
-            appId: "1:1075389846823:web:02fbdc2d55fdbddde84502"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-
-        // Controllo se l'utente è loggato
+        
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log("✅ Utente riconosciuto: " + user.email);
-            } else {
-                console.log("❌ Utente non autorizzato! Espulsione in corso...");
-                window.location.href = "login.html";
+            if (!user) window.location.href = "login.html";
+        });
+        window.esci = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); };
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
+    <script>
+        function apriDettagli(stanza) {
+            if(stanza !== 'cameretta') alert("Questo condizionatore non è attualmente configurato.");
+            else window.location.href = "dettaglio.html";
+        }
+
+        const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", {
+            clientId: "webapp_index_" + Math.random().toString(16).substring(2, 10),
+            clean: true
+        });
+
+        // Variabili per salvare lo stato
+        let statoAttuale = {
+            online: false,
+            mode: "OFF",
+            temp: 24
+        };
+
+        clientMQTT.on('connect', function () {
+            console.log("✅ Connessione MQTT Home!");
+            // Iscrizione ai canali di stato
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/status"); // Stato Online/Offline Wemos
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/state");
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/state");
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/sensor/segnale_wifi_cameretta/state");
+        });
+
+        clientMQTT.on('message', function (topic, message) {
+            const payload = message.toString().toLowerCase();
+            
+            // 1. ONLINE / OFFLINE
+            if (topic.includes("/status")) {
+                const badge = document.getElementById('badge-cameretta');
+                if (payload === "online") {
+                    statoAttuale.online = true;
+                    badge.innerText = "Online";
+                    badge.className = "status-badge online";
+                } else {
+                    statoAttuale.online = false;
+                    badge.innerText = "Offline";
+                    badge.className = "status-badge offline";
+                    document.getElementById('wifi-cameretta').className = "wifi-indicator"; // Resetta wifi
+                }
+            }
+
+            // 2. MODALITÀ & ACCENSIONE
+            if (topic.includes("/mode/state")) {
+                statoAttuale.mode = payload;
+                aggiornaInterfaccia();
+            }
+
+            // 3. TEMPERATURA
+            if (topic.includes("/target_temperature/state")) {
+                const t = parseFloat(payload);
+                if(!isNaN(t)) statoAttuale.temp = t;
+                aggiornaInterfaccia();
+            }
+
+            // 4. POTENZA SEGNALE WIFI (dBm)
+            if (topic.includes("/segnale_wifi_cameretta/state") && statoAttuale.online) {
+                const dbm = parseInt(payload);
+                const wifiIcon = document.getElementById('wifi-cameretta');
+                // La potenza varia circa da -40 (Perfetto) a -90 (Pessimo)
+                if (dbm > -65) {
+                    wifiIcon.className = "wifi-indicator wifi-excellent"; // Verde
+                } else if (dbm > -80) {
+                    wifiIcon.className = "wifi-indicator wifi-good"; // Giallo
+                } else {
+                    wifiIcon.className = "wifi-indicator wifi-poor"; // Rosso
+                }
             }
         });
 
-        // Funzione per il pulsante Esci
-        window.esci = function() {
-            signOut(auth).then(() => {
-                console.log("Uscita effettuata!");
-            }).catch((error) => {
-                console.error("Errore durante l'uscita: ", error);
-            });
-        };
-    </script>
+        // Funzione che disegna i colori in base ai dati
+        function aggiornaInterfaccia() {
+            const btn = document.getElementById('btn-power-cameretta');
+            const testo = document.getElementById('status-text-cameretta');
+            const card = document.getElementById('card-cameretta');
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
-    <script>
-        function apriDettagli(stanza) {
-            if(stanza === 'camera_letto') {
-                alert("Il condizionatore in Camera Letto non è attualmente connesso alla rete.");
+            if (statoAttuale.mode === "off") {
+                btn.classList.remove('on');
+                card.classList.remove('active');
+                testo.innerText = "Spento";
             } else {
-                window.location.href = "dettaglio.html";
+                btn.classList.add('on');
+                card.classList.add('active'); // Evidenzia leggermente la scheda
+                
+                let modeIta = "Freddo";
+                if(statoAttuale.mode === "heat") modeIta = "Caldo";
+                if(statoAttuale.mode === "dry") modeIta = "Deumid.";
+                if(statoAttuale.mode === "fan_only") modeIta = "Ventola";
+                if(statoAttuale.mode === "auto") modeIta = "Auto";
+                
+                testo.innerText = `${modeIta} | ${statoAttuale.temp}°C`;
             }
         }
 
-        // --- NUOVA CONNESSIONE AL SERVER PUBBLICO ---
-        const indirizzoServer = "wss://broker.hivemq.com:8884/mqtt";
-        const opzioniConnessione = {
-            clientId: "webapp_index_" + Math.random().toString(16).substring(2, 10),
-            clean: true
-            // Username e password rimossi perché usiamo il server pubblico
+        // Funzione per accendere/spegnere senza cambiare pagina
+        window.togglePowerHome = function() {
+            if(!statoAttuale.online) {
+                alert("Il condizionatore è offline!");
+                return;
+            }
+            const comando = (statoAttuale.mode === "off") ? "COOL" : "OFF";
+            clientMQTT.publish("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", comando);
+            
+            // Diamo un feedback visivo istantaneo in attesa della conferma dalla Wemos
+            document.getElementById('status-text-cameretta').innerText = "Invio comando...";
         };
-
-        const clientMQTT = mqtt.connect(indirizzoServer, opzioniConnessione);
-
-        clientMQTT.on('connect', function () {
-            console.log("✅ Connessione al Server MQTT riuscita con successo dalla Home!");
-        });
-
-        clientMQTT.on('error', function (errore) {
-            console.error("❌ Errore di connessione MQTT: ", errore);
-        });
     </script>
 </body>
 </html>
