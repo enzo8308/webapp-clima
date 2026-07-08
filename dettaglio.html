@@ -134,6 +134,7 @@
             font-size: 12px;
             cursor: pointer;
             transition: all 0.2s;
+            text-align: center;
         }
 
         .control-btn i {
@@ -172,98 +173,6 @@
             color: var(--accent-color);
             cursor: pointer;
         }
-
-        /* Funzioni Speciali */
-        .feature-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .feature-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .feature-item:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .feature-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .feature-icon {
-            width: 35px;
-            height: 35px;
-            border-radius: 8px;
-            background-color: var(--accent-light);
-            color: var(--accent-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        .feature-text div:first-child {
-            font-weight: 500;
-            font-size: 15px;
-        }
-
-        .feature-text div:last-child {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 3px;
-        }
-
-        /* Switch Toggle */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 46px;
-            height: 24px;
-        }
-
-        .switch input { 
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 24px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--success-color);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(22px);
-        }
     </style>
 </head>
 <body>
@@ -281,6 +190,36 @@
             <span style="font-size: 32px; margin-top: 10px;">°C</span>
         </div>
         <button class="power-big-btn" id="power-btn" onclick="toggleAccensione()"><i class="fas fa-power-off"></i></button>
+    </div>
+
+    <div class="control-section">
+        <div class="section-header">Modalità</div>
+        <div class="btn-grid" id="mode-buttons">
+            <div class="control-btn active" onclick="cambiaModalita('Caldo', this)"><i class="fas fa-sun"></i> Caldo</div>
+            <div class="control-btn" onclick="cambiaModalita('Freddo', this)"><i class="fas fa-snowflake"></i> Freddo</div>
+            <div class="control-btn" onclick="cambiaModalita('Deumid.', this)"><i class="fas fa-tint"></i> Deumid.</div>
+            <div class="control-btn" onclick="cambiaModalita('Ventola', this)"><i class="fas fa-fan"></i> Ventola</div>
+            <div class="control-btn" onclick="cambiaModalita('Auto', this)"><i class="fas fa-magic"></i> Auto</div>
+        </div>
+    </div>
+
+    <div class="control-section">
+        <div class="section-header">Temperatura</div>
+        <div class="temp-controls">
+            <button class="temp-btn" onclick="cambiaTemperatura(-1)"><i class="fas fa-minus"></i></button>
+            <span id="temp-display-control" style="font-size: 20px; font-weight: 500;">24 °C</span>
+            <button class="temp-btn" onclick="cambiaTemperatura(1)"><i class="fas fa-plus"></i></button>
+        </div>
+    </div>
+
+    <div class="control-section">
+        <div class="section-header">Velocità Ventola</div>
+        <div class="btn-grid" id="fan-buttons">
+            <div class="control-btn active" onclick="cambiaVentola('Bassa', this)"><i class="fas fa-signal" style="font-size: 14px;"></i> Bassa</div>
+            <div class="control-btn" onclick="cambiaVentola('Media', this)"><i class="fas fa-signal" style="font-size: 18px;"></i> Media</div>
+            <div class="control-btn" onclick="cambiaVentola('Alta', this)"><i class="fas fa-signal"></i> Alta</div>
+            <div class="control-btn" onclick="cambiaVentola('Auto', this)"><i class="fas fa-sync"></i> Auto</div>
+        </div>
     </div>
 
     <div class="control-section">
@@ -455,9 +394,9 @@
             
             let payloadSwing = 'OFF';
             // Inversione comandi applicata come richiesto
-            if (direzione === 'Oscilla Vert.') payloadSwing = 'BOTH'; // Tenta il movimento continuo
-            if (direzione === 'Extra Giù') payloadSwing = 'VERTICAL'; // Prima era Oscilla Vert
-            if (direzione === 'Extra Su') payloadSwing = 'HORIZONTAL'; // Prima era Oscilla Orizz
+            if (direzione === 'Oscilla Vert.') payloadSwing = 'BOTH';
+            if (direzione === 'Extra Giù') payloadSwing = 'VERTICAL';
+            if (direzione === 'Extra Su') payloadSwing = 'HORIZONTAL';
             if (direzione === 'Ferma') payloadSwing = 'OFF';
             
             inviaComando(`${baseTopic}/swing_mode/command`, payloadSwing);
