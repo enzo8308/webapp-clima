@@ -79,11 +79,10 @@
         <div class="section-header">Controllo Alette & Display</div>
         <div class="btn-grid" id="vane-buttons" style="grid-template-columns: repeat(3, 1fr);">
             <div class="control-btn" onclick="cambiaDirezione('Oscilla Vert.', this)"><i class="fas fa-arrows-alt-v"></i> Oscilla</div>
+            <div class="control-btn" onclick="cambiaDirezione('Extra Su', this)"><i class="fas fa-chevron-up"></i> Extra Su</div>
+            <div class="control-btn" onclick="cambiaDirezione('Extra Giù', this)"><i class="fas fa-chevron-down"></i> Extra Giù</div>
             <div class="control-btn active" onclick="cambiaDirezione('Ferma', this)"><i class="fas fa-stop"></i> Ferma aletta</div>
             <div class="control-btn" id="btn-light" onclick="toggleSpeciale('luce_display', this)"><i class="fas fa-lightbulb"></i> Luce Display</div>
-        </div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-top: 10px; text-align: center;">
-            Per posizionare l'aletta, premi "Oscilla" e poi "Ferma aletta" all'angolazione desiderata.
         </div>
     </div>
 
@@ -176,12 +175,17 @@
 
         function cambiaDirezione(direzione, elementoCliccato) {
             document.querySelectorAll('#vane-buttons .control-btn').forEach(btn => {
+                // Non togliere la selezione al tasto della luce
                 if(btn.id !== 'btn-light') btn.classList.remove('active');
             });
             elementoCliccato.classList.add('active');
+            
             let p = 'OFF'; 
-            if (direzione === 'Oscilla Vert.') p = 'VERTICAL'; 
+            if (direzione === 'Oscilla Vert.') p = 'BOTH'; 
+            if (direzione === 'Extra Su') p = 'HORIZONTAL'; 
+            if (direzione === 'Extra Giù') p = 'VERTICAL'; 
             if (direzione === 'Ferma') p = 'OFF';
+            
             inviaComando(baseTopic + "/swing_mode/command", p);
         }
 
