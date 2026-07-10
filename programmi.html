@@ -62,7 +62,6 @@
         .modal-body { padding: 20px; overflow-y: auto; background: var(--bg-color); flex: 1; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         
-        /* Elementi lista curve nella modale */
         .saved-curve-item { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px; border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
         .saved-curve-info strong { font-size: 16px; color: var(--text-main); }
         .saved-curve-info span { font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px; }
@@ -108,4 +107,283 @@
         </button>
 
         <div style="margin-bottom: 20px; background: var(--card-bg); padding: 15px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f0f0f0;">
-            <h3 style="font-size:
+            <h3 style="font-size: 12px; color: var(--accent-color); text-transform: uppercase; margin: 0 0 10px 0; letter-spacing: 0.5px; font-weight: 700;">Nome della nuova Curva</h3>
+            <input type="text" id="nome-curva-input" placeholder="Es. Notte Inverno..." style="width: 100%; padding: 12px 15px; border-radius: 10px; border: 2px solid #e6f2ff; box-sizing: border-box; font-family: inherit; font-size: 16px; font-weight: 500; color: var(--text-main); outline: none; background-color: #f8f9fa;">
+        </div>
+
+        <div class="curve-container" id="contenitore-curva">
+            </div>
+
+        <button class="add-curve-btn" onclick="aggiungiPuntoCurva()">
+            <i class="fas fa-plus"></i> Aggiungi Orario
+        </button>
+
+        <button class="save-btn" onclick="salvaCurvaCloud()">
+            <i class="fas fa-cloud-upload-alt"></i> Salva sul Cloud
+        </button>
+    </div>
+
+    <div id="modale-curve" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Le tue Curve</h3>
+                <span class="close-modal" onclick="chiudiModaleCurve()">&times;</span>
+            </div>
+            <div id="lista-curve-salvate" class="modal-body">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        window.cambiaTab = function(idTab, elementoCliccato) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(idTab).classList.add('active');
+            elementoCliccato.classList.add('active');
+        };
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let utenteLoggato = null;
+        let curveArchiviate = {}; 
+
+        // Rendo le funzioni accessibili globalmente in modo corretto
+        window.apriModaleCurve = function() {
+            document.getElementById('modale-curve').style.display = 'flex';
+            window.scaricaCurve(); 
+        };
+
+        window.chiudiModaleCurve = function() {
+            document.getElementById('modale-curve').style.display = 'none';
+        };
+
+        window.scaricaCurve = async function() {
+            const listDiv = document.getElementById('lista-curve-salvate');
+            if(!listDiv) return;
+            try {
+                const q = query(collection(db, "curve_termiche"), where("uid", "==", utenteLoggato.uid));
+                const querySnapshot = await getDocs(q);
+                
+                if(querySnapshot.empty) {
+                    listDiv.innerHTML = "<div style='font-size:13px; color:#888; text-align:center;'>Nessuna curva salvata.</div>";
+                    return;
+                }
+
+                let htmlStr = "";
+                curveArchiviate = {};
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    curveArchiviate[docSnap.id] = data;
+                    htmlStr += `
+                    <div class="saved-curve-item" id="item_${docSnap.id}">
+                        <div class="saved-curve-info">
+                            <strong>${data.nome}</strong>
+                            <span>${data.punti.length} orari configurati</span>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-load" onclick="caricaCurvaEditor('${docSnap.id}')">Carica</button>
+                            <button class="btn-delete" onclick="eliminaCurvaCloud('${docSnap.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>`;
+                });
+                listDiv.innerHTML = htmlStr;
+            } catch (error) {
+                listDiv.innerHTML = "<div style='color:red; font-size:12px;'>Errore Cloud. Hai attivato Firestore?</div>";
+            }
+        };
+
+        window.salvaCurvaCloud = async function() {
+            const nomeInput = document.getElementById('nome-curva-input').value;
+            if(!nomeInput.trim()) return alert("Devi inserire un nome per la curva!");
+            
+            const btn = document.querySelector('.save-btn');
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Salvataggio...";
+
+            let arrayPunti = [];
+            let memoriaMode = "COOL";
+            let memoriaFan = "AUTO";
+            let memoriaSwing = "OFF";
+            let memoriaLight = "ON";
+
+            document.querySelectorAll('.row-wrapper').forEach(row => {
+                let valMode = row.querySelector('.set-mode').value;
+                let valFan = row.querySelector('.set-fan').value;
+                let valSwing = row.querySelector('.set-swing').value;
+                let valLight = row.querySelector('.set-light').value;
+
+                if (valMode === "") valMode = memoriaMode; else memoriaMode = valMode;
+                if (valFan === "") valFan = memoriaFan; else memoriaFan = valFan;
+                if (valSwing === "") valSwing = memoriaSwing; else memoriaSwing = valSwing;
+                if (valLight === "") valLight = memoriaLight; else memoriaLight = valLight;
+
+                arrayPunti.push({
+                    time: row.querySelector('.curve-time').value,
+                    temp: parseInt(row.querySelector('.curve-temp').innerText),
+                    mode: valMode,
+                    fan: valFan,
+                    swing: valSwing,
+                    light: valLight
+                });
+            });
+
+            try {
+                await addDoc(collection(db, "curve_termiche"), { uid: utenteLoggato.uid, nome: nomeInput, punti: arrayPunti });
+                alert("Curva salvata con successo nel Cloud!");
+                document.getElementById('nome-curva-input').value = "";
+                window.scaricaCurve();
+            } catch (error) {
+                alert("Errore nel salvataggio! Assicurati di aver creato il Database Firestore.");
+            }
+            btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Salva sul Cloud";
+        };
+
+        window.eliminaCurvaCloud = async function(docId) {
+            const pinSicurezza = Math.floor(1000 + Math.random() * 9000);
+            const inserimento = prompt(`⚠️ ATTENZIONE ⚠️\nStai per eliminare definitivamente questa curva.\n\nInserisci il codice di sicurezza per confermare:\n👉 ${pinSicurezza}`);
+            
+            if (inserimento !== pinSicurezza.toString()) return alert("Codice errato o annullato. La curva NON è stata eliminata.");
+
+            try {
+                await deleteDoc(doc(db, "curve_termiche", docId));
+                document.getElementById('item_' + docId).remove();
+            } catch (error) { alert("Errore durante l'eliminazione."); }
+        };
+
+        window.caricaCurvaEditor = function(docId) {
+            const data = curveArchiviate[docId];
+            document.getElementById('nome-curva-input').value = data.nome + " (Copia)";
+            document.getElementById('contenitore-curva').innerHTML = ""; 
+            
+            data.punti.forEach(p => {
+                const newId = window.aggiungiPuntoCurva(p.time, p.temp);
+                const riga = document.getElementById(newId);
+                riga.querySelector('.set-mode').value = p.mode || "";
+                riga.querySelector('.set-fan').value = p.fan || "";
+                riga.querySelector('.set-swing').value = p.swing || "";
+                riga.querySelector('.set-light').value = p.light || "";
+            });
+            window.chiudiModaleCurve(); 
+        };
+
+        let countRighe = 0;
+        window.aggiungiPuntoCurva = function(defTime = "00:00", defTemp = 25) {
+            countRighe++;
+            const idRiga = 'riga_curva_' + countRighe;
+            
+            const html = `
+            <div class="row-wrapper" id="${idRiga}">
+                <div class="hour-row">
+                    <div class="hour-label">
+                        <input type="time" class="curve-time" value="${defTime}">
+                    </div>
+                    <div class="temp-stepper">
+                        <button onclick="window.cambiaGradi('${idRiga}_temp', -1)"><i class="fas fa-minus"></i></button>
+                        <span id="${idRiga}_temp" class="curve-temp">${defTemp}°</span>
+                        <button onclick="window.cambiaGradi('${idRiga}_temp', 1)"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="action-btns">
+                        <button class="btn-settings" onclick="window.toggleImpostazioni('${idRiga}')"><i class="fas fa-sliders-h"></i></button>
+                        <button class="btn-delete-row" onclick="document.getElementById('${idRiga}').remove()"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                
+                <div class="settings-panel" id="${idRiga}_settings">
+                    <label>Modalità</label>
+                    <select class="set-mode">
+                        <option value="">- Mantieni precedente -</option>
+                        <option value="OFF">Spento (OFF)</option>
+                        <option value="COOL">Freddo (Accende)</option>
+                        <option value="HEAT">Caldo (Accende)</option>
+                        <option value="DRY">Deumidificazione</option>
+                        <option value="FAN_ONLY">Solo Ventola</option>
+                        <option value="AUTO">Automatico</option>
+                    </select>
+                    
+                    <label>Velocità Ventola</label>
+                    <select class="set-fan">
+                        <option value="">- Mantieni precedente -</option>
+                        <option value="LOW">Bassa</option>
+                        <option value="MEDIUM">Media</option>
+                        <option value="HIGH">Alta</option>
+                        <option value="AUTO">Auto</option>
+                    </select>
+                    
+                    <label>Alette</label>
+                    <select class="set-swing">
+                        <option value="">- Mantieni precedente -</option>
+                        <option value="OFF">Ferme</option>
+                        <option value="VERTICAL">Tutte in Basso</option>
+                        <option value="HORIZONTAL">Tutte in Alto</option>
+                        <option value="BOTH">Oscillazione Continua</option>
+                    </select>
+
+                    <label>Luce Display</label>
+                    <select class="set-light">
+                        <option value="">- Mantieni precedente -</option>
+                        <option value="ON">Acceso</option>
+                        <option value="OFF">Spento</option>
+                    </select>
+                </div>
+            </div>`;
+            
+            document.getElementById('contenitore-curva').insertAdjacentHTML('beforeend', html);
+            return idRiga; 
+        };
+
+        window.cambiaGradi = function(idTemp, delta) {
+            let el = document.getElementById(idTemp);
+            let gradi = parseInt(el.innerText); 
+            gradi += delta;
+            if(gradi < 16) gradi = 16; if(gradi > 30) gradi = 30;
+            el.innerText = gradi + "°";
+        };
+
+        window.toggleImpostazioni = function(idRiga) {
+            let pannello = document.getElementById(idRiga + '_settings');
+            pannello.style.display = (pannello.style.display === 'none' || pannello.style.display === '') ? 'block' : 'none';
+        };
+
+        // Inizializzazione 
+        onAuthStateChanged(auth, (user) => { 
+            if (!user) { window.location.href = "login.html"; } 
+            else {
+                utenteLoggato = user;
+                document.getElementById('contenitore-curva').innerHTML = "";
+                window.aggiungiPuntoCurva("23:00", 24); 
+                window.aggiungiPuntoCurva("06:00", 26); 
+                window.scaricaCurve();
+            }
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
+    <script>
+        const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_programmi_" + Math.random().toString(16).substring(2, 10), clean: true });
+        function inviaComando(topic, msg) { if (clientMQTT && clientMQTT.connected) clientMQTT.publish(topic, msg.toString()); }
+
+        window.avviaProgrammaRapido = function(modo, temperatura) {
+            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", modo);
+            setTimeout(() => { inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/command", temperatura); }, 500);
+        };
+
+        window.avviaProgrammaNotte = function() {
+            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", "COOL");
+            setTimeout(() => {
+                inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/command", 25);
+                inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/fan_mode/command", "LOW");
+                inviaComando("vincenzo_clima_segreto_7788/switch/luce_display/command", "OFF");
+            }, 500);
+        };
+    </script>
+</body>
+</html>
