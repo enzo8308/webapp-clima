@@ -49,10 +49,24 @@
         .settings-panel select { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; color: var(--text-main); }
         .settings-panel label { font-weight: 600; margin-bottom: 5px; display: block; color: #555; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
         
+        /* Bottoni Generali e Azioni */
         .add-curve-btn { width: 100%; padding: 15px; background-color: #e6f2ff; color: var(--accent-color); border: 2px dashed #b3d7ff; border-radius: 16px; font-size: 15px; font-weight: 600; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
-        .save-btn { width: 100%; padding: 16px; background-color: var(--success-color); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(40,167,69,0.3); }
+        .save-btn { width: 100%; padding: 15px; background-color: #f0f4f8; color: var(--accent-color); border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px;}
         
-        /* Stili Finestra Modale (Pop-up Curve Salvate) */
+        /* Nuovi Bottoni AVVIA/FERMA */
+        .azione-container { display: flex; gap: 10px; margin-bottom: 25px; }
+        .avvia-btn { flex: 1; padding: 16px; background-color: var(--success-color); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(40,167,69,0.3); transition: 0.2s; }
+        .avvia-btn:active { transform: scale(0.98); }
+        .ferma-btn { display: none; width: 100%; padding: 16px; background-color: var(--error-color); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(220,53,69,0.3); transition: 0.2s; margin-bottom: 25px; }
+        .ferma-btn:active { transform: scale(0.98); }
+        
+        /* Banner Stato Sistema */
+        .status-banner { padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; font-weight: 600; font-size: 14px; display: flex; flex-direction: column; gap: 5px; transition: 0.3s; }
+        .status-fermo { background-color: #f8d7da; color: var(--error-color); border: 1px solid #f5c6cb; }
+        .status-attivo { background-color: #d4edda; color: var(--success-color); border: 1px solid #c3e6cb; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(40,167,69, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(40,167,69, 0); } 100% { box-shadow: 0 0 0 0 rgba(40,167,69, 0); } }
+
+        /* Modale Curve Salvate */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
         .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); overflow: hidden; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; max-height: 80vh; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #f0f0f0; background: #fff; }
@@ -102,12 +116,17 @@
 
     <div id="curva" class="tab-content">
         
+        <div id="banner-stato" class="status-banner status-fermo">
+            <span><i class="fas fa-power-off"></i> Automazione Ferma</span>
+            <span id="banner-sottotitolo" style="font-size: 11px; font-weight: 400;">Nessuna curva in esecuzione.</span>
+        </div>
+
         <button class="add-curve-btn" style="background-color: #fff; border: 1px solid var(--accent-color); color: var(--accent-color); margin-bottom: 20px; margin-top: 5px;" onclick="apriModaleCurve()">
-            <i class="fas fa-folder-open"></i> Carica una Curva Salvata
+            <i class="fas fa-folder-open"></i> Scegli Curva da Archivio
         </button>
 
         <div style="margin-bottom: 20px; background: var(--card-bg); padding: 15px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f0f0f0;">
-            <h3 style="font-size: 12px; color: var(--accent-color); text-transform: uppercase; margin: 0 0 10px 0; letter-spacing: 0.5px; font-weight: 700;">Nome della nuova Curva</h3>
+            <h3 style="font-size: 12px; color: var(--accent-color); text-transform: uppercase; margin: 0 0 10px 0; letter-spacing: 0.5px; font-weight: 700;">Nome della Curva</h3>
             <input type="text" id="nome-curva-input" placeholder="Es. Notte Inverno..." style="width: 100%; padding: 12px 15px; border-radius: 10px; border: 2px solid #e6f2ff; box-sizing: border-box; font-family: inherit; font-size: 16px; font-weight: 500; color: var(--text-main); outline: none; background-color: #f8f9fa;">
         </div>
 
@@ -118,15 +137,25 @@
             <i class="fas fa-plus"></i> Aggiungi Orario
         </button>
 
-        <button class="save-btn" onclick="salvaCurvaCloud()">
-            <i class="fas fa-cloud-upload-alt"></i> Salva sul Cloud
+        <div class="azione-container" id="box-avvia">
+            <button class="save-btn" onclick="salvaCurvaCloud()">
+                <i class="fas fa-cloud-upload-alt"></i> Salva su Cloud
+            </button>
+            <button class="avvia-btn" onclick="avviaEsecuzione()">
+                <i class="fas fa-play"></i> AVVIA CURVA
+            </button>
+        </div>
+        
+        <button id="btn-ferma" class="ferma-btn" onclick="fermaEsecuzione()">
+            <i class="fas fa-stop"></i> FERMA AUTOMAZIONE
         </button>
+
     </div>
 
     <div id="modale-curve" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Le tue Curve</h3>
+                <h3>Archivio Curve</h3>
                 <span class="close-modal" onclick="chiudiModaleCurve()">&times;</span>
             </div>
             <div id="lista-curve-salvate" class="modal-body">
@@ -146,7 +175,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // AGGIUNTO: setDoc e onSnapshot per gestire il "Post-it"
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
         
@@ -157,7 +187,7 @@
         let utenteLoggato = null;
         let curveArchiviate = {}; 
 
-        // Rendo le funzioni accessibili globalmente in modo corretto
+        // Modale
         window.apriModaleCurve = function() {
             document.getElementById('modale-curve').style.display = 'flex';
             window.scaricaCurve(); 
@@ -166,6 +196,99 @@
         window.chiudiModaleCurve = function() {
             document.getElementById('modale-curve').style.display = 'none';
         };
+
+        // --- SISTEMA AVVIA / FERMA (IL POST-IT CLOUD) ---
+        
+        // Funzione per raccogliere l'array pulito dall'editor (usata sia per salvare che per avviare)
+        function raccogliPuntiDaEditor() {
+            let arrayPunti = [];
+            let memoriaMode = "COOL";
+            let memoriaFan = "AUTO";
+            let memoriaSwing = "OFF";
+            let memoriaLight = "ON";
+
+            document.querySelectorAll('.row-wrapper').forEach(row => {
+                let valMode = row.querySelector('.set-mode').value;
+                let valFan = row.querySelector('.set-fan').value;
+                let valSwing = row.querySelector('.set-swing').value;
+                let valLight = row.querySelector('.set-light').value;
+
+                if (valMode === "") valMode = memoriaMode; else memoriaMode = valMode;
+                if (valFan === "") valFan = memoriaFan; else memoriaFan = valFan;
+                if (valSwing === "") valSwing = memoriaSwing; else memoriaSwing = valSwing;
+                if (valLight === "") valLight = memoriaLight; else memoriaLight = valLight;
+
+                arrayPunti.push({
+                    time: row.querySelector('.curve-time').value,
+                    temp: parseInt(row.querySelector('.curve-temp').innerText),
+                    mode: valMode,
+                    fan: valFan,
+                    swing: valSwing,
+                    light: valLight
+                });
+            });
+            return arrayPunti;
+        }
+
+        window.avviaEsecuzione = async function() {
+            const nomeInput = document.getElementById('nome-curva-input').value;
+            if(!nomeInput.trim()) return alert("Dai un nome alla curva prima di avviarla!");
+            
+            const punti = raccogliPuntiDaEditor();
+            if(punti.length === 0) return alert("Inserisci almeno un orario nella curva.");
+
+            // Scrive il Post-it su Firebase dicendo "Questa è la curva da eseguire ora"
+            try {
+                await setDoc(doc(db, "stato_sistema", utenteLoggato.uid), {
+                    attiva: true,
+                    nome_curva: nomeInput,
+                    punti: punti,
+                    aggiornato_il: new Date().toISOString()
+                });
+                alert("Automazione Avviata! Puoi spegnere il telefono, ci pensa il Cloud.");
+            } catch (error) {
+                alert("Errore nell'avvio dell'automazione.");
+                console.error(error);
+            }
+        };
+
+        window.fermaEsecuzione = async function() {
+            // Strappa il post-it
+            try {
+                await setDoc(doc(db, "stato_sistema", utenteLoggato.uid), {
+                    attiva: false,
+                    nome_curva: "",
+                    aggiornato_il: new Date().toISOString()
+                });
+            } catch (error) {
+                console.error("Errore stop:", error);
+            }
+        };
+
+        // Ascoltatore Real-Time del Post-it (Aggiorna il Banner Graficamente)
+        function ascoltaStatoSistema() {
+            onSnapshot(doc(db, "stato_sistema", utenteLoggato.uid), (docSnap) => {
+                const banner = document.getElementById('banner-stato');
+                const btnAvvia = document.getElementById('box-avvia');
+                const btnFerma = document.getElementById('btn-ferma');
+                
+                if (docSnap.exists() && docSnap.data().attiva === true) {
+                    // Sistema Attivo
+                    banner.className = "status-banner status-attivo";
+                    banner.innerHTML = `<span><i class="fas fa-check-circle"></i> Automazione in Esecuzione</span><span id="banner-sottotitolo" style="font-size: 11px; font-weight: 500;">Sta eseguendo: ${docSnap.data().nome_curva}</span>`;
+                    btnAvvia.style.display = "none";
+                    btnFerma.style.display = "flex";
+                } else {
+                    // Sistema Fermo
+                    banner.className = "status-banner status-fermo";
+                    banner.innerHTML = `<span><i class="fas fa-power-off"></i> Automazione Ferma</span><span id="banner-sottotitolo" style="font-size: 11px; font-weight: 400;">Nessuna curva in esecuzione.</span>`;
+                    btnAvvia.style.display = "flex";
+                    btnFerma.style.display = "none";
+                }
+            });
+        }
+        // ----------------------------------------------
+
 
         window.scaricaCurve = async function() {
             const listDiv = document.getElementById('lista-curve-salvate');
@@ -207,44 +330,20 @@
             if(!nomeInput.trim()) return alert("Devi inserire un nome per la curva!");
             
             const btn = document.querySelector('.save-btn');
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Salvataggio...";
+            const vecchioTesto = btn.innerHTML;
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
 
-            let arrayPunti = [];
-            let memoriaMode = "COOL";
-            let memoriaFan = "AUTO";
-            let memoriaSwing = "OFF";
-            let memoriaLight = "ON";
-
-            document.querySelectorAll('.row-wrapper').forEach(row => {
-                let valMode = row.querySelector('.set-mode').value;
-                let valFan = row.querySelector('.set-fan').value;
-                let valSwing = row.querySelector('.set-swing').value;
-                let valLight = row.querySelector('.set-light').value;
-
-                if (valMode === "") valMode = memoriaMode; else memoriaMode = valMode;
-                if (valFan === "") valFan = memoriaFan; else memoriaFan = valFan;
-                if (valSwing === "") valSwing = memoriaSwing; else memoriaSwing = valSwing;
-                if (valLight === "") valLight = memoriaLight; else memoriaLight = valLight;
-
-                arrayPunti.push({
-                    time: row.querySelector('.curve-time').value,
-                    temp: parseInt(row.querySelector('.curve-temp').innerText),
-                    mode: valMode,
-                    fan: valFan,
-                    swing: valSwing,
-                    light: valLight
-                });
-            });
+            const arrayPunti = raccogliPuntiDaEditor();
 
             try {
                 await addDoc(collection(db, "curve_termiche"), { uid: utenteLoggato.uid, nome: nomeInput, punti: arrayPunti });
-                alert("Curva salvata con successo nel Cloud!");
+                alert("Curva salvata in Archivio!");
                 document.getElementById('nome-curva-input').value = "";
                 window.scaricaCurve();
             } catch (error) {
                 alert("Errore nel salvataggio! Assicurati di aver creato il Database Firestore.");
             }
-            btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Salva sul Cloud";
+            btn.innerHTML = vecchioTesto;
         };
 
         window.eliminaCurvaCloud = async function(docId) {
@@ -362,6 +461,9 @@
                 window.aggiungiPuntoCurva("23:00", 24); 
                 window.aggiungiPuntoCurva("06:00", 26); 
                 window.scaricaCurve();
+                
+                // Fa partire il Listener del Banner appena fai l'accesso
+                ascoltaStatoSistema(); 
             }
         });
     </script>
