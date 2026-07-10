@@ -13,7 +13,6 @@
         
         .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background-color: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .back-btn { color: var(--text-main); text-decoration: none; font-size: 20px; cursor: pointer; }
-        
         .header-title { display: flex; align-items: center; margin: 0; font-size: 18px; font-weight: 500; }
         
         .status-badge { font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 10px; }
@@ -26,9 +25,11 @@
         .wifi-good { color: var(--warning-color); }
         .wifi-poor { color: var(--error-color); }
         
-        /* Icona collegamento programmi nel dettaglio */
         .prog-link { color: var(--text-main); font-size: 18px; margin-right: 15px; text-decoration: none; transition: 0.2s; }
         .prog-link:hover { color: var(--accent-color); }
+
+        /* BANNER DETTAGLIO CURVA ATTIVA */
+        #banner-curva-dettaglio { display: none; background-color: #d4edda; color: var(--success-color); text-align: center; padding: 10px; font-size: 12px; font-weight: bold; border-bottom: 1px solid #c3e6cb; }
 
         .main-status { text-align: center; padding: 30px 20px; background-color: var(--card-bg); margin-bottom: 15px; }
         .temperature-display { font-size: 64px; font-weight: 700; color: var(--accent-color); margin: 10px 0; display: flex; justify-content: center; align-items: flex-start; }
@@ -60,6 +61,10 @@
             <a href="programmi.html" class="prog-link" title="Programmazione"><i class="fas fa-clock"></i></a>
             <i class="fas fa-cog" style="color: var(--text-muted);"></i>
         </div>
+    </div>
+
+    <div id="banner-curva-dettaglio">
+        <i class="fas fa-magic"></i> AUTOMAZIONE IN ESECUZIONE: <span id="nome-curva-span"></span>
     </div>
 
     <div class="main-status" id="main-status-bg">
@@ -115,10 +120,28 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
         const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, (user) => { 
+            if (!user) {
+                window.location.href = "login.html"; 
+            } else {
+                onSnapshot(doc(db, "stato_sistema", user.uid), (docSnap) => {
+                    const banner = document.getElementById('banner-curva-dettaglio');
+                    if (docSnap.exists() && docSnap.data().attiva === true) {
+                        banner.style.display = 'block';
+                        document.getElementById('nome-curva-span').innerText = docSnap.data().nome_curva;
+                    } else {
+                        banner.style.display = 'none';
+                    }
+                });
+            }
+        });
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>

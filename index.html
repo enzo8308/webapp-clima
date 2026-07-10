@@ -40,11 +40,13 @@
         .wifi-good { color: var(--warning-color); }
         .wifi-poor { color: var(--error-color); }
 
-        /* NAVIGAZIONE AGGIORNATA E PULITA */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 11px; text-decoration: none; padding: 5px 20px; }
         .nav-item.active { color: var(--accent-color); }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        
+        /* Animazione per la curva attiva */
+        @keyframes pulse-small { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -71,6 +73,9 @@
                 </div>
             </div>
             <div class="card-title">Cameretta</div>
+            <div id="indicatore-curva-index" style="display: none; font-size: 9px; color: #fff; background: var(--success-color); padding: 3px 6px; border-radius: 4px; margin-top: 5px; width: fit-content; font-weight: bold; animation: pulse-small 2s infinite;">
+                <i class="fas fa-play"></i> CURVA ATTIVA
+            </div>
             <div class="card-status" id="status-text-cameretta">Attesa dati...</div>
             <div class="wifi-indicator" id="wifi-cameretta"><i class="fas fa-wifi"></i></div>
         </div>
@@ -96,10 +101,30 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        // Importo Firestore per leggere il Post-it
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
         const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, (user) => { 
+            if (!user) {
+                window.location.href = "login.html"; 
+            } else {
+                // Ascolta in tempo reale se c'è una curva attiva
+                onSnapshot(doc(db, "stato_sistema", user.uid), (docSnap) => {
+                    const badgeCurva = document.getElementById('indicatore-curva-index');
+                    if (docSnap.exists() && docSnap.data().attiva === true) {
+                        badgeCurva.style.display = 'block';
+                    } else {
+                        badgeCurva.style.display = 'none';
+                    }
+                });
+            }
+        });
+        
         window.esci = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); };
     </script>
 
