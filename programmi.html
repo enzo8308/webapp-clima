@@ -82,6 +82,16 @@
         .saved-curve-info span { font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px; }
         .btn-load { background: #e6f2ff; color: var(--accent-color); border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;}
         .btn-delete { background: #f8d7da; color: var(--error-color); border: none; font-size: 14px; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center;}
+/* Stili Finestra Modale (Pop-up Curve Salvate) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
+        .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); overflow: hidden; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; max-height: 80vh; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #f0f0f0; background: #fff; }
+        .modal-header h3 { margin: 0; font-size: 16px; color: var(--text-main); font-weight: 700; }
+        .close-modal { font-size: 26px; cursor: pointer; color: var(--text-muted); line-height: 1; transition: 0.2s; }
+        .close-modal:active { transform: scale(0.9); }
+        .modal-body { padding: 20px; overflow-y: auto; background: var(--bg-color); flex: 1; }
+        
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
     </style>
 </head>
 <body>
