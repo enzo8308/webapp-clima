@@ -11,51 +11,77 @@
         :root { --bg-color: #f5f6f8; --card-bg: #ffffff; --text-main: #333333; --text-muted: #888888; --accent-color: #007bff; --accent-light: #e6f2ff; --error-color: #dc3545; }
         body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 30px; }
         
-        .header { display: flex; align-items: center; padding: 20px; background-color: var(--card-bg); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .header { display: flex; align-items: center; padding: 20px; background-color: var(--card-bg); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .back-btn { color: var(--text-main); text-decoration: none; font-size: 20px; margin-right: 20px; cursor: pointer; }
         .header h1 { font-size: 18px; margin: 0; font-weight: 500; }
         
-        .tabs { display: flex; background-color: var(--card-bg); border-bottom: 1px solid #ddd; }
-        .tab { flex: 1; text-align: center; padding: 15px 0; font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; }
+        .tabs { display: flex; background-color: var(--card-bg); }
+        .tab { flex: 1; text-align: center; padding: 15px 0; font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; }
         .tab.active { color: var(--accent-color); border-bottom: 3px solid var(--accent-color); }
         .tab-content { display: none; padding: 15px; }
         .tab-content.active { display: block; }
         
-        .program-card { background-color: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s ease; }
-        .program-card:active { transform: scale(0.98); background-color: #f8f9fa; }
-        .program-info { flex: 1; }
-        .program-title { font-weight: 500; font-size: 16px; margin-bottom: 5px; }
-        .program-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
-        .program-icon { width: 40px; height: 40px; border-radius: 50%; background-color: #f0f4f8; color: var(--accent-color); display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 15px; }
+        /* Stili Editor Curva Avanzato (MIGLIORATO) */
+        .curve-container { margin-bottom: 15px; }
+        .row-wrapper { 
+            background-color: var(--card-bg); 
+            border-radius: 16px; 
+            padding: 15px; 
+            margin-bottom: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+            border: 1px solid #f0f0f0;
+            transition: all 0.2s ease;
+        }
         
-        /* Stili Editor Curva Avanzato */
-        .curve-container { background-color: var(--card-bg); border-radius: 12px; padding: 0 20px; margin-bottom: 15px; }
-        .row-wrapper { border-bottom: 1px solid #eee; padding: 15px 0; }
-        .row-wrapper:last-child { border-bottom: none; }
         .hour-row { display: flex; justify-content: space-between; align-items: center; }
         
-        .hour-label { font-weight: 500; font-size: 16px; display: flex; align-items: center; gap: 8px; }
-        .curve-time { border: none; background: transparent; font-family: inherit; font-size: 16px; font-weight: 500; color: var(--text-main); outline: none; width: 65px; }
+        .hour-label { font-weight: 500; display: flex; align-items: center; gap: 8px; color: var(--accent-color); }
+        .curve-time { 
+            border: none; 
+            background: #f0f4f8; 
+            font-family: inherit; 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            outline: none; 
+            padding: 6px 10px;
+            border-radius: 8px;
+            min-width: 90px; /* FIX PER GLI ZERI TAGLIATI */
+        }
         
-        .temp-stepper { display: flex; align-items: center; background-color: var(--bg-color); padding: 5px 8px; border-radius: 8px; }
-        .temp-stepper button { border: none; background: none; font-size: 14px; color: var(--accent-color); cursor: pointer; padding: 5px; }
-        .temp-stepper span { font-weight: 500; font-size: 15px; width: 22px; text-align: center; }
-        .action-btns { margin-left: 10px; display: flex; gap: 10px; }
-        .action-btns button { border: none; background: none; font-size: 16px; cursor: pointer; }
+        .temp-stepper { display: flex; align-items: center; background-color: #f8f9fa; padding: 5px; border-radius: 12px; border: 1px solid #eee; }
+        .temp-stepper button { border: none; background: #fff; width: 30px; height: 30px; border-radius: 8px; font-size: 14px; color: var(--accent-color); cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .temp-stepper span { font-weight: 700; font-size: 18px; width: 36px; text-align: center; color: var(--text-main); }
         
-        .settings-panel { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 13px; display: none; border-left: 3px solid var(--accent-color); }
-        .settings-panel select { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; }
-        .settings-panel label { font-weight: 500; margin-bottom: 3px; display: block; color: #555; }
+        .action-btns { margin-left: 5px; display: flex; gap: 8px; }
+        .action-btns button { border: none; background: #f0f4f8; width: 34px; height: 34px; border-radius: 50%; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .btn-settings { color: #6c757d; }
+        .btn-delete-row { color: var(--error-color); background: #f8d7da !important; }
         
-        .add-curve-btn { width: 100%; padding: 15px; background-color: var(--accent-light); color: var(--accent-color); border: 2px dashed var(--accent-color); border-radius: 12px; font-size: 15px; font-weight: 500; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: center; gap: 10px; }
-        .save-btn { width: 100%; padding: 15px; background-color: var(--success-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;}
+        .settings-panel { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 12px; 
+            margin-top: 15px; 
+            font-size: 13px; 
+            display: none; 
+            border: 1px solid #eee;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .settings-panel select { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; color: var(--text-main); }
+        .settings-panel label { font-weight: 600; margin-bottom: 5px; display: block; color: #555; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .add-curve-btn { width: 100%; padding: 15px; background-color: #e6f2ff; color: var(--accent-color); border: 2px dashed #b3d7ff; border-radius: 16px; font-size: 15px; font-weight: 600; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
+        .save-btn { width: 100%; padding: 16px; background-color: var(--accent-color); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,123,255,0.3); }
         
         /* Lista curve salvate */
-        .saved-curve-item { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 12px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        .saved-curve-info strong { font-size: 15px; }
-        .saved-curve-info span { font-size: 12px; color: var(--text-muted); display: block; margin-top: 3px; }
-        .btn-load { background: var(--accent-color); color: white; border: none; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-weight: 500; }
-        .btn-delete { background: none; color: var(--error-color); border: none; font-size: 16px; cursor: pointer; padding: 6px; }
+        .saved-curve-item { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px; border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .saved-curve-info strong { font-size: 16px; color: var(--text-main); }
+        .saved-curve-info span { font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px; }
+        .btn-load { background: #e6f2ff; color: var(--accent-color); border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;}
+        .btn-delete { background: #f8d7da; color: var(--error-color); border: none; font-size: 14px; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center;}
     </style>
 </head>
 <body>
@@ -285,7 +311,6 @@
             <div class="row-wrapper" id="${idRiga}">
                 <div class="hour-row">
                     <div class="hour-label">
-                        <i class="far fa-clock"></i> 
                         <input type="time" class="curve-time" value="${defTime}">
                     </div>
                     <div class="temp-stepper">
@@ -294,44 +319,52 @@
                         <button onclick="cambiaGradi('${idRiga}_temp', 1)"><i class="fas fa-plus"></i></button>
                     </div>
                     <div class="action-btns">
-                        <button style="color:var(--text-muted);" onclick="toggleImpostazioni('${idRiga}')"><i class="fas fa-cog"></i></button>
-                        <button style="color:var(--error-color);" onclick="document.getElementById('${idRiga}').remove()"><i class="fas fa-trash"></i></button>
+                        <button class="btn-settings" onclick="toggleImpostazioni('${idRiga}')"><i class="fas fa-sliders-h"></i></button>
+                        <button class="btn-delete-row" onclick="document.getElementById('${idRiga}').remove()"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
                 
                 <div class="settings-panel" id="${idRiga}_settings">
                     <label>Modalità</label>
-			<select class="set-mode">
-   			<option value="">- Mantieni precedente -</option>
-    			<option value="OFF">Spento (OFF)</option>
-    			<option value="COOL">Freddo</option><option value="HEAT">Caldo</option>
-    			<option value="DRY">Deumid.</option><option value="FAN_ONLY">Ventola</option><option value="AUTO">Auto</option>
-			</select>>
+                    <select class="set-mode">
+                        <option value="">- Mantieni precedente -</option>
+                        <option value="OFF">Spento (OFF)</option>
+                        <option value="COOL">Freddo (Accende)</option>
+                        <option value="HEAT">Caldo (Accende)</option>
+                        <option value="DRY">Deumidificazione</option>
+                        <option value="FAN_ONLY">Solo Ventola</option>
+                        <option value="AUTO">Automatico</option>
+                    </select>
                     
                     <label>Velocità Ventola</label>
                     <select class="set-fan">
                         <option value="">- Mantieni precedente -</option>
-                        <option value="LOW">Bassa</option><option value="MEDIUM">Media</option>
-                        <option value="HIGH">Alta</option><option value="AUTO">Auto</option>
+                        <option value="LOW">Bassa</option>
+                        <option value="MEDIUM">Media</option>
+                        <option value="HIGH">Alta</option>
+                        <option value="AUTO">Auto</option>
                     </select>
                     
                     <label>Alette</label>
                     <select class="set-swing">
                         <option value="">- Mantieni precedente -</option>
-                        <option value="OFF">Ferme</option><option value="VERTICAL">Extra Giù</option>
-                        <option value="HORIZONTAL">Extra Su</option><option value="BOTH">Oscilla</option>
+                        <option value="OFF">Ferme</option>
+                        <option value="VERTICAL">Tutte in Basso</option>
+                        <option value="HORIZONTAL">Tutte in Alto</option>
+                        <option value="BOTH">Oscillazione Continua</option>
                     </select>
 
                     <label>Luce Display</label>
                     <select class="set-light">
                         <option value="">- Mantieni precedente -</option>
-                        <option value="ON">Acceso</option><option value="OFF">Spento</option>
+                        <option value="ON">Acceso</option>
+                        <option value="OFF">Spento</option>
                     </select>
                 </div>
             </div>`;
             
             document.getElementById('contenitore-curva').insertAdjacentHTML('beforeend', html);
-            return idRiga; // Ritorna l'ID se serve ripopolarlo
+            return idRiga;
         };
 
         window.cambiaGradi = function(idTemp, delta) {
