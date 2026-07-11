@@ -20,7 +20,6 @@
         .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
         
         .card { background-color: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; position: relative; }
-        .card.active { border: 2px solid #d0d7de; }
         
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .card-icon { font-size: 24px; color: var(--accent-color); }
@@ -95,11 +94,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
         const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-
         onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
         window.esci = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); };
     </script>
@@ -113,11 +110,12 @@
 
         const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_index_" + Math.random().toString(16).substring(2, 10), clean: true });
         let statoAttuale = { online: false, mode: "OFF", temp: 24 };
+        const baseTopic = "vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta";
 
         clientMQTT.on('connect', function () {
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
-            clientMQTT.subscribe("vincenzo_clima_segreto_7788/climate/haier_tundra/mode/state");
-            clientMQTT.subscribe("vincenzo_clima_segreto_7788/climate/haier_tundra/target_temperature/state");
+            clientMQTT.subscribe(baseTopic + "/mode/state");
+            clientMQTT.subscribe(baseTopic + "/target_temperature/state");
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/sensor/segnale_wifi_cameretta/state");
         });
 
@@ -144,10 +142,10 @@
         });
 
         function aggiornaInterfaccia() {
-            const btn = document.getElementById('btn-power-cameretta'); const testo = document.getElementById('status-text-cameretta'); const card = document.getElementById('card-cameretta');
-            if (statoAttuale.mode === "off") { btn.classList.remove('on'); card.classList.remove('active'); testo.innerText = "Spento"; }
+            const btn = document.getElementById('btn-power-cameretta'); const testo = document.getElementById('status-text-cameretta');
+            if (statoAttuale.mode === "off") { btn.classList.remove('on'); testo.innerText = "Spento"; }
             else {
-                btn.classList.add('on'); card.classList.add('active');
+                btn.classList.add('on');
                 let modeIta = "Freddo"; if(statoAttuale.mode === "heat") modeIta = "Caldo"; if(statoAttuale.mode === "dry") modeIta = "Deumid."; if(statoAttuale.mode === "fan_only") modeIta = "Ventola"; if(statoAttuale.mode === "auto") modeIta = "Auto";
                 testo.innerText = `${modeIta} | ${statoAttuale.temp}°C`;
             }
@@ -155,7 +153,7 @@
 
         window.togglePowerHome = function() {
             if(!statoAttuale.online) { alert("Il condizionatore è offline!"); return; }
-            clientMQTT.publish("vincenzo_clima_segreto_7788/climate/haier_tundra/mode/command", (statoAttuale.mode === "off") ? "COOL" : "OFF");
+            clientMQTT.publish(baseTopic + "/mode/command", (statoAttuale.mode === "off") ? "cool" : "off");
         };
     </script>
 </body>
