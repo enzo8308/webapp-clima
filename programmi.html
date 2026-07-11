@@ -443,15 +443,12 @@
             // Invio la stringa MQTT al Wemos!
             clientMQTT.publish("vincenzo_clima_segreto_7788/curva/imposta", stringaCurva, { retain: true });
             
-            // Dico a tutta l'app che la curva è attiva
-            clientMQTT.publish("vincenzo_clima_segreto_7788/curva/stato", "ATTIVA", { retain: true });
-            
-            alert("Curva inviata! Il condizionatore gestirà gli orari in autonomia.");
+            alert("Richiesta inviata! L'app si aggiornerà appena il Wemos confermerà il salvataggio.");
         };
 
         window.fermaEsecuzione = function() {
+            // Invio il comando STOP, sarà il Wemos a dire a tutti che è ferma
             clientMQTT.publish("vincenzo_clima_segreto_7788/curva/imposta", "STOP", { retain: true });
-            clientMQTT.publish("vincenzo_clima_segreto_7788/curva/stato", "FERMA", { retain: true });
         };
 
         window.avviaProgrammaRapido = function(modo, temperatura) {
