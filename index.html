@@ -98,36 +98,23 @@
         <a href="#" class="nav-item" onclick="esci()"><i class="fas fa-sign-out-alt"></i><span>Esci</span></a>
     </div>
 
+    <!-- Firebase Auth per il login -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        // Importo Firestore per leggere il Post-it
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
 
         onAuthStateChanged(auth, (user) => { 
-            if (!user) {
-                window.location.href = "login.html"; 
-            } else {
-                // Ascolta in tempo reale se c'è una curva attiva
-                onSnapshot(doc(db, "stato_sistema", user.uid), (docSnap) => {
-                    const badgeCurva = document.getElementById('indicatore-curva-index');
-                    if (docSnap.exists() && docSnap.data().attiva === true) {
-                        badgeCurva.style.display = 'block';
-                    } else {
-                        badgeCurva.style.display = 'none';
-                    }
-                });
-            }
+            if (!user) window.location.href = "login.html"; 
         });
         
         window.esci = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); };
     </script>
 
+    <!-- Paho MQTT per comunicare col Wemos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
     <script>
         function apriDettagli(stanza) {
@@ -143,10 +130,12 @@
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/state");
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/state");
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/sensor/segnale_wifi_cameretta/state");
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/curva/stato");
         });
 
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();
+            
             if (topic.includes("/status")) {
                 const badge = document.getElementById('badge-cameretta');
                 if (payload === "online") {
@@ -163,6 +152,11 @@
                 if (dbm > -65) wifiIcon.className = "wifi-indicator wifi-excellent";
                 else if (dbm > -80) wifiIcon.className = "wifi-indicator wifi-good";
                 else wifiIcon.className = "wifi-indicator wifi-poor";
+            }
+            if (topic.includes("/curva/stato")) {
+                const badgeCurva = document.getElementById('indicatore-curva-index');
+                if (payload === "attiva") badgeCurva.style.display = 'block';
+                else badgeCurva.style.display = 'none';
             }
         });
 
