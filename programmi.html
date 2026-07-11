@@ -96,6 +96,7 @@
     </div>
 
     <div id="programmi" class="tab-content active">
+        <!-- Esempio Programmi Rapidi -->
         <div class="program-card" onclick="avviaProgrammaNotte()">
             <div class="program-icon" style="color: #20c997; background-color: #d4edda;"><i class="fas fa-moon"></i></div>
             <div class="program-info"><div class="program-title">Notte Serena</div><div class="program-desc">Freddo 25°C, ventola minima, luce spenta.</div></div>
@@ -130,8 +131,7 @@
             <input type="text" id="nome-curva-input" placeholder="Es. Notte Inverno..." style="width: 100%; padding: 12px 15px; border-radius: 10px; border: 2px solid #e6f2ff; box-sizing: border-box; font-family: inherit; font-size: 16px; font-weight: 500; color: var(--text-main); outline: none; background-color: #f8f9fa;">
         </div>
 
-        <div class="curve-container" id="contenitore-curva">
-            </div>
+        <div class="curve-container" id="contenitore-curva"></div>
 
         <button class="add-curve-btn" onclick="aggiungiPuntoCurva()">
             <i class="fas fa-plus"></i> Aggiungi Orario
@@ -163,6 +163,7 @@
         </div>
     </div>
 
+    <!-- UI E INTERAZIONE -->
     <script>
         window.cambiaTab = function(idTab, elementoCliccato) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -288,10 +289,10 @@
         };
     </script>
 
+    <!-- FIREBASE CLOUD ARCHIVIO -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        // Usiamo Firebase solo per l'archivio Cloud delle curve salvate
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
@@ -351,7 +352,7 @@
 
         window.salvaCurvaCloud = async function() {
             const nomeInput = document.getElementById('nome-curva-input').value;
-            if(!nomeInput.trim()) return alert("Devi inserire un nome per la curva!");
+            if(!nomeInput.trim()) return alert("Devi inserire un nome per la curva prima di salvarla in archivio!");
             
             const btn = document.querySelector('.save-btn');
             const vecchioTesto = btn.innerHTML;
@@ -361,7 +362,7 @@
 
             try {
                 await addDoc(collection(db, "curve_termiche"), { uid: utenteLoggato.uid, nome: nomeInput, punti: arrayPunti });
-                alert("Curva salvata in Archivio!");
+                alert("Curva salvata nell'archivio Cloud!");
                 document.getElementById('nome-curva-input').value = "";
                 window.scaricaCurve();
             } catch (error) {
@@ -399,6 +400,7 @@
         };
     </script>
 
+    <!-- MQTT LOGIC -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
     <script>
         const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_programmi_" + Math.random().toString(16).substring(2, 10), clean: true });
@@ -408,6 +410,7 @@
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/curva/stato");
         });
 
+        // Ascolta in tempo reale le risposte dal Wemos
         clientMQTT.on('message', function(topic, message) {
             if (topic === "vincenzo_clima_segreto_7788/curva/stato") {
                 const payload = message.toString();
@@ -440,27 +443,27 @@
                 stringaCurva += `${p.time},${p.mode},${p.temp},${p.fan},${p.swing},${p.light}|`;
             });
 
-            // Invio la stringa MQTT al Wemos!
+            // Invio la stringa MQTT al Wemos! Sarà LUI a rispondere pubblicando "ATTIVA" sul topic
             clientMQTT.publish("vincenzo_clima_segreto_7788/curva/imposta", stringaCurva, { retain: true });
             
-            alert("Richiesta inviata! L'app si aggiornerà appena il Wemos confermerà il salvataggio.");
+            alert("Richiesta inviata! Attendi qualche secondo che il banner diventi verde (il Wemos sta salvando).");
         };
 
         window.fermaEsecuzione = function() {
-            // Invio il comando STOP, sarà il Wemos a dire a tutti che è ferma
+            // Invio STOP. Sarà il Wemos a rispondere pubblicando "FERMA" sul topic
             clientMQTT.publish("vincenzo_clima_segreto_7788/curva/imposta", "STOP", { retain: true });
         };
 
         window.avviaProgrammaRapido = function(modo, temperatura) {
-            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", modo);
-            setTimeout(() => { inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/command", temperatura); }, 500);
+            inviaComando(baseTopic + "/mode/command", modo);
+            setTimeout(() => { inviaComando(baseTopic + "/target_temperature/command", temperatura); }, 500);
         };
 
         window.avviaProgrammaNotte = function() {
-            inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/mode/command", "COOL");
+            inviaComando(baseTopic + "/mode/command", "COOL");
             setTimeout(() => {
-                inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/target_temperature/command", 25);
-                inviaComando("vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta/fan_mode/command", "LOW");
+                inviaComando(baseTopic + "/target_temperature/command", 25);
+                inviaComando(baseTopic + "/fan_mode/command", "LOW");
                 inviaComando("vincenzo_clima_segreto_7788/switch/luce_display/command", "OFF");
             }, 500);
         };
