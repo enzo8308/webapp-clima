@@ -3,469 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Programmi e Curva Termica</title>
+    <title>Smart Home Clima</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --bg-color: #f5f6f8; --card-bg: #ffffff; --text-main: #333333; --text-muted: #888888; --accent-color: #007bff; --accent-light: #e6f2ff; --error-color: #dc3545; --success-color: #28a745;}
-        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 30px; }
+        :root { --bg-color: #f5f6f8; --card-bg: #ffffff; --text-main: #333333; --text-muted: #888888; --accent-color: #007bff; --error-color: #dc3545; --success-color: #28a745; --warning-color: #ffc107; }
+        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background-color: var(--bg-color); }
+        .header h1 { font-size: 22px; margin: 0; }
+        .header .add-btn { background-color: #0056b3; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
         
-        .header { display: flex; align-items: center; padding: 20px; background-color: var(--card-bg); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .back-btn { color: var(--text-main); text-decoration: none; font-size: 20px; margin-right: 20px; cursor: pointer; }
-        .header h1 { font-size: 18px; margin: 0; font-weight: 500; }
+        .section-title { display: flex; justify-content: space-between; padding: 0 20px; margin-bottom: 10px; font-weight: 500; }
+        .section-title a { color: var(--accent-color); text-decoration: none; font-size: 14px; }
         
-        .tabs { display: flex; background-color: var(--card-bg); }
-        .tab { flex: 1; text-align: center; padding: 15px 0; font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; }
-        .tab.active { color: var(--accent-color); border-bottom: 3px solid var(--accent-color); }
-        .tab-content { display: none; padding: 15px; }
-        .tab-content.active { display: block; }
+        .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
         
-        /* Stili Tab Programmi */
-        .program-card { background-color: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s ease; }
-        .program-card:active { transform: scale(0.98); background-color: #f8f9fa; }
-        .program-info { flex: 1; }
-        .program-title { font-weight: 500; font-size: 16px; margin-bottom: 5px; }
-        .program-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
-        .program-icon { width: 40px; height: 40px; border-radius: 50%; background-color: #f0f4f8; color: var(--accent-color); display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 15px; }
+        .card { background-color: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; position: relative; }
+        .card.active { border: 2px solid #d0d7de; }
         
-        /* Stili Editor Curva Avanzato */
-        .curve-container { margin-bottom: 15px; }
-        .row-wrapper { background-color: var(--card-bg); border-radius: 16px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; transition: all 0.2s ease; }
-        .hour-row { display: flex; justify-content: space-between; align-items: center; }
-        .hour-label { font-weight: 500; display: flex; align-items: center; gap: 8px; color: var(--accent-color); }
-        .curve-time { border: none; background: #f0f4f8; font-family: inherit; font-size: 16px; font-weight: 600; color: var(--text-main); outline: none; padding: 6px 10px; border-radius: 8px; min-width: 90px; }
-        .temp-stepper { display: flex; align-items: center; background-color: #f8f9fa; padding: 5px; border-radius: 12px; border: 1px solid #eee; }
-        .temp-stepper button { border: none; background: #fff; width: 30px; height: 30px; border-radius: 8px; font-size: 14px; color: var(--accent-color); cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .temp-stepper span { font-weight: 700; font-size: 18px; width: 36px; text-align: center; color: var(--text-main); }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-icon { font-size: 24px; color: var(--accent-color); }
         
-        .action-btns { margin-left: 5px; display: flex; gap: 8px; }
-        .action-btns button { border: none; background: #f0f4f8; width: 34px; height: 34px; border-radius: 50%; font-size: 14px; cursor: pointer; transition: 0.2s; }
-        .btn-settings { color: #6c757d; }
-        .btn-delete-row { color: var(--error-color); background: #f8d7da !important; }
+        .power-btn { width: 34px; height: 34px; border-radius: 50%; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: 0.3s; z-index: 10; cursor: pointer; }
+        .power-btn.on { background-color: var(--success-color); color: white; box-shadow: 0 2px 5px rgba(40,167,69,0.3); }
         
-        .settings-panel { background: #f8f9fa; padding: 15px; border-radius: 12px; margin-top: 15px; font-size: 13px; display: none; border: 1px solid #eee; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-        .settings-panel select { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; color: var(--text-main); }
-        .settings-panel label { font-weight: 600; margin-bottom: 5px; display: block; color: #555; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-title { font-weight: 500; margin-top: 15px; font-size: 15px; }
+        .card-status { font-size: 12px; color: var(--text-muted); margin-top: 5px; font-weight: 500; }
         
-        /* Bottoni Generali e Azioni */
-        .add-curve-btn { width: 100%; padding: 15px; background-color: #e6f2ff; color: var(--accent-color); border: 2px dashed #b3d7ff; border-radius: 16px; font-size: 15px; font-weight: 600; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
-        .save-btn { width: 100%; padding: 15px; background-color: #f0f4f8; color: var(--accent-color); border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px;}
+        .status-badge { font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 8px; display: inline-block; }
+        .status-badge.online { background-color: #d4edda; color: var(--success-color); }
+        .status-badge.offline { background-color: #f8d7da; color: var(--error-color); }
         
-        /* Nuovi Bottoni AVVIA/FERMA */
-        .azione-container { display: flex; gap: 10px; margin-bottom: 25px; }
-        .avvia-btn { flex: 1; padding: 16px; background-color: var(--success-color); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(40,167,69,0.3); transition: 0.2s; }
-        .avvia-btn:active { transform: scale(0.98); }
-        .ferma-btn { display: none; width: 100%; padding: 16px; background-color: var(--error-color); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(220,53,69,0.3); transition: 0.2s; margin-bottom: 25px; }
-        .ferma-btn:active { transform: scale(0.98); }
-        
-        /* Banner Stato Sistema */
-        .status-banner { padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; font-weight: 600; font-size: 14px; display: flex; flex-direction: column; gap: 5px; transition: 0.3s; }
-        .status-fermo { background-color: #f8d7da; color: var(--error-color); border: 1px solid #f5c6cb; }
-        .status-attivo { background-color: #d4edda; color: var(--success-color); border: 1px solid #c3e6cb; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(40,167,69, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(40,167,69, 0); } 100% { box-shadow: 0 0 0 0 rgba(40,167,69, 0); } }
+        .wifi-indicator { position: absolute; bottom: 15px; right: 15px; font-size: 14px; color: #ccc; }
+        .wifi-excellent { color: var(--success-color); }
+        .wifi-good { color: var(--warning-color); }
+        .wifi-poor { color: var(--error-color); }
 
-        /* Modale Curve Salvate */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
-        .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); overflow: hidden; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; max-height: 80vh; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #f0f0f0; background: #fff; }
-        .modal-header h3 { margin: 0; font-size: 16px; color: var(--text-main); font-weight: 700; }
-        .close-modal { font-size: 26px; cursor: pointer; color: var(--text-muted); line-height: 1; transition: 0.2s; }
-        .close-modal:active { transform: scale(0.9); }
-        .modal-body { padding: 20px; overflow-y: auto; background: var(--bg-color); flex: 1; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        
-        .saved-curve-item { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px; border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-        .saved-curve-info strong { font-size: 16px; color: var(--text-main); }
-        .saved-curve-info span { font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px; }
-        .btn-load { background: #e6f2ff; color: var(--accent-color); border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;}
-        .btn-delete { background: #f8d7da; color: var(--error-color); border: none; font-size: 14px; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center;}
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 11px; text-decoration: none; padding: 5px 20px; }
+        .nav-item.active { color: var(--accent-color); }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <a href="dettaglio.html" class="back-btn"><i class="fas fa-chevron-left"></i></a>
-        <h1>Cameretta - Programmi</h1>
+        <h1>Casa Tua</h1>
+        <div class="add-btn"><i class="fas fa-plus"></i></div>
     </div>
 
-    <div class="tabs">
-        <div class="tab active" onclick="cambiaTab('programmi', this)">PROGRAMMI</div>
-        <div class="tab" onclick="cambiaTab('curva', this)"><i class="fas fa-chart-line"></i> CURVA</div>
+    <div class="section-title">
+        <span>I tuoi elettrodomestici</span>
+        <a href="#">Gestisci</a>
     </div>
 
-    <div id="programmi" class="tab-content active">
-        <!-- Esempio Programmi Rapidi -->
-        <div class="program-card" onclick="avviaProgrammaNotte()">
-            <div class="program-icon" style="color: #20c997; background-color: #d4edda;"><i class="fas fa-moon"></i></div>
-            <div class="program-info"><div class="program-title">Notte Serena</div><div class="program-desc">Freddo 25°C, ventola minima, luce spenta.</div></div>
-        </div>
-        <div class="program-card" onclick="avviaProgrammaRapido('HEAT', 30)">
-            <div class="program-icon" style="color: #dc3545; background-color: #f8d7da;"><i class="fas fa-sun"></i></div>
-            <div class="program-info"><div class="program-title">Caldo</div><div class="program-desc">Aria condizionata calda (imposta a 30 °C).</div></div>
-        </div>
-        <div class="program-card" onclick="avviaProgrammaRapido('COOL', 16)">
-            <div class="program-icon" style="color: #007bff; background-color: #e6f2ff;"><i class="fas fa-snowflake"></i></div>
-            <div class="program-info"><div class="program-title">Freddo</div><div class="program-desc">Aria condizionata fresca (imposta a 16 °C).</div></div>
-        </div>
-        <div class="program-card" onclick="avviaProgrammaRapido('DRY', 24)">
-            <div class="program-icon" style="color: #17a2b8; background-color: #d1ecf1;"><i class="fas fa-tint"></i></div>
-            <div class="program-info"><div class="program-title">Deumidificazione</div><div class="program-desc">Riduce l'umidità all'interno (24°C).</div></div>
-        </div>
-    </div>
-
-    <div id="curva" class="tab-content">
-        
-        <div id="banner-stato" class="status-banner status-fermo">
-            <span><i class="fas fa-power-off"></i> Automazione Ferma</span>
-            <span id="banner-sottotitolo" style="font-size: 11px; font-weight: 400;">Nessuna curva in esecuzione.</span>
-        </div>
-
-        <button class="add-curve-btn" style="background-color: #fff; border: 1px solid var(--accent-color); color: var(--accent-color); margin-bottom: 20px; margin-top: 5px;" onclick="apriModaleCurve()">
-            <i class="fas fa-folder-open"></i> Scegli Curva da Archivio
-        </button>
-
-        <div style="margin-bottom: 20px; background: var(--card-bg); padding: 15px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f0f0f0;">
-            <h3 style="font-size: 12px; color: var(--accent-color); text-transform: uppercase; margin: 0 0 10px 0; letter-spacing: 0.5px; font-weight: 700;">Nome della Curva</h3>
-            <input type="text" id="nome-curva-input" placeholder="Es. Notte Inverno..." style="width: 100%; padding: 12px 15px; border-radius: 10px; border: 2px solid #e6f2ff; box-sizing: border-box; font-family: inherit; font-size: 16px; font-weight: 500; color: var(--text-main); outline: none; background-color: #f8f9fa;">
-        </div>
-
-        <div class="curve-container" id="contenitore-curva"></div>
-
-        <button class="add-curve-btn" onclick="aggiungiPuntoCurva()">
-            <i class="fas fa-plus"></i> Aggiungi Orario
-        </button>
-
-        <div class="azione-container" id="box-avvia">
-            <button class="save-btn" onclick="salvaCurvaCloud()">
-                <i class="fas fa-cloud-upload-alt"></i> Salva in Archivio
-            </button>
-            <button class="avvia-btn" onclick="avviaEsecuzione()">
-                <i class="fas fa-play"></i> AVVIA CURVA
-            </button>
-        </div>
-        
-        <button id="btn-ferma" class="ferma-btn" onclick="fermaEsecuzione()">
-            <i class="fas fa-stop"></i> FERMA AUTOMAZIONE
-        </button>
-
-    </div>
-
-    <div id="modale-curve" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Archivio Curve</h3>
-                <span class="close-modal" onclick="chiudiModaleCurve()">&times;</span>
+    <div class="device-grid">
+        <div class="card" onclick="apriDettagli('cameretta')" id="card-cameretta">
+            <div class="card-header">
+                <div style="display: flex; align-items: center;">
+                    <i class="fas fa-wind card-icon"></i>
+                    <span id="badge-cameretta" class="status-badge offline">Offline</span>
+                </div>
+                <div class="power-btn" id="btn-power-cameretta" onclick="event.stopPropagation(); togglePowerHome()">
+                    <i class="fas fa-power-off"></i>
+                </div>
             </div>
-            <div id="lista-curve-salvate" class="modal-body">
+            <div class="card-title">Cameretta</div>
+            <div class="card-status" id="status-text-cameretta">Attesa dati...</div>
+            <div class="wifi-indicator" id="wifi-cameretta"><i class="fas fa-wifi"></i></div>
+        </div>
+
+        <div class="card" onclick="apriDettagli('cucina')">
+            <div class="card-header">
+                <div style="display: flex; align-items: center;">
+                    <i class="fas fa-wind card-icon" style="color: #ccc;"></i>
+                    <span class="status-badge offline">Offline</span>
                 </div>
+                <div class="power-btn"><i class="fas fa-power-off"></i></div>
+            </div>
+            <div class="card-title">Cucina</div>
+            <div class="card-status">Non connesso</div>
         </div>
     </div>
 
-    <!-- UI E INTERAZIONE -->
-    <script>
-        window.cambiaTab = function(idTab, elementoCliccato) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(idTab).classList.add('active');
-            elementoCliccato.classList.add('active');
-        };
+    <div class="bottom-nav">
+        <a href="#" class="nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="#" class="nav-item" onclick="esci()"><i class="fas fa-sign-out-alt"></i><span>Esci</span></a>
+    </div>
 
-        window.apriModaleCurve = function() {
-            document.getElementById('modale-curve').style.display = 'flex';
-            window.scaricaCurve(); 
-        };
-        window.chiudiModaleCurve = function() {
-            document.getElementById('modale-curve').style.display = 'none';
-        };
-
-        let countRighe = 0;
-        window.aggiungiPuntoCurva = function(defTime = "00:00", defTemp = 25) {
-            countRighe++;
-            const idRiga = 'riga_curva_' + countRighe;
-            
-            const html = `
-            <div class="row-wrapper" id="${idRiga}">
-                <div class="hour-row">
-                    <div class="hour-label">
-                        <input type="time" class="curve-time" value="${defTime}">
-                    </div>
-                    <div class="temp-stepper">
-                        <button onclick="window.cambiaGradi('${idRiga}_temp', -1)"><i class="fas fa-minus"></i></button>
-                        <span id="${idRiga}_temp" class="curve-temp">${defTemp}°</span>
-                        <button onclick="window.cambiaGradi('${idRiga}_temp', 1)"><i class="fas fa-plus"></i></button>
-                    </div>
-                    <div class="action-btns">
-                        <button class="btn-settings" onclick="window.toggleImpostazioni('${idRiga}')"><i class="fas fa-sliders-h"></i></button>
-                        <button class="btn-delete-row" onclick="document.getElementById('${idRiga}').remove()"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-                
-                <div class="settings-panel" id="${idRiga}_settings">
-                    <label>Modalità</label>
-                    <select class="set-mode">
-                        <option value="">- Mantieni precedente -</option>
-                        <option value="OFF">Spento (OFF)</option>
-                        <option value="COOL">Freddo (Accende)</option>
-                        <option value="HEAT">Caldo (Accende)</option>
-                        <option value="DRY">Deumidificazione</option>
-                        <option value="FAN_ONLY">Solo Ventola</option>
-                        <option value="AUTO">Automatico</option>
-                    </select>
-                    
-                    <label>Velocità Ventola</label>
-                    <select class="set-fan">
-                        <option value="">- Mantieni precedente -</option>
-                        <option value="LOW">Bassa</option>
-                        <option value="MEDIUM">Media</option>
-                        <option value="HIGH">Alta</option>
-                        <option value="AUTO">Auto</option>
-                    </select>
-                    
-                    <label>Alette</label>
-                    <select class="set-swing">
-                        <option value="">- Mantieni precedente -</option>
-                        <option value="OFF">Ferme</option>
-                        <option value="VERTICAL">Tutte in Basso</option>
-                        <option value="HORIZONTAL">Tutte in Alto</option>
-                        <option value="BOTH">Oscillazione Continua</option>
-                    </select>
-
-                    <label>Luce Display</label>
-                    <select class="set-light">
-                        <option value="">- Mantieni precedente -</option>
-                        <option value="ON">Acceso</option>
-                        <option value="OFF">Spento</option>
-                    </select>
-                </div>
-            </div>`;
-            
-            document.getElementById('contenitore-curva').insertAdjacentHTML('beforeend', html);
-            return idRiga; 
-        };
-
-        window.cambiaGradi = function(idTemp, delta) {
-            let el = document.getElementById(idTemp);
-            let gradi = parseInt(el.innerText); 
-            gradi += delta;
-            if(gradi < 16) gradi = 16; if(gradi > 30) gradi = 30;
-            el.innerText = gradi + "°";
-        };
-
-        window.toggleImpostazioni = function(idRiga) {
-            let pannello = document.getElementById(idRiga + '_settings');
-            pannello.style.display = (pannello.style.display === 'none' || pannello.style.display === '') ? 'block' : 'none';
-        };
-
-        window.raccogliPuntiDaEditor = function() {
-            let arrayPunti = [];
-            let memoriaMode = "COOL";
-            let memoriaFan = "AUTO";
-            let memoriaSwing = "OFF";
-            let memoriaLight = "ON";
-
-            document.querySelectorAll('.row-wrapper').forEach(row => {
-                let valMode = row.querySelector('.set-mode').value;
-                let valFan = row.querySelector('.set-fan').value;
-                let valSwing = row.querySelector('.set-swing').value;
-                let valLight = row.querySelector('.set-light').value;
-
-                if (valMode === "") valMode = memoriaMode; else memoriaMode = valMode;
-                if (valFan === "") valFan = memoriaFan; else memoriaFan = valFan;
-                if (valSwing === "") valSwing = memoriaSwing; else memoriaSwing = valSwing;
-                if (valLight === "") valLight = memoriaLight; else memoriaLight = valLight;
-
-                arrayPunti.push({
-                    time: row.querySelector('.curve-time').value,
-                    temp: parseInt(row.querySelector('.curve-temp').innerText),
-                    mode: valMode,
-                    fan: valFan,
-                    swing: valSwing,
-                    light: valLight
-                });
-            });
-            return arrayPunti;
-        };
-    </script>
-
-    <!-- FIREBASE CLOUD ARCHIVIO -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
-        
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
-        
-        let utenteLoggato = null;
-        let curveArchiviate = {}; 
 
-        onAuthStateChanged(auth, (user) => { 
-            if (!user) { window.location.href = "login.html"; } 
-            else {
-                utenteLoggato = user;
-                document.getElementById('contenitore-curva').innerHTML = "";
-                window.aggiungiPuntoCurva("23:00", 24); 
-                window.aggiungiPuntoCurva("06:00", 26); 
-                window.scaricaCurve();
-            }
-        });
-
-        window.scaricaCurve = async function() {
-            const listDiv = document.getElementById('lista-curve-salvate');
-            if(!listDiv) return;
-            try {
-                const q = query(collection(db, "curve_termiche"), where("uid", "==", utenteLoggato.uid));
-                const querySnapshot = await getDocs(q);
-                
-                if(querySnapshot.empty) {
-                    listDiv.innerHTML = "<div style='font-size:13px; color:#888; text-align:center;'>Nessuna curva salvata.</div>";
-                    return;
-                }
-
-                let htmlStr = "";
-                curveArchiviate = {};
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    curveArchiviate[docSnap.id] = data;
-                    htmlStr += `
-                    <div class="saved-curve-item" id="item_${docSnap.id}">
-                        <div class="saved-curve-info">
-                            <strong>${data.nome}</strong>
-                            <span>${data.punti.length} orari configurati</span>
-                        </div>
-                        <div style="display:flex; gap:10px;">
-                            <button class="btn-load" onclick="caricaCurvaEditor('${docSnap.id}')">Carica</button>
-                            <button class="btn-delete" onclick="eliminaCurvaCloud('${docSnap.id}')"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>`;
-                });
-                listDiv.innerHTML = htmlStr;
-            } catch (error) {
-                listDiv.innerHTML = "<div style='color:red; font-size:12px;'>Errore Cloud. Hai attivato Firestore?</div>";
-            }
-        };
-
-        window.salvaCurvaCloud = async function() {
-            const nomeInput = document.getElementById('nome-curva-input').value;
-            if(!nomeInput.trim()) return alert("Devi inserire un nome per la curva prima di salvarla in archivio!");
-            
-            const btn = document.querySelector('.save-btn');
-            const vecchioTesto = btn.innerHTML;
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
-
-            const arrayPunti = window.raccogliPuntiDaEditor();
-
-            try {
-                await addDoc(collection(db, "curve_termiche"), { uid: utenteLoggato.uid, nome: nomeInput, punti: arrayPunti });
-                alert("Curva salvata nell'archivio Cloud!");
-                document.getElementById('nome-curva-input').value = "";
-                window.scaricaCurve();
-            } catch (error) {
-                alert("Errore nel salvataggio! Assicurati di aver creato il Database Firestore.");
-            }
-            btn.innerHTML = vecchioTesto;
-        };
-
-        window.eliminaCurvaCloud = async function(docId) {
-            const pinSicurezza = Math.floor(1000 + Math.random() * 9000);
-            const inserimento = prompt(`⚠️ ATTENZIONE ⚠️\nStai per eliminare definitivamente questa curva.\n\nInserisci il codice di sicurezza per confermare:\n👉 ${pinSicurezza}`);
-            
-            if (inserimento !== pinSicurezza.toString()) return alert("Codice errato o annullato. La curva NON è stata eliminata.");
-
-            try {
-                await deleteDoc(doc(db, "curve_termiche", docId));
-                document.getElementById('item_' + docId).remove();
-            } catch (error) { alert("Errore durante l'eliminazione."); }
-        };
-
-        window.caricaCurvaEditor = function(docId) {
-            const data = curveArchiviate[docId];
-            document.getElementById('nome-curva-input').value = data.nome + " (Copia)";
-            document.getElementById('contenitore-curva').innerHTML = ""; 
-            
-            data.punti.forEach(p => {
-                const newId = window.aggiungiPuntoCurva(p.time, p.temp);
-                const riga = document.getElementById(newId);
-                riga.querySelector('.set-mode').value = p.mode || "";
-                riga.querySelector('.set-fan').value = p.fan || "";
-                riga.querySelector('.set-swing').value = p.swing || "";
-                riga.querySelector('.set-light').value = p.light || "";
-            });
-            window.chiudiModaleCurve(); 
-        };
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
+        window.esci = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); };
     </script>
 
-    <!-- MQTT LOGIC -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
     <script>
-        const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_programmi_" + Math.random().toString(16).substring(2, 10), clean: true });
-        const baseTopic = "vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta";
+        function apriDettagli(stanza) {
+            if(stanza !== 'cameretta') alert("Questo condizionatore non è attualmente configurato.");
+            else window.location.href = "dettaglio.html";
+        }
 
-        clientMQTT.on('connect', function() {
-            clientMQTT.subscribe("vincenzo_clima_segreto_7788/curva/stato");
+        const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_index_" + Math.random().toString(16).substring(2, 10), clean: true });
+        let statoAttuale = { online: false, mode: "off", temp: 24 };
+
+        clientMQTT.on('connect', function () {
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/climate/haier_tundra/mode/state");
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/climate/haier_tundra/target_temperature/state");
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/sensor/segnale_wifi_cameretta/state");
         });
 
-        // Ascolta in tempo reale le risposte dal Wemos
-        clientMQTT.on('message', function(topic, message) {
-            if (topic === "vincenzo_clima_segreto_7788/curva/stato") {
-                const payload = message.toString();
-                const banner = document.getElementById('banner-stato');
-                const btnAvvia = document.getElementById('box-avvia');
-                const btnFerma = document.getElementById('btn-ferma');
-                
-                if (payload === "ATTIVA") {
-                    banner.className = "status-banner status-attivo";
-                    banner.innerHTML = `<span><i class="fas fa-check-circle"></i> Automazione in Esecuzione</span><span id="banner-sottotitolo" style="font-size: 11px; font-weight: 500;">Il Wemos sta gestendo la temperatura</span>`;
-                    btnAvvia.style.display = "none";
-                    btnFerma.style.display = "flex";
+        clientMQTT.on('message', function (topic, message) {
+            const payload = message.toString().toLowerCase();
+            
+            if (topic.includes("/status")) {
+                const badge = document.getElementById('badge-cameretta');
+                if (payload === "online") {
+                    statoAttuale.online = true; badge.innerText = "Online"; badge.className = "status-badge online";
                 } else {
-                    banner.className = "status-banner status-fermo";
-                    banner.innerHTML = `<span><i class="fas fa-power-off"></i> Automazione Ferma</span><span id="banner-sottotitolo" style="font-size: 11px; font-weight: 400;">Nessuna curva in esecuzione.</span>`;
-                    btnAvvia.style.display = "flex";
-                    btnFerma.style.display = "none";
+                    statoAttuale.online = false; badge.innerText = "Offline"; badge.className = "status-badge offline";
+                    document.getElementById('wifi-cameretta').className = "wifi-indicator";
                 }
+            }
+            if (topic.includes("/mode/state")) { statoAttuale.mode = payload; aggiornaInterfaccia(); }
+            if (topic.includes("/target_temperature/state")) { const t = parseFloat(payload); if(!isNaN(t)) statoAttuale.temp = t; aggiornaInterfaccia(); }
+            if (topic.includes("/segnale_wifi_cameretta/state") && statoAttuale.online) {
+                const dbm = parseInt(payload); const wifiIcon = document.getElementById('wifi-cameretta');
+                if (dbm > -65) wifiIcon.className = "wifi-indicator wifi-excellent";
+                else if (dbm > -80) wifiIcon.className = "wifi-indicator wifi-good";
+                else wifiIcon.className = "wifi-indicator wifi-poor";
             }
         });
 
-        function inviaComando(topic, msg) { if (clientMQTT && clientMQTT.connected) clientMQTT.publish(topic, msg.toString()); }
+        function aggiornaInterfaccia() {
+            const btn = document.getElementById('btn-power-cameretta'); const testo = document.getElementById('status-text-cameretta'); const card = document.getElementById('card-cameretta');
+            if (statoAttuale.mode === "off") { btn.classList.remove('on'); card.classList.remove('active'); testo.innerText = "Spento"; }
+            else {
+                btn.classList.add('on'); card.classList.add('active');
+                let modeIta = "Freddo"; if(statoAttuale.mode === "heat") modeIta = "Caldo"; if(statoAttuale.mode === "dry") modeIta = "Deumid."; if(statoAttuale.mode === "fan_only") modeIta = "Ventola"; if(statoAttuale.mode === "auto") modeIta = "Auto";
+                testo.innerText = `${modeIta} | ${statoAttuale.temp}°C`;
+            }
+        }
 
-        window.avviaEsecuzione = function() {
-            const arrayPunti = window.raccogliPuntiDaEditor();
-            if(arrayPunti.length === 0) return alert("Inserisci almeno un orario nella curva.");
-            
-            let stringaCurva = "";
-            arrayPunti.forEach(p => {
-                stringaCurva += `${p.time},${p.mode},${p.temp},${p.fan},${p.swing},${p.light}|`;
-            });
-
-            // Invio la stringa MQTT al Wemos! Sarà LUI a rispondere pubblicando "ATTIVA" sul topic
-            clientMQTT.publish("vincenzo_clima_segreto_7788/curva/imposta", stringaCurva, { retain: true });
-            
-            alert("Richiesta inviata! Attendi qualche secondo che il banner diventi verde (il Wemos sta salvando).");
-        };
-
-        window.fermaEsecuzione = function() {
-            // Invio STOP. Sarà il Wemos a rispondere pubblicando "FERMA" sul topic
-            clientMQTT.publish("vincenzo_clima_segreto_7788/curva/imposta", "STOP", { retain: true });
-        };
-
-        window.avviaProgrammaRapido = function(modo, temperatura) {
-            inviaComando(baseTopic + "/mode/command", modo);
-            setTimeout(() => { inviaComando(baseTopic + "/target_temperature/command", temperatura); }, 500);
-        };
-
-        window.avviaProgrammaNotte = function() {
-            inviaComando(baseTopic + "/mode/command", "COOL");
-            setTimeout(() => {
-                inviaComando(baseTopic + "/target_temperature/command", 25);
-                inviaComando(baseTopic + "/fan_mode/command", "LOW");
-                inviaComando("vincenzo_clima_segreto_7788/switch/luce_display/command", "OFF");
-            }, 500);
+        window.togglePowerHome = function() {
+            if(!statoAttuale.online) { alert("Il condizionatore è offline!"); return; }
+            clientMQTT.publish("vincenzo_clima_segreto_7788/climate/haier_tundra/mode/command", (statoAttuale.mode === "off") ? "cool" : "off");
         };
     </script>
 </body>
