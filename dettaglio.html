@@ -9,13 +9,12 @@
     
     <style>
         :root { 
-            /* Colori base dell'App */
-            --bg-color: #f0f5fa; /* Azzurrino chiaro per tutta l'app */
+            --bg-color: #f0f5fa; 
             --card-bg: #ffffff; 
             --text-main: #222222; 
             --text-muted: #888888; 
             
-            /* Tema Dinamico (cambia in base alla modalità) */
+            /* Tema Dinamico */
             --theme-color: #007bff; 
             --theme-bg: #eaf4ff; 
             
@@ -25,27 +24,32 @@
         
         body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 40px; }
         
-        /* HEADER COMUNE */
+        /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px 5px 20px; background-color: var(--bg-color); }
         .back-btn { color: var(--text-main); text-decoration: none; font-size: 20px; cursor: pointer; }
         .header-title { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; }
-        
         .status-badge { font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
         .status-badge.online { background-color: #d4edda; color: var(--success-color); }
         .status-badge.offline { background-color: #f8d7da; color: var(--error-color); }
         
-        /* SWITCH BASE/PRO ALTO A DESTRA */
-        .view-toggle-row { display: flex; justify-content: flex-end; align-items: center; padding: 0 20px 10px 20px; gap: 8px; font-size: 11px; font-weight: 700; color: var(--text-main); background-color: var(--bg-color); position: sticky; top: 0; z-index: 100;}
+        /* BARRA DEI TOGGLE IN ALTO (SIMMETRICA) */
+        .view-toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 20px 10px 20px; font-size: 11px; font-weight: 700; color: var(--text-main); background-color: var(--bg-color); position: sticky; top: 0; z-index: 100;}
+        .toggle-group { display: flex; align-items: center; gap: 8px; }
+        
         .switch-sm { position: relative; display: inline-block; width: 38px; height: 20px; }
         .switch-sm input { opacity: 0; width: 0; height: 0; }
         .slider-sm { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--theme-color); transition: .3s; border-radius: 34px; }
         .slider-sm:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+        
         .switch-sm input:checked + .slider-sm { background-color: var(--theme-color); }
         .switch-sm input:checked + .slider-sm:before { transform: translateX(18px); }
+        
+        /* Toggle Power spento (grigio) */
+        .slider-sm.power-slider { background-color: #d5dbe1; }
 
-        /* ==================== VISTA BASE (Classica Intatta) ==================== */
-        #view-base { display: block; animation: fadeIn 0.3s; padding-top: 10px;}
-        .main-status-base { text-align: center; padding: 10px 20px 30px 20px; }
+        /* ==================== VISTA BASE ==================== */
+        #view-base { display: block; animation: fadeIn 0.3s; padding-top: 5px;}
+        .main-status-base { text-align: center; padding: 0px 20px 30px 20px; }
         .temperature-display-base { font-size: 72px; font-weight: 700; color: var(--text-main); margin: 0; display: flex; justify-content: center; align-items: flex-start; }
         .temperature-display-base span { font-size: 32px; margin-top: 15px; }
         .power-big-btn-base { width: 50px; height: 50px; border-radius: 50%; background-color: var(--theme-color); color: white; font-size: 20px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-top: 15px; cursor: pointer; transition: 0.3s; }
@@ -60,23 +64,13 @@
         .temp-btn-base { width: 45px; height: 45px; border-radius: 10px; background-color: white; border: 1px solid #ddd; font-size: 20px; color: var(--text-main); cursor: pointer; }
 
 
-        /* ==================== VISTA PRO (Nuova Grafica Fedele) ==================== */
+        /* ==================== VISTA PRO ==================== */
         #view-pro { display: none; padding: 0 20px; animation: fadeIn 0.3s; }
         
         .pro-gauge-wrapper { position: relative; max-width: 280px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
         
-        /* TASTO POWER IN ALTO A SINISTRA */
-        .pro-top-power { position: absolute; top: 10px; left: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; z-index: 10; }
-        .pro-power-switch { width: 48px; height: 28px; border-radius: 14px; background: var(--theme-color); position: relative; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .pro-power-switch.off { background: #d5dbe1; box-shadow: none; }
-        .pro-power-thumb { width: 24px; height: 24px; border-radius: 50%; background: #fff; position: absolute; top: 2px; right: 2px; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
-        .pro-power-switch.off .pro-power-thumb { right: 22px; }
-        .pro-power-thumb i { font-size: 12px; color: var(--theme-color); }
-        .pro-power-switch.off .pro-power-thumb i { color: #888; }
-        .pro-power-label { font-size: 11px; font-weight: 700; color: #555; }
-
-        /* TERMOSTATO SVG E INFORMAZIONI */
-        .pro-gauge-container { width: 100%; height: auto; position: relative; margin-top: 10px; }
+        /* TERMOSTATO SVG */
+        .pro-gauge-container { width: 100%; height: auto; position: relative; margin-top: 0px; }
         .pro-gauge-svg { width: 100%; height: auto; display: block; overflow: visible; }
         
         .pro-gauge-info { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 15px; }
@@ -85,30 +79,33 @@
         .info-temp { font-size: 78px; font-weight: 700; color: var(--theme-color); line-height: 1; font-family: 'Roboto', sans-serif; letter-spacing: -2px;}
         .info-current { font-size: 12px; font-weight: 500; color: #555; margin-top: 10px; }
         
-        /* FRECCE TEMPERATURA SOTTO IL CERCHIO */
-        .pro-arrows { display: flex; justify-content: center; gap: 40px; margin-top: -15px; margin-bottom: 20px; z-index: 5; position: relative;}
+        /* FRECCE SOTTO IL CERCHIO */
+        .pro-arrows { display: flex; justify-content: center; gap: 40px; margin-top: -15px; margin-bottom: 25px; z-index: 5; position: relative;}
         .pro-circle-btn { width: 44px; height: 44px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.06); font-size: 16px; color: #555; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;}
         .pro-circle-btn:active { transform: scale(0.9); }
 
-        /* PULSANTE MODALITÀ (PILLOLA CENTRALE) */
-        .pro-mode-pill-container { display: flex; justify-content: center; margin-bottom: 25px; }
-        .pro-mode-pill { background: var(--theme-bg); border: 1.5px solid var(--theme-color); color: var(--theme-color); border-radius: 20px; padding: 10px 25px; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: 0.3s; }
-
-        /* SCHEDE INFERIORI (ARROTONDATE E BIANCHE) */
-        .pro-card { background: var(--card-bg); border-radius: 18px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 12px rgba(0,0,0,0.03); }
-        .pro-card-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; margin-left: 5px; letter-spacing: 0.5px;}
+        /* LISTA PILLOLE E TENDINE (ACCORDION) */
+        .pro-pills-stack { display: flex; flex-direction: column; gap: 15px; width: 100%; }
         
-        .pro-grid-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .pro-pill-container { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .pro-mode-pill { background: var(--theme-bg); border: 1.5px solid var(--theme-color); color: var(--theme-color); border-radius: 20px; padding: 10px 25px; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: 0.3s; width: max-content; }
+        
+        .accordion-content { display: none; width: 100%; background: var(--card-bg); border-radius: 18px; padding: 15px; margin-top: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); animation: fadeInDown 0.2s ease-out; box-sizing: border-box; }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Tasti dentro le tendine */
+        .pro-grid-row { display: flex; gap: 10px; }
         .pro-btn { flex: 1; background-color: #f8f9fa; border-radius: 12px; padding: 12px 5px; text-align: center; border: 1.5px solid transparent; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px;}
         .pro-btn i { font-size: 18px; color: var(--text-muted); }
         .pro-btn span { font-size: 11px; font-weight: 600; color: var(--text-main); }
         
-        /* Stile pulsante attivo nella vista PRO */
         .pro-btn.active { background-color: var(--theme-bg); border-color: var(--theme-color); }
         .pro-btn.active i, .pro-btn.active span { color: var(--theme-color); }
 
-        .flex-between { display: flex; justify-content: space-between; align-items: center; padding: 5px; }
-
+        /* Card Luce in fondo */
+        .pro-card { background: var(--card-bg); border-radius: 18px; padding: 15px; margin-top: 15px; box-shadow: 0 2px 12px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center;}
+        .pro-card-title { font-size: 13px; font-weight: 600; color: var(--text-main); margin: 0; }
+        
         /* Toggle generico per la luce */
         .switch-light { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch-light input { opacity: 0; width: 0; height: 0; }
@@ -116,18 +113,12 @@
         .slider-light:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
         .switch-light input:checked + .slider-light { background-color: #555; }
         .switch-light input:checked + .slider-light:before { transform: translateX(20px); }
-
-        /* MODALE A SCOMPARSA (Comune) */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(2px); }
-        .modal-content { background: var(--bg-color); width: 100%; border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 25px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); animation: slideUp 0.3s; box-sizing: border-box;}
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
     </style>
 </head>
 <body>
 
-    <!-- HEADER E SWITCH BASE/PRO -->
     <div class="header">
         <a href="index.html" class="back-btn"><i class="fas fa-chevron-left"></i></a>
         <div class="header-title">
@@ -137,18 +128,26 @@
     </div>
     
     <div class="view-toggle-row">
-        <span>BASE</span>
-        <label class="switch-sm">
-            <input type="checkbox" id="view-toggle-checkbox" onchange="toggleView()">
-            <span class="slider-sm"></span>
-        </label>
-        <span>PRO</span>
+        <div class="toggle-group" style="cursor: pointer;" onclick="toggleAccensione()">
+            <span id="lbl-off" style="color: var(--text-muted);">OFF</span>
+            <label class="switch-sm" style="pointer-events: none;">
+                <input type="checkbox" id="top-power-checkbox">
+                <span class="slider-sm power-slider"></span>
+            </label>
+            <span id="lbl-on" style="color: var(--text-muted);">ON</span>
+        </div>
+
+        <div class="toggle-group">
+            <span>BASE</span>
+            <label class="switch-sm">
+                <input type="checkbox" id="view-toggle-checkbox" onchange="toggleView()">
+                <span class="slider-sm"></span>
+            </label>
+            <span>PRO</span>
+        </div>
     </div>
 
 
-    <!-- ==========================================
-         VISTA BASE (Classica Intatta)
-         ========================================== -->
     <div id="view-base">
         <div class="main-status-base">
             <div class="temperature-display-base">
@@ -203,22 +202,9 @@
     </div>
 
 
-    <!-- ==========================================
-         VISTA PRO (Accattivante, come in Foto)
-         ========================================== -->
     <div id="view-pro">
         
         <div class="pro-gauge-wrapper">
-            
-            <!-- Tasto On/Off Integrato a Sinistra -->
-            <div class="pro-top-power" onclick="toggleAccensione()">
-                <div class="pro-power-switch off" id="pro-power-switch">
-                    <div class="pro-power-thumb"><i class="fas fa-power-off"></i></div>
-                </div>
-                <div class="pro-power-label" id="pro-power-label">Off</div>
-            </div>
-
-            <!-- Il Termostato ad Arco SVG -->
             <div class="pro-gauge-container">
                 <svg viewBox="0 0 300 270" class="pro-gauge-svg">
                     <defs>
@@ -226,15 +212,11 @@
                             <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.15)"/>
                         </filter>
                     </defs>
-                    <!-- Background Ticks (Grigio chiaro) -->
                     <path d="M 51 249 A 140 140 0 1 1 249 249" fill="none" stroke="#d5dbe1" stroke-width="15" stroke-linecap="butt" stroke-dasharray="4 8" />
-                    <!-- Solid Progress (Colorato dinamicamente) -->
                     <path id="pro-arc-path" d="M 51 249 A 140 140 0 1 1 249 249" fill="none" stroke="var(--theme-color)" stroke-width="15" stroke-linecap="round" stroke-dasharray="660" stroke-dashoffset="330" style="transition: stroke-dashoffset 0.4s ease-out, stroke 0.4s;" />
-                    <!-- Pallino indicatore (Thumb) -->
                     <circle id="pro-arc-thumb" cx="150" cy="10" r="14" fill="#fff" stroke="var(--theme-color)" stroke-width="4" filter="url(#shadowThumb)" style="transform-origin: 150px 150px; transform: rotate(0deg); transition: transform 0.4s ease-out, stroke 0.4s;" />
                 </svg>
                 
-                <!-- Testi al centro del termostato -->
                 <div class="pro-gauge-info">
                     <div class="badge-eco"><i class="fas fa-tree"></i> ECO</div>
                     <div class="info-title testo-stato-title">Condizionatore e Eco</div>
@@ -243,47 +225,63 @@
                 </div>
             </div>
 
-            <!-- Frecce Circolari Su/Giù -->
             <div class="pro-arrows">
                 <button class="pro-circle-btn" onclick="cambiaTemperatura(-1)"><i class="fas fa-chevron-down"></i></button>
                 <button class="pro-circle-btn" onclick="cambiaTemperatura(1)"><i class="fas fa-chevron-up"></i></button>
             </div>
         </div>
 
-        <!-- Pulsante Modalità (A forma di pillola) -->
-        <div class="pro-mode-pill-container">
-            <button class="pro-mode-pill" onclick="apriModaleModalita()">
-                <i class="fas fa-snowflake icona-stato"></i> <span class="testo-stato">Fresco</span>
-            </button>
+        <div class="pro-pills-stack">
+            
+            <div class="pro-pill-container">
+                <button class="pro-mode-pill" onclick="toggleAccordion('acc-mode')">
+                    <i class="fas fa-snowflake icona-stato"></i> <span class="testo-stato">Fresco</span>
+                </button>
+                <div id="acc-mode" class="accordion-content">
+                    <div class="pro-grid-row">
+                        <div class="pro-btn btn-mode" data-val="cool" onclick="cambiaModalita('cool')"><i class="fas fa-snowflake"></i><span>Freddo</span></div>
+                        <div class="pro-btn btn-mode" data-val="heat" onclick="cambiaModalita('heat')"><i class="fas fa-sun"></i><span>Caldo</span></div>
+                        <div class="pro-btn btn-mode" data-val="dry" onclick="cambiaModalita('dry')"><i class="fas fa-tint"></i><span>Deumid.</span></div>
+                        <div class="pro-btn btn-mode" data-val="fan_only" onclick="cambiaModalita('fan_only')"><i class="fas fa-fan"></i><span>Ventola</span></div>
+                        <div class="pro-btn btn-mode" data-val="auto" onclick="cambiaModalita('auto')"><i class="fas fa-magic"></i><span>Auto</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pro-pill-container">
+                <button class="pro-mode-pill" onclick="toggleAccordion('acc-fan')">
+                    <i class="fas fa-fan"></i> <span id="lbl-pill-fan">Ventola: Auto</span>
+                </button>
+                <div id="acc-fan" class="accordion-content">
+                    <div class="pro-grid-row">
+                        <div class="pro-btn btn-fan" data-val="low" onclick="cambiaVentola('low')"><i class="fas fa-signal" style="font-size: 12px;"></i><span>Bassa</span></div>
+                        <div class="pro-btn btn-fan" data-val="medium" onclick="cambiaVentola('medium')"><i class="fas fa-signal" style="font-size: 16px;"></i><span>Media</span></div>
+                        <div class="pro-btn btn-fan" data-val="high" onclick="cambiaVentola('high')"><i class="fas fa-signal" style="font-size: 20px;"></i><span>Alta</span></div>
+                        <div class="pro-btn btn-fan" data-val="auto" onclick="cambiaVentola('auto')"><i class="fas fa-sync"></i><span>Auto</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pro-pill-container">
+                <button class="pro-mode-pill" onclick="toggleAccordion('acc-swing')">
+                    <i class="fas fa-arrows-alt-v"></i> <span id="lbl-pill-swing">Alette: Ferma</span>
+                </button>
+                <div id="acc-swing" class="accordion-content">
+                    <div class="pro-grid-row" style="margin-bottom: 10px;">
+                        <div class="pro-btn btn-vane" data-val="vertical" onclick="cambiaDirezione('vertical')"><i class="fas fa-arrows-alt-v"></i><span>Oscilla</span></div>
+                        <div class="pro-btn btn-vane" data-val="horizontal" onclick="cambiaDirezione('horizontal')"><i class="fas fa-chevron-up"></i><span>Extra Su</span></div>
+                        <div class="pro-btn btn-vane" data-val="vertical_down" onclick="cambiaDirezione('vertical')"><i class="fas fa-chevron-down"></i><span>Extra Giù</span></div>
+                    </div>
+                    <div class="pro-grid-row">
+                        <div class="pro-btn active btn-vane" data-val="off" onclick="cambiaDirezione('off')"><i class="fas fa-stop"></i><span>Ferma aletta</span></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <!-- Alette -->
         <div class="pro-card">
-            <div class="pro-grid-row">
-                <div class="pro-btn btn-vane" data-val="vertical" onclick="cambiaDirezione('vertical')"><i class="fas fa-arrows-alt-v"></i><span>Oscilla</span></div>
-                <div class="pro-btn btn-vane" data-val="horizontal" onclick="cambiaDirezione('horizontal')"><i class="fas fa-chevron-up"></i><span>Extra Su</span></div>
-                <div class="pro-btn btn-vane" data-val="vertical_down" onclick="cambiaDirezione('vertical')"><i class="fas fa-chevron-down"></i><span>Extra Giù</span></div>
-            </div>
-            <!-- Ferma aletta è largo 1 colonna e mezza -->
-            <div style="width: 40%;">
-                <div class="pro-btn active btn-vane" data-val="off" onclick="cambiaDirezione('off')"><i class="fas fa-stop"></i><span>Ferma aletta</span></div>
-            </div>
-        </div>
-
-        <!-- Ventola -->
-        <div class="pro-card">
-            <div class="pro-card-title">VELOCITÀ VENTOLA</div>
-            <div class="pro-grid-row" style="margin-bottom: 0;">
-                <div class="pro-btn active btn-fan" data-val="low" onclick="cambiaVentola('low')"><i class="fas fa-signal" style="font-size: 12px;"></i><span>Bassa</span></div>
-                <div class="pro-btn btn-fan" data-val="medium" onclick="cambiaVentola('medium')"><i class="fas fa-signal" style="font-size: 16px;"></i><span>Media</span></div>
-                <div class="pro-btn btn-fan" data-val="high" onclick="cambiaVentola('high')"><i class="fas fa-signal" style="font-size: 20px;"></i><span>Alta</span></div>
-                <div class="pro-btn btn-fan" data-val="auto" onclick="cambiaVentola('auto')"><i class="fas fa-sync"></i><span>Auto</span></div>
-            </div>
-        </div>
-
-        <!-- Luce Display -->
-        <div class="pro-card flex-between" style="padding: 10px 15px;">
-            <span class="pro-card-title" style="margin:0; font-size: 13px; text-transform: none;">Luce Display</span>
+            <span class="pro-card-title"><i class="fas fa-lightbulb" style="color: var(--text-muted); margin-right: 8px;"></i> Luce Display</span>
             <label class="switch-light">
                 <input type="checkbox" id="pro-light-toggle" onchange="toggleLuce()">
                 <span class="slider-light"></span>
@@ -292,22 +290,7 @@
 
     </div>
 
-    <!-- MODALE MODALITA' (Si apre premendo la pillola) -->
-    <div id="modal-mode" class="modal-overlay" style="display:none;" onclick="chiudiModaleModalita(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div style="font-weight: 700; font-size: 12px; color: var(--text-muted); margin-bottom: 20px; text-transform: uppercase;">MODALITÀ</div>
-            <div class="btn-grid-base">
-                <div class="control-btn-base btn-mode" data-val="cool" onclick="cambiaModalita('cool'); chiudiModaleModalita()"><i class="fas fa-snowflake"></i> Freddo</div>
-                <div class="control-btn-base btn-mode" data-val="heat" onclick="cambiaModalita('heat'); chiudiModaleModalita()"><i class="fas fa-sun"></i> Caldo</div>
-                <div class="control-btn-base btn-mode" data-val="dry" onclick="cambiaModalita('dry'); chiudiModaleModalita()"><i class="fas fa-tint"></i> Deumid.</div>
-                <div class="control-btn-base btn-mode" data-val="fan_only" onclick="cambiaModalita('fan_only'); chiudiModaleModalita()"><i class="fas fa-fan"></i> Ventola</div>
-                <div class="control-btn-base btn-mode" data-val="auto" onclick="cambiaModalita('auto'); chiudiModaleModalita()"><i class="fas fa-magic"></i> Auto</div>
-            </div>
-        </div>
-    </div>
 
-
-    <!-- Firebase Auth -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -317,7 +300,6 @@
         onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
     </script>
 
-    <!-- LOGICA MQTT, ANIMAZIONI E SINCRONIZZAZIONE -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
     <script>
         // Gestione Vista BASE/PRO
@@ -333,8 +315,20 @@
             }
         };
 
-        function apriModaleModalita() { document.getElementById('modal-mode').style.display = 'flex'; }
-        function chiudiModaleModalita() { document.getElementById('modal-mode').style.display = 'none'; }
+        // Gestione Menu a tendina (Pillole)
+        function toggleAccordion(id) {
+            const el = document.getElementById(id);
+            if (el.style.display === 'none' || el.style.display === '') {
+                // Chiude gli altri prima di aprire
+                document.querySelectorAll('.accordion-content').forEach(acc => acc.style.display = 'none');
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        }
+        function chiudiAccordions() {
+            document.querySelectorAll('.accordion-content').forEach(acc => acc.style.display = 'none');
+        }
 
         const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_dett_" + Math.random().toString(16).substring(2, 10), clean: true });
         const baseTopic = "vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta";
@@ -346,6 +340,8 @@
             clientMQTT.subscribe(baseTopic + "/mode/state");
             clientMQTT.subscribe(baseTopic + "/target_temperature/state");
             clientMQTT.subscribe(baseTopic + "/current_temperature/state");
+            clientMQTT.subscribe(baseTopic + "/fan_mode/state");
+            clientMQTT.subscribe(baseTopic + "/swing_mode/state");
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/switch/luce_display/state");
         });
 
@@ -366,24 +362,25 @@
                 
                 if (payload === "off") {
                     climaAcceso = false; 
-                    // Stile OFF globale
                     document.body.style.setProperty('--theme-color', '#888888');
                     document.body.style.setProperty('--theme-bg', '#e2e3e5');
                     
                     document.getElementById('base-power-btn').classList.add('off');
-                    document.getElementById('pro-power-switch').classList.add('off');
-                    document.getElementById('pro-power-label').innerText = "Off";
+                    document.getElementById('top-power-checkbox').checked = false;
+                    document.getElementById('lbl-off').style.color = "var(--theme-color)";
+                    document.getElementById('lbl-on').style.color = "var(--text-muted)";
                     
                     document.querySelectorAll('.testo-stato').forEach(t => t.innerText = "Spento");
                     document.querySelectorAll('.icona-stato').forEach(i => i.className = "fas fa-power-off icona-stato");
                     document.querySelectorAll('.testo-stato-title').forEach(t => t.innerText = "Condizionatore Spento");
                     
-                    aggiornaTermostato(gradiAttuali, true); // Svuota l'arco
+                    aggiornaTermostato(gradiAttuali, true); 
                 } else {
                     climaAcceso = true; 
                     document.getElementById('base-power-btn').classList.remove('off');
-                    document.getElementById('pro-power-switch').classList.remove('off');
-                    document.getElementById('pro-power-label').innerText = "On";
+                    document.getElementById('top-power-checkbox').checked = true;
+                    document.getElementById('lbl-off').style.color = "var(--text-muted)";
+                    document.getElementById('lbl-on').style.color = "var(--theme-color)";
                     
                     let color = '#007bff'; let bg = '#eaf4ff'; let testo = 'Fresco'; let icona = 'fas fa-snowflake';
 
@@ -416,8 +413,18 @@
                 document.querySelectorAll('.current-temp-val').forEach(el => el.innerText = isNaN(currTemp) ? "--" : currTemp);
             }
             
-            else if (topic.includes("/fan_mode/state")) { syncActiveButtons('.btn-fan', payload); }
-            else if (topic.includes("/swing_mode/state")) { syncActiveButtons('.btn-vane', payload); }
+            else if (topic.includes("/fan_mode/state")) { 
+                syncActiveButtons('.btn-fan', payload); 
+                let lbl = "Auto";
+                if(payload === "low") lbl = "Bassa"; if(payload === "medium") lbl = "Media"; if(payload === "high") lbl = "Alta";
+                document.getElementById('lbl-pill-fan').innerText = "Ventola: " + lbl;
+            }
+            else if (topic.includes("/swing_mode/state")) { 
+                syncActiveButtons('.btn-vane', payload);
+                let lbl = "Ferma";
+                if(payload === "vertical") lbl = "Oscilla"; if(payload === "horizontal") lbl = "Su"; if(payload === "vertical_down") lbl = "Giù";
+                document.getElementById('lbl-pill-swing').innerText = "Alette: " + lbl;
+            }
 
             else if (topic.includes("/luce_display/state")) {
                 luceAccesa = (payload === "on");
@@ -428,18 +435,14 @@
             }
         });
 
-        // ANIMAZIONE MATEMATICA DEL TERMOSTATO SVG
         function aggiornaTermostato(temp, isEmpty) {
             const minT = 16; const maxT = 30;
             let val = temp; if(val < minT) val = minT; if(val > maxT) val = maxT;
-            
             const progress = (val - minT) / (maxT - minT);
             
-            // L'arco totale è lungo 660. L'offset nasconde la linea.
             const dashOffset = isEmpty ? 660 : 660 - (progress * 660);
             document.getElementById('pro-arc-path').style.strokeDashoffset = dashOffset;
             
-            // Il pallino ruota da -135° (sinistra) a +135° (destra)
             const angle = -135 + (progress * 270);
             document.getElementById('pro-arc-thumb').style.transform = `rotate(${angle}deg)`;
         }
@@ -456,11 +459,25 @@
             if (clientMQTT && clientMQTT.connected) { clientMQTT.publish(topic, messaggio.toString()); }
         }
 
-        function toggleAccensione() { inviaComando(baseTopic + "/mode/command", climaAcceso ? "off" : "cool"); }
-        function cambiaModalita(modalita) { inviaComando(baseTopic + "/mode/command", modalita); }
-        function cambiaVentola(velocita) { inviaComando(baseTopic + "/fan_mode/command", velocita); }
-        function cambiaDirezione(direzione) { inviaComando(baseTopic + "/swing_mode/command", direzione); }
-        function toggleLuce() { inviaComando("vincenzo_clima_segreto_7788/switch/luce_display/command", luceAccesa ? "OFF" : "ON"); }
+        // Comandi e Auto-Chiusura tendine
+        function toggleAccensione() { 
+            inviaComando(baseTopic + "/mode/command", climaAcceso ? "off" : "cool"); 
+        }
+        function cambiaModalita(modalita) { 
+            inviaComando(baseTopic + "/mode/command", modalita); 
+            chiudiAccordions(); 
+        }
+        function cambiaVentola(velocita) { 
+            inviaComando(baseTopic + "/fan_mode/command", velocita); 
+            chiudiAccordions(); 
+        }
+        function cambiaDirezione(direzione) { 
+            inviaComando(baseTopic + "/swing_mode/command", direzione); 
+            chiudiAccordions(); 
+        }
+        function toggleLuce() { 
+            inviaComando("vincenzo_clima_segreto_7788/switch/luce_display/command", luceAccesa ? "OFF" : "ON"); 
+        }
 
         function cambiaTemperatura(delta) {
             if (!isOnline) return;
