@@ -347,8 +347,11 @@
         }
         
         window.onload = () => {
-            if(localStorage.getItem('climaViewPreference') === 'PRO') {
-                document.getElementById('view-toggle-checkbox').checked = true; toggleView();
+            // Se non c'è una preferenza salvata, oppure è su PRO, apre la vista PRO di default
+            let pref = localStorage.getItem('climaViewPreference');
+            if(pref !== 'BASE') {
+                document.getElementById('view-toggle-checkbox').checked = true; 
+                toggleView();
             }
         };
 
