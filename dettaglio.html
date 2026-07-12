@@ -22,30 +22,33 @@
             --error-color: #dc3545;
         }
         
-        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 40px; }
+        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 40px; overflow-x: hidden; }
         
         /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px 5px 20px; background-color: var(--bg-color); }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px 10px 20px; background-color: var(--bg-color); }
         .back-btn { color: var(--text-main); text-decoration: none; font-size: 20px; cursor: pointer; }
-        .header-title { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; }
+        .header-title { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; }
         .status-badge { font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
         .status-badge.online { background-color: #d4edda; color: var(--success-color); }
         .status-badge.offline { background-color: #f8d7da; color: var(--error-color); }
         
         /* BARRA DEI TOGGLE IN ALTO (SIMMETRICA) */
-        .view-toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 20px 10px 20px; font-size: 11px; font-weight: 700; color: var(--text-main); background-color: var(--bg-color); position: sticky; top: 0; z-index: 100;}
-        .toggle-group { display: flex; align-items: center; gap: 8px; }
+        .top-bar-controls { display: flex; justify-content: space-between; padding: 0 20px 10px 20px; background-color: var(--bg-color); position: sticky; top: 0; z-index: 100;}
+        .toggle-wrapper { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .toggle-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .toggle-group { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; color: var(--text-muted); }
         
-        .switch-sm { position: relative; display: inline-block; width: 38px; height: 20px; }
-        .switch-sm input { opacity: 0; width: 0; height: 0; }
-        .slider-sm { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--theme-color); transition: .3s; border-radius: 34px; }
-        .slider-sm:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+        /* Switch identici per dimensione */
+        .switch-header { position: relative; display: inline-block; width: 46px; height: 26px; }
+        .switch-header input { opacity: 0; width: 0; height: 0; }
+        .slider-header { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #d5dbe1; transition: .3s; border-radius: 34px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+        .slider-header:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
         
-        .switch-sm input:checked + .slider-sm { background-color: var(--theme-color); }
-        .switch-sm input:checked + .slider-sm:before { transform: translateX(18px); }
-        
-        /* Toggle Power spento (grigio) */
-        .slider-sm.power-slider { background-color: #d5dbe1; }
+        /* Colori Switch */
+        .switch-header input:checked + .slider-header { background-color: var(--theme-color); }
+        .switch-header input:checked + .slider-header:before { transform: translateX(20px); }
+        .active-text { color: var(--text-main); }
+
 
         /* ==================== VISTA BASE ==================== */
         #view-base { display: block; animation: fadeIn 0.3s; padding-top: 5px;}
@@ -64,7 +67,7 @@
         .temp-btn-base { width: 45px; height: 45px; border-radius: 10px; background-color: white; border: 1px solid #ddd; font-size: 20px; color: var(--text-main); cursor: pointer; }
 
 
-        /* ==================== VISTA PRO ==================== */
+        /* ==================== VISTA PRO (TRENDY) ==================== */
         #view-pro { display: none; padding: 0 20px; animation: fadeIn 0.3s; }
         
         .pro-gauge-wrapper { position: relative; max-width: 280px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
@@ -81,39 +84,48 @@
         
         /* FRECCE SOTTO IL CERCHIO */
         .pro-arrows { display: flex; justify-content: center; gap: 40px; margin-top: -15px; margin-bottom: 25px; z-index: 5; position: relative;}
-        .pro-circle-btn { width: 44px; height: 44px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.06); font-size: 16px; color: #555; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;}
+        .pro-circle-btn { width: 46px; height: 46px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.06); font-size: 18px; color: #555; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;}
         .pro-circle-btn:active { transform: scale(0.9); }
 
-        /* LISTA PILLOLE E TENDINE (ACCORDION) */
-        .pro-pills-stack { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+        /* NUOVA GRIGLIA "SMART TILES" (HOMEKIT STYLE) */
+        .smart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         
-        .pro-pill-container { width: 100%; display: flex; flex-direction: column; align-items: center; }
-        .pro-mode-pill { background: var(--theme-bg); border: 1.5px solid var(--theme-color); color: var(--theme-color); border-radius: 20px; padding: 10px 25px; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: 0.3s; width: max-content; }
+        .smart-tile { background: var(--card-bg); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; min-height: 105px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid rgba(0,0,0,0.02); transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; box-sizing: border-box;}
+        .smart-tile:active { transform: scale(0.96); }
         
-        .accordion-content { display: none; width: 100%; background: var(--card-bg); border-radius: 18px; padding: 15px; margin-top: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); animation: fadeInDown 0.2s ease-out; box-sizing: border-box; }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .tile-icon { width: 42px; height: 42px; border-radius: 50%; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 15px; transition: 0.3s; }
+        
+        .tile-info { display: flex; flex-direction: column; gap: 2px; }
+        .tile-title { font-size: 13px; font-weight: 700; color: var(--text-main); }
+        .tile-value { font-size: 11px; font-weight: 600; color: var(--text-muted); transition: 0.3s; }
 
-        /* Tasti dentro le tendine */
-        .pro-grid-row { display: flex; gap: 10px; }
-        .pro-btn { flex: 1; background-color: #f8f9fa; border-radius: 12px; padding: 12px 5px; text-align: center; border: 1.5px solid transparent; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px;}
-        .pro-btn i { font-size: 18px; color: var(--text-muted); }
-        .pro-btn span { font-size: 11px; font-weight: 600; color: var(--text-main); }
+        /* Stile Dinamico Tile (Colorato in base al tema) */
+        .smart-tile.theme-active .tile-icon { background: var(--theme-bg); color: var(--theme-color); }
         
-        .pro-btn.active { background-color: var(--theme-bg); border-color: var(--theme-color); }
-        .pro-btn.active i, .pro-btn.active span { color: var(--theme-color); }
+        /* Tile Luce (Glow dedicato) */
+        .smart-tile.light-on .tile-icon { background: var(--theme-color); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .smart-tile.light-on .tile-value { color: var(--theme-color); }
 
-        /* Card Luce in fondo */
-        .pro-card { background: var(--card-bg); border-radius: 18px; padding: 15px; margin-top: 15px; box-shadow: 0 2px 12px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center;}
-        .pro-card-title { font-size: 13px; font-weight: 600; color: var(--text-main); margin: 0; }
+
+        /* ==================== PANNELLI A COMPARSA (iOS BOTTOM SHEETS) ==================== */
+        .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .sheet-overlay.show { opacity: 1; pointer-events: all; }
         
-        /* Toggle generico per la luce */
-        .switch-light { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .switch-light input { opacity: 0; width: 0; height: 0; }
-        .slider-light { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #d5dbe1; transition: .3s; border-radius: 34px; }
-        .slider-light:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
-        .switch-light input:checked + .slider-light { background-color: #555; }
-        .switch-light input:checked + .slider-light:before { transform: translateX(20px); }
+        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 20px 25px 40px 25px; box-sizing: border-box; }
+        .bottom-sheet.open { bottom: 0; }
         
+        .sheet-handle { width: 40px; height: 5px; background: #e0e0e0; border-radius: 5px; margin: 0 auto 20px auto; }
+        .sheet-title { font-size: 16px; font-weight: 700; margin-bottom: 25px; text-align: center; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px;}
+        
+        /* Bottoni dentro i Pannelli */
+        .sheet-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 10px; }
+        .sheet-opt { background-color: #f8f9fa; border-radius: 16px; padding: 15px 5px; text-align: center; border: 2px solid transparent; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;}
+        .sheet-opt i { font-size: 22px; color: var(--text-muted); }
+        .sheet-opt span { font-size: 11px; font-weight: 600; color: var(--text-main); }
+        
+        .sheet-opt.active { background-color: var(--theme-bg); border-color: var(--theme-color); }
+        .sheet-opt.active i, .sheet-opt.active span { color: var(--theme-color); }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -127,23 +139,29 @@
         <i class="fas fa-wifi" style="color: var(--success-color); font-size: 14px;"></i>
     </div>
     
-    <div class="view-toggle-row">
-        <div class="toggle-group" style="cursor: pointer;" onclick="toggleAccensione()">
-            <span id="lbl-off" style="color: var(--text-muted);">OFF</span>
-            <label class="switch-sm" style="pointer-events: none;">
-                <input type="checkbox" id="top-power-checkbox">
-                <span class="slider-sm power-slider"></span>
-            </label>
-            <span id="lbl-on" style="color: var(--text-muted);">ON</span>
+    <div class="top-bar-controls">
+        <div class="toggle-wrapper" onclick="toggleAccensione()" style="cursor: pointer;">
+            <span class="toggle-label">Accensione</span>
+            <div class="toggle-group">
+                <span id="lbl-off" class="active-text">OFF</span>
+                <label class="switch-header" style="pointer-events: none;">
+                    <input type="checkbox" id="top-power-checkbox">
+                    <span class="slider-header power-slider"></span>
+                </label>
+                <span id="lbl-on">ON</span>
+            </div>
         </div>
 
-        <div class="toggle-group">
-            <span>BASE</span>
-            <label class="switch-sm">
-                <input type="checkbox" id="view-toggle-checkbox" onchange="toggleView()">
-                <span class="slider-sm"></span>
-            </label>
-            <span>PRO</span>
+        <div class="toggle-wrapper">
+            <span class="toggle-label">Visualizzazione</span>
+            <div class="toggle-group">
+                <span id="lbl-classica" class="active-text">CLASSICA</span>
+                <label class="switch-header">
+                    <input type="checkbox" id="view-toggle-checkbox" onchange="toggleView()">
+                    <span class="slider-header"></span>
+                </label>
+                <span id="lbl-pro">PRO</span>
+            </div>
         </div>
     </div>
 
@@ -207,11 +225,7 @@
         <div class="pro-gauge-wrapper">
             <div class="pro-gauge-container">
                 <svg viewBox="0 0 300 270" class="pro-gauge-svg">
-                    <defs>
-                        <filter id="shadowThumb">
-                            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.15)"/>
-                        </filter>
-                    </defs>
+                    <defs><filter id="shadowThumb"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.15)"/></filter></defs>
                     <path d="M 51 249 A 140 140 0 1 1 249 249" fill="none" stroke="#d5dbe1" stroke-width="15" stroke-linecap="butt" stroke-dasharray="4 8" />
                     <path id="pro-arc-path" d="M 51 249 A 140 140 0 1 1 249 249" fill="none" stroke="var(--theme-color)" stroke-width="15" stroke-linecap="round" stroke-dasharray="660" stroke-dashoffset="330" style="transition: stroke-dashoffset 0.4s ease-out, stroke 0.4s;" />
                     <circle id="pro-arc-thumb" cx="150" cy="10" r="14" fill="#fff" stroke="var(--theme-color)" stroke-width="4" filter="url(#shadowThumb)" style="transform-origin: 150px 150px; transform: rotate(0deg); transition: transform 0.4s ease-out, stroke 0.4s;" />
@@ -231,63 +245,80 @@
             </div>
         </div>
 
-        <div class="pro-pills-stack">
+        <div class="smart-grid">
             
-            <div class="pro-pill-container">
-                <button class="pro-mode-pill" onclick="toggleAccordion('acc-mode')">
-                    <i class="fas fa-snowflake icona-stato"></i> <span class="testo-stato">Fresco</span>
-                </button>
-                <div id="acc-mode" class="accordion-content">
-                    <div class="pro-grid-row">
-                        <div class="pro-btn btn-mode" data-val="cool" onclick="cambiaModalita('cool')"><i class="fas fa-snowflake"></i><span>Freddo</span></div>
-                        <div class="pro-btn btn-mode" data-val="heat" onclick="cambiaModalita('heat')"><i class="fas fa-sun"></i><span>Caldo</span></div>
-                        <div class="pro-btn btn-mode" data-val="dry" onclick="cambiaModalita('dry')"><i class="fas fa-tint"></i><span>Deumid.</span></div>
-                        <div class="pro-btn btn-mode" data-val="fan_only" onclick="cambiaModalita('fan_only')"><i class="fas fa-fan"></i><span>Ventola</span></div>
-                        <div class="pro-btn btn-mode" data-val="auto" onclick="cambiaModalita('auto')"><i class="fas fa-magic"></i><span>Auto</span></div>
-                    </div>
+            <div class="smart-tile theme-active" id="tile-mode" onclick="openSheet('sheet-mode')">
+                <div class="tile-icon"><i class="fas fa-snowflake icona-stato"></i></div>
+                <div class="tile-info">
+                    <div class="tile-title">Modalità</div>
+                    <div class="tile-value testo-stato">Fresco</div>
                 </div>
             </div>
 
-            <div class="pro-pill-container">
-                <button class="pro-mode-pill" onclick="toggleAccordion('acc-fan')">
-                    <i class="fas fa-fan"></i> <span id="lbl-pill-fan">Ventola: Auto</span>
-                </button>
-                <div id="acc-fan" class="accordion-content">
-                    <div class="pro-grid-row">
-                        <div class="pro-btn btn-fan" data-val="low" onclick="cambiaVentola('low')"><i class="fas fa-signal" style="font-size: 12px;"></i><span>Bassa</span></div>
-                        <div class="pro-btn btn-fan" data-val="medium" onclick="cambiaVentola('medium')"><i class="fas fa-signal" style="font-size: 16px;"></i><span>Media</span></div>
-                        <div class="pro-btn btn-fan" data-val="high" onclick="cambiaVentola('high')"><i class="fas fa-signal" style="font-size: 20px;"></i><span>Alta</span></div>
-                        <div class="pro-btn btn-fan" data-val="auto" onclick="cambiaVentola('auto')"><i class="fas fa-sync"></i><span>Auto</span></div>
-                    </div>
+            <div class="smart-tile theme-active" id="tile-fan" onclick="openSheet('sheet-fan')">
+                <div class="tile-icon"><i class="fas fa-fan"></i></div>
+                <div class="tile-info">
+                    <div class="tile-title">Ventola</div>
+                    <div class="tile-value" id="lbl-tile-fan">Auto</div>
                 </div>
             </div>
 
-            <div class="pro-pill-container">
-                <button class="pro-mode-pill" onclick="toggleAccordion('acc-swing')">
-                    <i class="fas fa-arrows-alt-v"></i> <span id="lbl-pill-swing">Alette: Ferma</span>
-                </button>
-                <div id="acc-swing" class="accordion-content">
-                    <div class="pro-grid-row" style="margin-bottom: 10px;">
-                        <div class="pro-btn btn-vane" data-val="vertical" onclick="cambiaDirezione('vertical')"><i class="fas fa-arrows-alt-v"></i><span>Oscilla</span></div>
-                        <div class="pro-btn btn-vane" data-val="horizontal" onclick="cambiaDirezione('horizontal')"><i class="fas fa-chevron-up"></i><span>Extra Su</span></div>
-                        <div class="pro-btn btn-vane" data-val="vertical_down" onclick="cambiaDirezione('vertical')"><i class="fas fa-chevron-down"></i><span>Extra Giù</span></div>
-                    </div>
-                    <div class="pro-grid-row">
-                        <div class="pro-btn active btn-vane" data-val="off" onclick="cambiaDirezione('off')"><i class="fas fa-stop"></i><span>Ferma aletta</span></div>
-                    </div>
+            <div class="smart-tile theme-active" id="tile-swing" onclick="openSheet('sheet-swing')">
+                <div class="tile-icon"><i class="fas fa-arrows-alt-v"></i></div>
+                <div class="tile-info">
+                    <div class="tile-title">Alette</div>
+                    <div class="tile-value" id="lbl-tile-swing">Ferma</div>
+                </div>
+            </div>
+
+            <div class="smart-tile" id="tile-light" onclick="toggleLuce()">
+                <div class="tile-icon"><i class="fas fa-lightbulb"></i></div>
+                <div class="tile-info">
+                    <div class="tile-title">Luce Display</div>
+                    <div class="tile-value" id="lbl-tile-light">Spenta</div>
                 </div>
             </div>
 
         </div>
 
-        <div class="pro-card">
-            <span class="pro-card-title"><i class="fas fa-lightbulb" style="color: var(--text-muted); margin-right: 8px;"></i> Luce Display</span>
-            <label class="switch-light">
-                <input type="checkbox" id="pro-light-toggle" onchange="toggleLuce()">
-                <span class="slider-light"></span>
-            </label>
-        </div>
+    </div>
 
+    <div class="sheet-overlay" id="sheet-overlay" onclick="closeAllSheets()"></div>
+
+    <div class="bottom-sheet" id="sheet-mode">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">Seleziona Modalità</div>
+        <div class="sheet-options">
+            <div class="sheet-opt btn-mode" data-val="cool" onclick="cambiaModalita('cool')"><i class="fas fa-snowflake"></i><span>Freddo</span></div>
+            <div class="sheet-opt btn-mode" data-val="heat" onclick="cambiaModalita('heat')"><i class="fas fa-sun"></i><span>Caldo</span></div>
+            <div class="sheet-opt btn-mode" data-val="dry" onclick="cambiaModalita('dry')"><i class="fas fa-tint"></i><span>Deumid.</span></div>
+            <div class="sheet-opt btn-mode" data-val="fan_only" onclick="cambiaModalita('fan_only')"><i class="fas fa-fan"></i><span>Ventola</span></div>
+            <div class="sheet-opt btn-mode" data-val="auto" onclick="cambiaModalita('auto')"><i class="fas fa-magic"></i><span>Auto</span></div>
+        </div>
+    </div>
+
+    <div class="bottom-sheet" id="sheet-fan">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">Velocità Ventola</div>
+        <div class="sheet-options">
+            <div class="sheet-opt btn-fan" data-val="low" onclick="cambiaVentola('low')"><i class="fas fa-signal" style="font-size: 14px;"></i><span>Bassa</span></div>
+            <div class="sheet-opt btn-fan" data-val="medium" onclick="cambiaVentola('medium')"><i class="fas fa-signal" style="font-size: 18px;"></i><span>Media</span></div>
+            <div class="sheet-opt btn-fan" data-val="high" onclick="cambiaVentola('high')"><i class="fas fa-signal" style="font-size: 22px;"></i><span>Alta</span></div>
+            <div class="sheet-opt btn-fan" data-val="auto" onclick="cambiaVentola('auto')"><i class="fas fa-sync"></i><span>Auto</span></div>
+        </div>
+    </div>
+
+    <div class="bottom-sheet" id="sheet-swing">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">Direzione Alette</div>
+        <div class="sheet-options" style="margin-bottom: 15px;">
+            <div class="sheet-opt btn-vane" data-val="vertical" onclick="cambiaDirezione('vertical')"><i class="fas fa-arrows-alt-v"></i><span>Oscilla</span></div>
+            <div class="sheet-opt btn-vane" data-val="horizontal" onclick="cambiaDirezione('horizontal')"><i class="fas fa-chevron-up"></i><span>Extra Su</span></div>
+            <div class="sheet-opt btn-vane" data-val="vertical_down" onclick="cambiaDirezione('vertical')"><i class="fas fa-chevron-down"></i><span>Extra Giù</span></div>
+        </div>
+        <div class="sheet-options">
+            <div class="sheet-opt btn-vane active" data-val="off" onclick="cambiaDirezione('off')" style="grid-column: span 3;"><i class="fas fa-stop"></i><span>Ferma Aletta in posizione corrente</span></div>
+        </div>
     </div>
 
 
@@ -307,27 +338,28 @@
             const isPro = document.getElementById('view-toggle-checkbox').checked;
             document.getElementById('view-base').style.display = isPro ? 'none' : 'block';
             document.getElementById('view-pro').style.display = isPro ? 'block' : 'none';
+            
+            // Colora i testi dei Toggle
+            document.getElementById('lbl-classica').className = isPro ? '' : 'active-text';
+            document.getElementById('lbl-pro').className = isPro ? 'active-text' : '';
+            
             localStorage.setItem('climaViewPreference', isPro ? 'PRO' : 'BASE');
         }
+        
         window.onload = () => {
             if(localStorage.getItem('climaViewPreference') === 'PRO') {
                 document.getElementById('view-toggle-checkbox').checked = true; toggleView();
             }
         };
 
-        // Gestione Menu a tendina (Pillole)
-        function toggleAccordion(id) {
-            const el = document.getElementById(id);
-            if (el.style.display === 'none' || el.style.display === '') {
-                // Chiude gli altri prima di aprire
-                document.querySelectorAll('.accordion-content').forEach(acc => acc.style.display = 'none');
-                el.style.display = 'block';
-            } else {
-                el.style.display = 'none';
-            }
+        // Gestione Bottom Sheets
+        function openSheet(id) {
+            document.getElementById('sheet-overlay').classList.add('show');
+            document.getElementById(id).classList.add('open');
         }
-        function chiudiAccordions() {
-            document.querySelectorAll('.accordion-content').forEach(acc => acc.style.display = 'none');
+        function closeAllSheets() {
+            document.getElementById('sheet-overlay').classList.remove('show');
+            document.querySelectorAll('.bottom-sheet').forEach(sheet => sheet.classList.remove('open'));
         }
 
         const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_dett_" + Math.random().toString(16).substring(2, 10), clean: true });
@@ -367,20 +399,26 @@
                     
                     document.getElementById('base-power-btn').classList.add('off');
                     document.getElementById('top-power-checkbox').checked = false;
-                    document.getElementById('lbl-off').style.color = "var(--theme-color)";
-                    document.getElementById('lbl-on').style.color = "var(--text-muted)";
+                    document.getElementById('lbl-off').className = "active-text";
+                    document.getElementById('lbl-on').className = "";
                     
                     document.querySelectorAll('.testo-stato').forEach(t => t.innerText = "Spento");
                     document.querySelectorAll('.icona-stato').forEach(i => i.className = "fas fa-power-off icona-stato");
                     document.querySelectorAll('.testo-stato-title').forEach(t => t.innerText = "Condizionatore Spento");
+                    
+                    // Disattiva il colore delle Tiles se spento
+                    document.querySelectorAll('.smart-tile.theme-active').forEach(t => t.style.opacity = '0.5');
                     
                     aggiornaTermostato(gradiAttuali, true); 
                 } else {
                     climaAcceso = true; 
                     document.getElementById('base-power-btn').classList.remove('off');
                     document.getElementById('top-power-checkbox').checked = true;
-                    document.getElementById('lbl-off').style.color = "var(--text-muted)";
-                    document.getElementById('lbl-on').style.color = "var(--theme-color)";
+                    document.getElementById('lbl-off').className = "";
+                    document.getElementById('lbl-on').className = "active-text";
+                    
+                    // Riattiva l'opacità delle tiles
+                    document.querySelectorAll('.smart-tile.theme-active').forEach(t => t.style.opacity = '1');
                     
                     let color = '#007bff'; let bg = '#eaf4ff'; let testo = 'Fresco'; let icona = 'fas fa-snowflake';
 
@@ -417,21 +455,36 @@
                 syncActiveButtons('.btn-fan', payload); 
                 let lbl = "Auto";
                 if(payload === "low") lbl = "Bassa"; if(payload === "medium") lbl = "Media"; if(payload === "high") lbl = "Alta";
-                document.getElementById('lbl-pill-fan').innerText = "Ventola: " + lbl;
+                document.getElementById('lbl-tile-fan').innerText = lbl;
             }
             else if (topic.includes("/swing_mode/state")) { 
                 syncActiveButtons('.btn-vane', payload);
                 let lbl = "Ferma";
-                if(payload === "vertical") lbl = "Oscilla"; if(payload === "horizontal") lbl = "Su"; if(payload === "vertical_down") lbl = "Giù";
-                document.getElementById('lbl-pill-swing').innerText = "Alette: " + lbl;
+                if(payload === "vertical") lbl = "Oscilla"; if(payload === "horizontal") lbl = "Extra Su"; if(payload === "vertical_down") lbl = "Extra Giù";
+                document.getElementById('lbl-tile-swing').innerText = lbl;
             }
 
             else if (topic.includes("/luce_display/state")) {
                 luceAccesa = (payload === "on");
                 const btnBase = document.querySelector('.control-btn-base.btn-light');
-                if(luceAccesa) { btnBase.classList.add('active'); btnBase.style.backgroundColor = "var(--theme-bg)"; } 
-                else { btnBase.classList.remove('active'); btnBase.style.backgroundColor = "#e2e3e5"; }
-                document.getElementById('pro-light-toggle').checked = luceAccesa;
+                const tileLight = document.getElementById('tile-light');
+                
+                if(luceAccesa) { 
+                    btnBase.classList.add('active'); 
+                    btnBase.style.backgroundColor = "var(--theme-bg)"; 
+                    
+                    // Colora e attiva la tile PRO
+                    tileLight.classList.add('light-on');
+                    document.getElementById('lbl-tile-light').innerText = "Accesa";
+                } 
+                else { 
+                    btnBase.classList.remove('active'); 
+                    btnBase.style.backgroundColor = "#e2e3e5"; 
+                    
+                    // Spegni la tile PRO
+                    tileLight.classList.remove('light-on');
+                    document.getElementById('lbl-tile-light').innerText = "Spenta";
+                }
             }
         });
 
@@ -459,21 +512,21 @@
             if (clientMQTT && clientMQTT.connected) { clientMQTT.publish(topic, messaggio.toString()); }
         }
 
-        // Comandi e Auto-Chiusura tendine
+        // Comandi che chiudono i pannelli automaticamente
         function toggleAccensione() { 
             inviaComando(baseTopic + "/mode/command", climaAcceso ? "off" : "cool"); 
         }
         function cambiaModalita(modalita) { 
             inviaComando(baseTopic + "/mode/command", modalita); 
-            chiudiAccordions(); 
+            closeAllSheets(); 
         }
         function cambiaVentola(velocita) { 
             inviaComando(baseTopic + "/fan_mode/command", velocita); 
-            chiudiAccordions(); 
+            closeAllSheets(); 
         }
         function cambiaDirezione(direzione) { 
             inviaComando(baseTopic + "/swing_mode/command", direzione); 
-            chiudiAccordions(); 
+            closeAllSheets(); 
         }
         function toggleLuce() { 
             inviaComando("vincenzo_clima_segreto_7788/switch/luce_display/command", luceAccesa ? "OFF" : "ON"); 
