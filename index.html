@@ -30,7 +30,6 @@
 
         .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 24px; }
         
-        /* CARD CSS (Generata da JS) */
         .smart-card { background-color: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1.15; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: 1px solid rgba(0,0,0,0.02); cursor: pointer; }
         .smart-card:active { transform: scale(0.95); }
         
@@ -64,7 +63,7 @@
         .btn-logout { width: 100%; background: #ffebe9; color: var(--error-color); border: none; padding: 16px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s;}
         .btn-logout:active { transform: scale(0.95); }
 
-        /* FLOATING BOTTOM NAV */
+        /* FLOATING NAV */
         .floating-nav { position: fixed; bottom: 25px; left: 24px; right: 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 12px 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.4); z-index: 900; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; text-decoration: none; padding: 8px 15px; border-radius: 20px; transition: 0.3s; }
         .nav-item i { font-size: 22px; }
@@ -78,7 +77,6 @@
             <h1 class="greeting">Casa</h1>
             <p class="subtitle">Bentornato!</p>
         </div>
-        <!-- Omino Attivo -->
         <div class="profile-btn" onclick="openProfile()"><i class="fas fa-user-circle"></i></div>
     </div>
 
@@ -96,12 +94,9 @@
         <h2 class="section-title">Le tue Stanze</h2>
     </div>
 
-    <!-- GRIGLIA STANZE VUOTA: SI RIEMPIRÀ DA SOLA -->
     <div class="device-grid" id="device-grid">
-        <!-- Generato da Firebase -->
-    </div>
+        </div>
 
-    <!-- PANNELLO PROFILO E LOGOUT -->
     <div class="sheet-overlay" id="sheet-overlay" onclick="closeProfile()"></div>
     <div class="bottom-sheet" id="sheet-profile">
         <div class="sheet-handle"></div>
@@ -115,7 +110,6 @@
         <a href="impostazioni.html" class="nav-item"><i class="fas fa-cog"></i><span>Impostazioni</span></a>
     </div>
 
-    <!-- FIREBASE & MQTT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -127,7 +121,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Profilo
         onAuthStateChanged(auth, (user) => { 
             if (!user) window.location.href = "login.html"; 
             else document.getElementById('user-email-display').innerText = user.email;
@@ -138,10 +131,7 @@
         window.esciApp = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); }
         window.apriDettagli = function(stanzaId) { window.location.href = `dettaglio.html?stanza=${stanzaId}`; }
 
-        // --- SISTEMA DINAMICO STANZE E MQTT ---
         const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_home_" + Math.random().toString(16).substring(2, 10), clean: true });
-        
-        // Struttura in ram delle stanze
         window.stanzeState = {}; 
 
         const docRef = doc(db, "impostazioni", "stanze_config");
@@ -150,24 +140,20 @@
             if (docSnap.exists()) {
                 const stanzeDb = docSnap.data();
                 const grid = document.getElementById('device-grid');
-                grid.innerHTML = ''; // Svuota la griglia
+                grid.innerHTML = '';
                 
                 for (const [id, config] of Object.entries(stanzeDb)) {
-                    // Crea o aggiorna lo stato in ram
                     if(!window.stanzeState[id]) {
                         window.stanzeState[id] = { online: false, mode: "off", temp: 24, topic: config.topic, icon: config.icon, nome: config.nome };
-                        // Iscriviti ai nuovi topic MQTT
                         if(clientMQTT.connected) {
                             clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${config.topic}/mode/state`);
                             clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${config.topic}/target_temperature/state`);
                         }
                     } else {
-                        // Se ha solo cambiato nome o icona, aggiorna l'oggetto
                         window.stanzeState[id].nome = config.nome;
                         window.stanzeState[id].icon = config.icon;
                     }
 
-                    // Genera HTML della singola card
                     const cardHTML = `
                     <div class="smart-card" id="card-${id}" onclick="apriDettagli('${id}')">
                         <div class="card-top">
@@ -184,19 +170,23 @@
                         <div class="wifi-indicator"><i class="fas fa-wifi" id="wifi-icon-${id}"></i></div>
                     </div>`;
                     grid.insertAdjacentHTML('beforeend', cardHTML);
-                    aggiornaUIStanza(id); // Applica lo stato visivo (Acceso/Spento)
+                    aggiornaUIStanza(id);
                 }
             } else {
-                // Se non c'è il database, crea la Cameretta di default
-                const defaultStanza = { cameretta: { nome: "Cameretta", icon: "fa-rocket", topic: "haier_tundra_cameretta" } };
-                setDoc(docRef, defaultStanza);
+                // SE IL DATABASE È VUOTO, LO INIZIALIZZIAMO SUBITO CON TUTTE E 4 LE TUE STANZE STORICHE!
+                const defaultStanze = {
+                    cameretta: { nome: "Cameretta", icon: "fa-rocket", topic: "haier_tundra_cameretta" },
+                    soggiorno: { nome: "Soggiorno", icon: "fa-couch", topic: "haier_tundra_soggiorno" },
+                    cucina: { nome: "Cucina", icon: "fa-utensils", topic: "haier_tundra_cucina" },
+                    camera: { nome: "Camera da letto", icon: "fa-bed", topic: "haier_tundra_camera" }
+                };
+                setDoc(docRef, defaultStanze);
             }
         });
 
         // GESTIONE MQTT
         clientMQTT.on('connect', function () {
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
-            // Sottoscrivi a tutte le stanze caricate
             Object.keys(window.stanzeState).forEach(id => {
                 clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${window.stanzeState[id].topic}/mode/state`);
                 clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${window.stanzeState[id].topic}/target_temperature/state`);
@@ -206,7 +196,6 @@
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();
             
-            // ONLINE GLOBALE
             if (topic.includes("/status")) {
                 const isOnline = (payload === "online");
                 Object.keys(window.stanzeState).forEach(id => {
@@ -218,7 +207,6 @@
                 });
             }
             
-            // SMISTAMENTO A OGNI STANZA
             Object.keys(window.stanzeState).forEach(id => {
                 const top = window.stanzeState[id].topic;
                 if (topic.includes(`${top}/mode/state`)) { window.stanzeState[id].mode = payload; aggiornaUIStanza(id); }
@@ -227,8 +215,8 @@
         });
 
         window.aggiornaUIStanza = function(id) {
-            const card = document.getElementById(`card-${id}`); 
-            if(!card) return; // Se la card non è ancora renderizzata
+            const card = document.getElementById('card-${id}'); 
+            if(!card) return;
             
             const testo = document.getElementById(`status-text-${id}`);
             const icona = document.getElementById(`icon-${id}`);
