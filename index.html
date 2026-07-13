@@ -19,14 +19,16 @@
             --warning-color: #ff9500; 
             --error-color: #ff3b30; 
         }
-        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 110px; overflow-x: hidden; }
+        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 110px; overflow-x: hidden; user-select: none; -webkit-user-select: none; }
         
         .header { display: flex; justify-content: space-between; align-items: flex-start; padding: 30px 24px 15px 24px; }
         .greeting-box { display: flex; flex-direction: column; gap: 4px; }
         .greeting { font-size: 28px; font-weight: 900; letter-spacing: -0.5px; color: var(--text-main); margin: 0; }
         .subtitle { font-size: 14px; font-weight: 500; color: var(--text-muted); margin: 0; }
         
-        .profile-btn { width: 44px; height: 44px; border-radius: 22px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--accent-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s;}
+        /* Avatar omino circolare */
+        .profile-btn { width: 44px; height: 44px; border-radius: 22px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--accent-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; overflow: hidden; border: 2px solid white; }
+        .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
         .profile-btn:active { transform: scale(0.9); }
 
         .summary-scroll { padding: 0 24px; margin-bottom: 25px; }
@@ -38,10 +40,11 @@
         .section-header { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 24px; margin-bottom: 15px; }
         .section-title { font-size: 18px; font-weight: 700; margin: 0; }
 
-        .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 24px; }
+        /* GRIGLIA STANZE PRONTA AL DRAG & DROP */
+        .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 24px; position: relative; }
         
-        .smart-card { background-color: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1.15; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: 1px solid rgba(0,0,0,0.02); cursor: pointer; }
-        .smart-card:active { transform: scale(0.95); }
+        .smart-card { background-color: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1.15; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 1px solid rgba(0,0,0,0.02); cursor: grab; touch-action: none; }
+        .smart-card.dragging { opacity: 0.5; transform: scale(1.05); box-shadow: 0 15px 30px rgba(0,0,0,0.1); cursor: grabbing; z-index: 999; }
         
         .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .icon-box { width: 44px; height: 44px; border-radius: 22px; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.4s; }
@@ -61,15 +64,24 @@
         .smart-card.is-on .power-toggle { background: var(--accent-color); color: white; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3); }
         .smart-card.is-on .card-status { color: var(--accent-color); }
 
-        /* PANNELLO PROFILO A COMPARSA */
+        /* PANNELLO PROFILO AVANZATO (BOTTOM SHEET) */
         .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sheet-overlay.show { opacity: 1; pointer-events: all; }
-        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 20px 25px 40px 25px; box-sizing: border-box; text-align: center;}
+        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 25px 25px 40px 25px; box-sizing: border-box; text-align: center;}
         .bottom-sheet.open { bottom: 0; }
         .sheet-handle { width: 40px; height: 5px; background: #e0e0e0; border-radius: 5px; margin: 0 auto 20px auto; }
         
-        .profile-pic-large { width: 70px; height: 70px; border-radius: 35px; background: var(--accent-bg); color: var(--accent-color); font-size: 30px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; }
-        .profile-email { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 25px; }
+        /* Contenitore Foto Profilo Edificabile */
+        .profile-pic-container { position: relative; width: 80px; height: 70px; margin: 0 auto 10px auto; cursor: pointer; }
+        .profile-pic-large { width: 70px; height: 70px; border-radius: 35px; background: var(--accent-bg); color: var(--accent-color); font-size: 30px; display: flex; align-items: center; justify-content: center; margin: 0 auto; overflow: hidden; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .profile-pic-large img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-edit-badge { position: absolute; bottom: 0; right: 5px; width: 24px; height: 24px; border-radius: 12px; background: var(--accent-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        .form-input { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid #e0e0e0; background: #f8f9fa; font-size: 16px; font-weight: 700; color: var(--text-main); text-align: center; box-sizing: border-box; outline: none; margin-top: 10px; font-family: 'Roboto', sans-serif;}
+        .form-input:focus { border-color: var(--accent-color); background: white; }
+        .profile-email { font-size: 12px; color: var(--text-muted); margin: 8px 0 25px 0; font-weight: 500; }
+
+        .btn-action { width: 100%; background: var(--accent-color); color: white; border: none; padding: 16px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3); font-family: 'Roboto', sans-serif; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;}
         .btn-logout { width: 100%; background: #ffebe9; color: var(--error-color); border: none; padding: 16px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s;}
         .btn-logout:active { transform: scale(0.95); }
 
@@ -84,10 +96,10 @@
 
     <div class="header">
         <div class="greeting-box">
-            <h1 class="greeting">Casa</h1>
-            <p class="subtitle">Bentornato!</p>
+            <h1 class="greeting" id="greeting-text">Casa</h1>
+            <p class="subtitle">Gestione Climatizzatori</p>
         </div>
-        <div class="profile-btn" onclick="openProfile()"><i class="fas fa-user-circle"></i></div>
+        <div class="profile-btn" id="top-avatar-btn" onclick="openProfile()"><i class="fas fa-user-circle"></i></div>
     </div>
 
     <div class="summary-scroll">
@@ -95,7 +107,7 @@
             <div class="summary-icon"><i class="fas fa-home"></i></div>
             <div class="summary-text">
                 <h3>Smart Clima Cloud</h3>
-                <p>Seleziona una stanza per regolarne il comfort.</p>
+                <p>Tieni premuto e trascina una stanza per riordinarla.</p>
             </div>
         </div>
     </div>
@@ -109,8 +121,19 @@
     <div class="sheet-overlay" id="sheet-overlay" onclick="closeProfile()"></div>
     <div class="bottom-sheet" id="sheet-profile">
         <div class="sheet-handle"></div>
-        <div class="profile-pic-large"><i class="fas fa-user"></i></div>
+        
+        <div class="profile-pic-container" onclick="triggerPhotoSelect()">
+            <div class="profile-pic-large" id="sheet-avatar-view"><i class="fas fa-user"></i></div>
+            <div class="photo-edit-badge"><i class="fas fa-camera"></i></div>
+        </div>
+        <input type="file" id="photo-file-input" accept="image/*" style="display:none;" onchange="loadPhotoLocal(event)">
+        
+        <div style="padding: 0 10px;">
+            <input type="text" class="form-input" id="profile-name-input" placeholder="Inserisci il tuo Nome">
+        </div>
         <div class="profile-email" id="user-email-display">caricamento...</div>
+        
+        <button class="btn-action" id="btn-save-profile" onclick="saveProfileCloud()"><i class="fas fa-save"></i> Salva Profilo</button>
         <button class="btn-logout" onclick="esciApp()"><i class="fas fa-sign-out-alt"></i> Esci dall'App</button>
     </div>
 
@@ -132,70 +155,138 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        let currentUser = null;
+        let base64PhotoStr = "";
         window.stanzeState = {};
+        window.stanzeRawConfig = {}; // Contiene i dati puri di Firebase per salvare l'ordine
 
+        // 1. GESTIONE SESSIONE UTENTE E PROFILO PERSONALIZZATO
         onAuthStateChanged(auth, (user) => { 
-            if (!user) window.location.href = "login.html"; 
-            else document.getElementById('user-email-display').innerText = user.email;
+            if (!user) {
+                window.location.href = "login.html"; 
+            } else {
+                currentUser = user;
+                document.getElementById('user-email-display').innerText = user.email;
+                
+                // Ascolta i dati del profilo utente (Nome + Foto) in Realtime
+                onSnapshot(doc(db, "utenti", user.uid), (userSnap) => {
+                    if (userSnap.exists()) {
+                        const uData = userSnap.data();
+                        if (uData.nome) {
+                            document.getElementById('greeting-text').innerText = `Ciao, ${uData.nome}`;
+                            document.getElementById('profile-name-input').value = uData.nome;
+                        }
+                        if (uData.foto) {
+                            base64PhotoStr = uData.foto;
+                            const imgHtml = `<img src="${uData.foto}">`;
+                            document.getElementById('top-avatar-btn').innerHTML = imgHtml;
+                            document.getElementById('sheet-avatar-view').innerHTML = imgHtml;
+                        }
+                    } else {
+                        document.getElementById('greeting-text').innerText = "Casa";
+                    }
+                });
+            }
         });
 
+        // Azioni Profilo
         window.openProfile = function() { document.getElementById('sheet-overlay').classList.add('show'); document.getElementById('sheet-profile').classList.add('open'); }
         window.closeProfile = function() { document.getElementById('sheet-overlay').classList.remove('show'); document.getElementById('sheet-profile').classList.remove('open'); }
         window.esciApp = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); }
+        window.triggerPhotoSelect = function() { document.getElementById('photo-file-input').click(); }
+        
+        // Conversione Foto caricata in Base64 leggera
+        window.loadPhotoLocal = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Ottimizzazione client-side tramite canvas per non appesantire Firestore
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 120; const MAX_HEIGHT = 120;
+                    let width = img.width; let height = img.height;
+                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
+                    else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    base64PhotoStr = canvas.toDataURL('image/jpeg', 0.7); // Formato leggerissimo compressato
+                    document.getElementById('sheet-avatar-view').innerHTML = `<img src="${base64PhotoStr}">`;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Salvataggio Profilo su Firebase
+        window.saveProfileCloud = function() {
+            if(!currentUser) return;
+            const btn = document.getElementById('btn-save-profile');
+            btn.innerText = "Salvataggio Cloud...";
+            const nomeInput = document.getElementById('profile-name-input').value.trim();
+            
+            setDoc(doc(db, "utenti", currentUser.uid), { nome: nomeInput, foto: base64PhotoStr }, { merge: true })
+                .then(() => {
+                    btn.innerHTML = `<i class="fas fa-save"></i> Salva Profilo`;
+                    closeProfile();
+                });
+        }
+
         window.apriDettagli = function(stanzaId) { window.location.href = `dettaglio.html?stanza=${stanzaId}`; }
 
+        // --- 2. CONFIGURAZIONE INTERFACCIA STANZE E MQTT BROKER ---
         const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_home_" + Math.random().toString(16).substring(2, 10), clean: true });
 
         clientMQTT.on('connect', function () {
-            // Sottoscrizione stato Cameretta originale
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/sensor/segnale_wifi_cameretta/state");
-            
-            // Sottoscrizione per le altre stanze caricate in memoria
-            Object.keys(window.stanzeState).forEach(id => {
-                subscribeStanzaMQTT(id, window.stanzeState[id].topic);
-            });
+            Object.keys(window.stanzeState).forEach(id => subscribeStanzaMQTT(id, window.stanzeState[id].topic));
         });
 
         function subscribeStanzaMQTT(id, topic) {
             if (clientMQTT && clientMQTT.connected) {
                 clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/mode/state`);
                 clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/target_temperature/state`);
-                // Le stanze nuove si sottoscrivono al proprio stato autonomo
-                if (id !== 'cameretta') {
-                    clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${id}/status`);
-                }
+                if (id !== 'cameretta') clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${id}/status`);
             }
         }
 
+        // Lettura Struttura Stanze con Ordinamento Cloud
         const docRef = doc(db, "impostazioni", "stanze_config");
-        
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
-                const stanzeDb = docSnap.data();
+                window.stanzeRawConfig = docSnap.data();
                 const grid = document.getElementById('device-grid');
                 grid.innerHTML = '';
                 
-                for (const [id, config] of Object.entries(stanzeDb)) {
+                // Mappa in array e ordina in base al parametro .ordine
+                const sortedRooms = Object.entries(window.stanzeRawConfig).map(([id, data]) => ({ id, ...data }));
+                sortedRooms.forEach((r, idx) => { if(r.ordine === undefined) r.ordine = idx; });
+                sortedRooms.sort((a, b) => a.ordine - b.ordine);
+                
+                sortedRooms.forEach((room) => {
+                    const id = room.id;
                     if(!window.stanzeState[id]) {
-                        window.stanzeState[id] = { online: false, mode: "off", temp: 24, topic: config.topic, icon: config.icon, nome: config.nome };
-                        subscribeStanzaMQTT(id, config.topic);
+                        window.stanzeState[id] = { online: false, mode: "off", temp: 24, topic: room.topic, icon: room.icon, nome: room.nome };
+                        subscribeStanzaMQTT(id, room.topic);
                     } else {
-                        window.stanzeState[id].nome = config.nome;
-                        window.stanzeState[id].icon = config.icon;
-                        window.stanzeState[id].topic = config.topic;
+                        window.stanzeState[id].nome = room.nome;
+                        window.stanzeState[id].icon = room.icon;
+                        window.stanzeState[id].topic = room.topic;
                     }
 
                     const cardHTML = `
-                    <div class="smart-card" id="card-${id}" onclick="apriDettagli('${id}')">
+                    <div class="smart-card" id="card-${id}" data-id="${id}" draggable="true">
                         <div class="card-top">
-                            <div class="icon-box" id="icon-box-${id}"><i class="fas ${config.icon}" id="icon-${id}"></i></div>
+                            <div class="icon-box" id="icon-box-${id}"><i class="fas ${room.icon}" id="icon-${id}"></i></div>
                             <div class="power-toggle" id="btn-power-${id}" onclick="event.stopPropagation(); togglePowerHome('${id}')">
                                 <i class="fas fa-power-off"></i>
                             </div>
                         </div>
                         <div class="card-bottom">
-                            <h4 class="card-title">${config.nome}</h4>
+                            <h4 class="card-title">${room.nome}</h4>
                             <p class="card-status" id="status-text-${id}">Connessione...</p>
                             <div class="connection-status"><span class="status-dot" id="dot-${id}"></span><span id="badge-${id}">Offline</span></div>
                         </div>
@@ -204,23 +295,102 @@
                     grid.insertAdjacentHTML('beforeend', cardHTML);
                     window.aggiornaUIStanza(id);
                     window.updateRoomStatusDOM(id);
-                }
+                });
+                
+                initDragAndDropLogic(); // Attiva i gestori fisici del drag drop
             } else {
                 const defaultStanze = {
-                    cameretta: { nome: "Cameretta", icon: "fa-rocket", topic: "haier_tundra_cameretta" },
-                    soggiorno: { nome: "Soggiorno", icon: "fa-couch", topic: "haier_tundra_soggiorno" },
-                    cucina: { nome: "Cucina", icon: "fa-utensils", topic: "haier_tundra_cucina" },
-                    camera: { nome: "Camera da letto", icon: "fa-bed", topic: "haier_tundra_camera" }
+                    cameretta: { nome: "Cameretta", icon: "fa-rocket", topic: "haier_tundra_cameretta", ordine: 0 },
+                    soggiorno: { nome: "Soggiorno", icon: "fa-couch", topic: "haier_tundra_soggiorno", ordine: 1 },
+                    cucina: { nome: "Cucina", icon: "fa-utensils", topic: "haier_tundra_cucina", ordine: 2 },
+                    camera: { nome: "Camera da letto", icon: "fa-bed", topic: "haier_tundra_camera", ordine: 3 }
                 };
                 setDoc(docRef, defaultStanze);
             }
         });
 
+        // --- 3. MOTORE COMPLETO DRAG & DROP (DESKTOP + TOUCH SMARTPHONE) ---
+        function initDragAndDropLogic() {
+            const cards = document.querySelectorAll('.smart-card');
+            const grid = document.getElementById('device-grid');
+            
+            cards.forEach(card => {
+                // Eventi standard Desktop
+                card.addEventListener('dragstart', () => card.classList.add('dragging'));
+                card.addEventListener('dragend', () => {
+                    card.classList.remove('dragging');
+                    salvaNuovoOrdineCloud();
+                });
+
+                // Gestione Touch evoluta per Smartphone (Long Press + Drag)
+                let touchTimer;
+                card.addEventListener('touchstart', (e) => {
+                    touchTimer = setTimeout(() => {
+                        card.classList.add('dragging');
+                    }, 350); // Attiva dopo 350ms di pressione continua
+                });
+
+                card.addEventListener('touchmove', (e) => {
+                    if (!card.classList.contains('dragging')) { clearTimeout(touchTimer); return; }
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+                    const currentCardOver = targetEl ? targetEl.closest('.smart-card') : null;
+                    
+                    if (currentCardOver && currentCardOver !== card) {
+                        const allCards = [...grid.querySelectorAll('.smart-card:not(.dragging)')];
+                        const nextEl = allCards.find(c => {
+                            const box = c.getBoundingClientRect();
+                            return touch.clientY < box.top + box.height / 2 && touch.clientX < box.left + box.width / 2;
+                        });
+                        grid.insertBefore(card, nextEl);
+                    }
+                });
+
+                card.addEventListener('touchend', () => {
+                    clearTimeout(touchTimer);
+                    if (card.classList.contains('dragging')) {
+                        card.classList.remove('dragging');
+                        salvaNuovoOrdineCloud();
+                    }
+                });
+            });
+
+            // Gestore trascinamento standard Desktop
+            grid.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const draggingCard = grid.querySelector('.dragging');
+                const siblings = [...grid.querySelectorAll('.smart-card:not(.dragging)')];
+                let nextSibling = siblings.find(sibling => {
+                    const box = sibling.getBoundingClientRect();
+                    return e.clientY < box.top + box.height / 2 && e.clientX < box.left + box.width / 2;
+                });
+                grid.insertBefore(draggingCard, nextSibling);
+            });
+        }
+
+        // Funzione che compila la nuova sequenza e la spinge in Cloud su Firebase
+        function salvaNuovoOrdineCloud() {
+            const currentCards = [...document.querySelectorAll('.smart-card')];
+            let modificato = false;
+            
+            currentCards.forEach((card, index) => {
+                const id = card.getAttribute('data-id');
+                if (window.stanzeRawConfig[id] && window.stanzeRawConfig[id].ordine !== index) {
+                    window.stanzeRawConfig[id].ordine = index;
+                    modificato = true;
+                }
+            });
+
+            if (modificato) {
+                setDoc(docRef, window.stanzeRawConfig); // Spinge l'ordine globale su Firebase
+            }
+        }
+
+        // Sincronizzazione visiva parametri MQTT (Invariati)
         window.updateRoomStatusDOM = function(id) {
-            const s = window.stanzeState[id];
-            if (!s) return;
-            const badge = document.getElementById(`badge-${id}`);
-            const dot = document.getElementById(`dot-${id}`);
+            const s = window.stanzeState[id]; if (!s) return;
+            const badge = document.getElementById(`badge-${id}`); const dot = document.getElementById(`dot-${id}`);
             if(badge) badge.innerText = s.online ? "Online" : "Offline";
             if(dot) dot.className = s.online ? "status-dot online" : "status-dot";
             window.aggiornaUIStanza(id);
@@ -228,78 +398,40 @@
 
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();
-            
-            // Cameretta Stato Master
             if (topic === "vincenzo_clima_segreto_7788/status") {
-                if (window.stanzeState.cameretta) {
-                    window.stanzeState.cameretta.online = (payload === "online");
-                    window.updateRoomStatusDOM('cameretta');
-                }
+                if (window.stanzeState.cameretta) { window.stanzeState.cameretta.online = (payload === "online"); window.updateRoomStatusDOM('cameretta'); }
             }
-            
-            // Altre stanze (rispondono solo al proprio canale dedicato)
             Object.keys(window.stanzeState).forEach(id => {
-                if (topic === `vincenzo_clima_segreto_7788/${id}/status`) {
-                    window.stanzeState[id].online = (payload === "online");
-                    window.updateRoomStatusDOM(id);
-                }
-            });
-            
-            // Regolazione parametri
-            Object.keys(window.stanzeState).forEach(id => {
+                if (topic === `vincenzo_clima_segreto_7788/${id}/status`) { window.stanzeState[id].online = (payload === "online"); window.updateRoomStatusDOM(id); }
                 const top = window.stanzeState[id].topic;
                 if (topic.includes(`${top}/mode/state`)) { window.stanzeState[id].mode = payload; window.aggiornaUIStanza(id); }
                 if (topic.includes(`${top}/target_temperature/state`)) { const t = parseFloat(payload); if(!isNaN(t)) window.stanzeState[id].temp = t; window.aggiornaUIStanza(id); }
             });
-
-            // Segnale Wi-Fi Cameretta
-            if (topic.includes("/sensor/segnale_wifi_cameretta/state") && window.stanzeState.cameretta) {
-                const dbm = parseInt(payload); const wifiIcon = document.getElementById('wifi-icon-cameretta');
-                if (wifiIcon && window.stanzeState.cameretta.online) {
-                    if (dbm > -65) wifiIcon.style.color = 'var(--success-color)';
-                    else if (dbm > -80) wifiIcon.style.color = 'var(--warning-color)';
-                    else wifiIcon.style.color = 'var(--error-color)';
-                }
-            }
         });
 
         window.aggiornaUIStanza = function(id) {
-            const card = document.getElementById(`card-${id}`); 
-            if(!card) return; 
-            
-            const testo = document.getElementById(`status-text-${id}`);
-            const icona = document.getElementById(`icon-${id}`);
+            const card = document.getElementById(`card-${id}`); if(!card) return;
+            const testo = document.getElementById(`status-text-${id}`); const icona = document.getElementById(`icon-${id}`);
             const s = window.stanzeState[id];
-
             if (s.mode === "off") { 
-                card.classList.remove('is-on'); 
-                testo.innerText = "Spento";
-                icona.className = `fas ${s.icon}`;
+                card.classList.remove('is-on'); testo.innerText = "Spento"; icona.className = `fas ${s.icon}`;
             } else {
                 card.classList.add('is-on');
                 let modeIta = "Fresco"; let color = "#007aff"; let bg = "#e5f1ff"; let iconClass = "fas fa-snowflake";
-                
                 if(s.mode === "heat") { modeIta = "Caldo"; color = "#ff3b30"; bg = "#ffebe9"; iconClass = "fas fa-sun"; }
                 if(s.mode === "dry") { modeIta = "Deumid."; color = "#5ac8fa"; bg = "#eef9ff"; iconClass = "fas fa-tint"; }
                 if(s.mode === "fan_only") { modeIta = "Ventola"; color = "#8e8e93"; bg = "#f2f2f7"; iconClass = "fas fa-fan"; }
                 if(s.mode === "auto") { modeIta = "Auto"; color = "#34c759"; bg = "#ebf9ee"; iconClass = "fas fa-magic"; }
-                
-                card.style.setProperty('--accent-color', color);
-                card.style.setProperty('--accent-bg', bg);
-                icona.className = iconClass;
-                testo.innerText = `${modeIta} • ${s.temp}°C`;
+                card.style.setProperty('--accent-color', color); card.style.setProperty('--accent-bg', bg);
+                icona.className = iconClass; testo.innerText = `${modeIta} • ${s.temp}°C`;
             }
-
             const wifiIcon = document.getElementById(`wifi-icon-${id}`);
             if(wifiIcon) wifiIcon.style.color = s.online ? 'var(--success-color)' : '#d1d1d6';
         }
 
         window.togglePowerHome = function(id) {
-            const s = window.stanzeState[id];
-            if(!s) return;
-            if(!s.online) { alert("Il condizionatore è Offline!"); return; }
-            const nextMode = (s.mode === "off") ? "cool" : "off";
-            clientMQTT.publish(`vincenzo_clima_segreto_7788/climate/${s.topic}/mode/command`, nextMode);
+            const s = window.stanzeState[id]; if(!s) return; if(!s.online) { alert("Il condizionatore è Offline!"); return; }
+            clientMQTT.publish(`vincenzo_clima_segreto_7788/climate/${s.topic}/mode/command`, (s.mode === "off") ? "cool" : "off");
         };
     </script>
 </body>

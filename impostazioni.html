@@ -29,7 +29,6 @@
         .item-text h4 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main); }
         .item-text p { margin: 3px 0 0 0; font-size: 12px; color: var(--text-muted); }
         
-        /* PANNELLI A COMPARSA (BOTTOM SHEETS) */
         .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sheet-overlay.show { opacity: 1; pointer-events: all; }
         .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 20px 25px 40px 25px; box-sizing: border-box; max-height: 85vh; overflow-y: auto;}
@@ -44,12 +43,10 @@
         .form-input:focus { border-color: var(--accent-color); background: #fff;}
         .btn-action { width: 100%; background: var(--accent-color); color: white; border: none; padding: 16px; border-radius: 16px; font-size: 16px; font-weight: 700; margin-top: 10px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3); font-family: 'Roboto', sans-serif;}
         
-        /* Lista input per rinominare */
         .rename-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;}
         .rename-row { display: flex; align-items: center; gap: 10px;}
         .rename-icon { width: 40px; height: 40px; border-radius: 10px; background: #f0f5fa; color: var(--accent-color); display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
 
-        /* FLOATING NAV */
         .floating-nav { position: fixed; bottom: 25px; left: 24px; right: 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 12px 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.4); z-index: 100; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; text-decoration: none; padding: 8px 15px; border-radius: 20px; transition: 0.3s; }
         .nav-item i { font-size: 22px; }
@@ -71,8 +68,6 @@
     <div class="settings-section">
         <div class="settings-title">La tua Casa</div>
         <div class="settings-card">
-            
-            <!-- AGGIUNGI STANZA (+) -->
             <div class="settings-item" onclick="openSheet('sheet-add')">
                 <div class="item-left">
                     <div class="item-icon" style="background: #eafaf1; color: var(--success-color);"><i class="fas fa-plus"></i></div>
@@ -84,7 +79,6 @@
                 <div class="item-right"><i class="fas fa-chevron-right"></i></div>
             </div>
 
-            <!-- MODIFICA NOMI -->
             <div class="settings-item" onclick="openRenameSheet()">
                 <div class="item-left">
                     <div class="item-icon" style="background: var(--accent-bg); color: var(--accent-color);"><i class="fas fa-edit"></i></div>
@@ -95,78 +89,65 @@
                 </div>
                 <div class="item-right"><i class="fas fa-chevron-right"></i></div>
             </div>
-
         </div>
     </div>
 
-    <!-- PANNELLO: AGGIUNGI STANZA -->
     <div class="sheet-overlay" id="sheet-overlay" onclick="closeAllSheets()"></div>
-    
     <div class="bottom-sheet" id="sheet-add">
         <div class="sheet-handle"></div>
         <div class="sheet-title">Nuova Stanza</div>
         <div class="sheet-desc">Aggiungi un nuovo condizionatore alla tua casa. Verrà creato automaticamente in Cloud.</div>
-        
         <div class="form-group">
             <label class="form-label">Nome visualizzato (es. Studio)</label>
             <input type="text" class="form-input" id="new-name" placeholder="Es. Bagno Piccolo">
         </div>
-
         <div class="form-group">
             <label class="form-label">Scegli Icona</label>
             <select class="form-select" id="new-icon">
                 <option value="fa-couch">Divano (Soggiorno)</option>
                 <option value="fa-bed">Letto (Camera)</option>
                 <option value="fa-utensils">Posate (Cucina)</option>
-                <option value="fa-rocket">Razzo (Cameretta bimbi)</option>
+                <option value="fa-rocket">Razzo (Cameretta)</option>
                 <option value="fa-bath">Vasca (Bagno)</option>
                 <option value="fa-desktop">PC (Studio)</option>
-                <option value="fa-door-open">Porta (Ingresso)</option>
             </select>
         </div>
-
         <div class="form-group">
             <label class="form-label">Nome Interno Sistema (Topic MQTT)</label>
             <input type="text" class="form-input" id="new-topic" placeholder="es. haier_tundra_bagno">
-            <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">*Deve coincidere col nome scritto nel file Wemos (YAML).</p>
         </div>
-
         <button class="btn-action" id="btn-salva-nuova" onclick="creaNuovaStanza()">Crea Stanza</button>
     </div>
 
-    <!-- PANNELLO: RINOMINA STANZE -->
     <div class="bottom-sheet" id="sheet-rename">
         <div class="sheet-handle"></div>
         <div class="sheet-title">Modifica Nomi</div>
         <div class="sheet-desc">Cambia il nome delle stanze già presenti.</div>
-        
-        <div class="rename-list" id="rename-container">
-            <!-- Verrà riempito dal JS leggendo da Firebase -->
-        </div>
-
+        <div class="rename-list" id="rename-container">Caricamento in corso...</div>
         <button class="btn-action" id="btn-salva-nomi" onclick="salvaNomi()">Salva Modifiche</button>
     </div>
 
     <div class="toast" id="toast-success"><i class="fas fa-check-circle" style="margin-right: 6px;"></i> Fatto!</div>
 
-    <!-- NAV INFERIORE -->
     <div class="floating-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
         <a href="impostazioni.html" class="nav-item active"><i class="fas fa-cog"></i><span>Impostazioni</span></a>
     </div>
 
-    <!-- FIREBASE & LOGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
         
-        let databaseStanze = {}; // Salveremo qui il database letto
+        let databaseStanze = {};
         const docRef = doc(db, "impostazioni", "stanze_config");
+
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
 
         window.openSheet = function(id) {
             document.getElementById('sheet-overlay').classList.add('show');
@@ -183,24 +164,20 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // AGGIUNGI UNA NUOVA STANZA
         window.creaNuovaStanza = function() {
             const nome = document.getElementById('new-name').value.trim();
             const icon = document.getElementById('new-icon').value;
             const topic = document.getElementById('new-topic').value.trim().toLowerCase();
-            
-            if(!nome || !topic) { alert("Inserisci Nome e Topic MQTT!"); return; }
+            if(!nome || !topic) { alert("Compila tutti i campi!"); return; }
             
             const btn = document.getElementById('btn-salva-nuova');
-            btn.innerText = "Salvataggio...";
-
-            // Generiamo un ID univoco pulito per l'HTML (senza spazi)
+            btn.innerText = "Salvataggio Cloud...";
             const id = nome.toLowerCase().replace(/[^a-z0-9]/g, '');
 
             getDoc(docRef).then((docSnap) => {
                 let dbData = docSnap.exists() ? docSnap.data() : {};
-                dbData[id] = { nome: nome, icon: icon, topic: topic };
-                
+                const currentCount = Object.keys(dbData).length;
+                dbData[id] = { nome: nome, icon: icon, topic: topic, ordine: currentCount };
                 setDoc(docRef, dbData).then(() => {
                     btn.innerText = "Crea Stanza";
                     document.getElementById('new-name').value = '';
@@ -210,47 +187,50 @@
             });
         }
 
-        // RINOMINA STANZE (Popola la lista)
+        // RISOLTO: Caricamento sincrono perfetto della lista nomi
         window.openRenameSheet = function() {
             const container = document.getElementById('rename-container');
-            container.innerHTML = 'Caricamento...';
-            openSheet('sheet-rename');
+            container.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Connessione Cloud...</div>';
+            window.openSheet('sheet-rename');
 
             getDoc(docRef).then((docSnap) => {
                 if(docSnap.exists()) {
                     databaseStanze = docSnap.data();
                     container.innerHTML = '';
                     
+                    // Ordina la lista per rendere la rinomina coerente visivamente
+                    const sortedRooms = Object.entries(databaseStanze).map(([id, d]) => ({ id, ...data }));
+                    sortedRooms.sort((a,b) => (a.ordine || 0) - (b.ordine || 0));
+
                     for (const [id, config] of Object.entries(databaseStanze)) {
                         const row = `
                         <div class="rename-row">
                             <div class="rename-icon"><i class="fas ${config.icon}"></i></div>
-                            <input type="text" class="form-input rename-input" data-id="${id}" value="${config.nome}">
+                            <input type="text" class="form-input rename-input" data-id="${id}" value="${config.nome}" style="margin-top:0;">
                         </div>`;
                         container.insertAdjacentHTML('beforeend', row);
                     }
                 } else {
                     container.innerHTML = 'Nessuna stanza trovata.';
                 }
+            }).catch(() => {
+                container.innerHTML = 'Errore nel caricamento. Riprova.';
             });
         }
 
-        // SALVA LE MODIFICHE AI NOMI
         window.salvaNomi = function() {
             const btn = document.getElementById('btn-salva-nomi');
-            btn.innerText = "Salvataggio...";
-            
-            // Legge tutti gli input modificati
+            btn.innerText = "Salvataggio Cloud...";
             const inputs = document.querySelectorAll('.rename-input');
+            
             inputs.forEach(input => {
                 const id = input.getAttribute('data-id');
                 const nuovoNome = input.value.trim();
                 if(nuovoNome && databaseStanze[id]) {
-                    databaseStanze[id].nome = nuovoNome; // Aggiorna l'oggetto in memoria
+                    databaseStanze[id].nome = nuovoNome;
                 }
             });
 
-            // Sovrascrive il Cloud con i nuovi nomi
             setDoc(docRef, databaseStanze).then(() => {
                 btn.innerText = "Salva Modifiche";
                 mostraToast();
