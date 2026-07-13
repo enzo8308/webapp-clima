@@ -9,13 +9,14 @@
     
     <style>
         :root { 
-            --bg-color: #f0f5fa; /* Stesso azzurrino chiaro della pagina dettagli */
+            --bg-color: #f0f5fa; 
             --card-bg: #ffffff; 
             --text-main: #1c1c1e; 
             --text-muted: #8e8e93; 
             --accent-color: #007aff; 
             --accent-bg: #e5f1ff;
             --success-color: #34c759; 
+            --warning-color: #ff9500;
             --error-color: #ff3b30;
         }
         
@@ -29,7 +30,7 @@
         
         .profile-btn { width: 44px; height: 44px; border-radius: 22px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--accent-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; }
 
-        /* WIDGET SOMMARIO (HomeKit Style) */
+        /* WIDGET SOMMARIO */
         .summary-scroll { padding: 0 24px; margin-bottom: 25px; }
         .summary-widget { background: linear-gradient(135deg, #007aff, #0056b3); border-radius: 24px; padding: 20px; color: white; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 20px rgba(0, 122, 255, 0.2); }
         .summary-icon { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 20px; }
@@ -49,10 +50,8 @@
         
         .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
         
-        /* Icona con sfondo che cambia colore */
         .icon-box { width: 44px; height: 44px; border-radius: 22px; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.4s; }
         
-        /* Tasto Power Integrato */
         .power-toggle { width: 34px; height: 34px; border-radius: 17px; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.3s; z-index: 10; }
         .power-toggle:active { transform: scale(0.9); }
         
@@ -60,20 +59,20 @@
         .card-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin: 0; letter-spacing: -0.3px;}
         .card-status { font-size: 12px; font-weight: 600; color: var(--text-muted); margin: 0; transition: 0.3s;}
         
-        /* Connessione (Pallino stile Apple) */
         .connection-status { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-top: 8px; color: var(--text-muted);}
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--error-color); }
         .status-dot.online { background: var(--success-color); box-shadow: 0 0 6px rgba(52, 199, 89, 0.5); }
         
-        /* --- STILI DINAMICI CARD ACCESA --- */
+        /* Indicatore Wi-Fi in basso a destra */
+        .wifi-indicator { position: absolute; bottom: 18px; right: 18px; font-size: 13px; color: #d1d1d6; transition: color 0.3s; }
+
+        /* STILI DINAMICI CARD ACCESA */
         .smart-card.is-on .icon-box { background: var(--accent-bg); color: var(--accent-color); }
         .smart-card.is-on .power-toggle { background: var(--accent-color); color: white; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3); }
         .smart-card.is-on .card-status { color: var(--accent-color); }
 
-
-        /* BOTTOM NAV FLOATING (Effetto Vetro) */
+        /* BOTTOM NAV FLOATING */
         .floating-nav { position: fixed; bottom: 25px; left: 24px; right: 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 12px 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.4); z-index: 1000; }
-        
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; text-decoration: none; padding: 8px 15px; border-radius: 20px; transition: 0.3s; }
         .nav-item i { font-size: 22px; }
         .nav-item.active { color: var(--accent-color); background: var(--accent-bg); }
@@ -82,7 +81,6 @@
 </head>
 <body>
 
-    <!-- HEADER -->
     <div class="header">
         <div class="greeting-box">
             <h1 class="greeting">Casa</h1>
@@ -91,7 +89,6 @@
         <div class="profile-btn"><i class="fas fa-user-circle"></i></div>
     </div>
 
-    <!-- WIDGET SOMMARIO -->
     <div class="summary-scroll">
         <div class="summary-widget">
             <div class="summary-icon"><i class="fas fa-home"></i></div>
@@ -107,13 +104,12 @@
         <i class="fas fa-plus-circle add-btn"></i>
     </div>
 
-    <!-- GRIGLIA DISPOSITIVI -->
     <div class="device-grid">
         
-        <!-- CARD CAMERETTA (Attiva) -->
+        <!-- CARD CAMERETTA -->
         <div class="smart-card" id="card-cameretta" onclick="apriDettagli('cameretta')">
             <div class="card-top">
-                <div class="icon-box" id="icon-box-cameretta"><i class="fas fa-snowflake" id="icon-cameretta"></i></div>
+                <div class="icon-box" id="icon-box-cameretta"><i class="fas fa-rocket" id="icon-cameretta"></i></div>
                 <div class="power-toggle" id="btn-power-cameretta" onclick="event.stopPropagation(); togglePowerHome()">
                     <i class="fas fa-power-off"></i>
                 </div>
@@ -126,9 +122,10 @@
                     <span id="badge-cameretta">Offline</span>
                 </div>
             </div>
+            <div class="wifi-indicator"><i class="fas fa-wifi" id="wifi-icon-cameretta"></i></div>
         </div>
 
-        <!-- CARD SOGGIORNO (Fittizia per ora) -->
+        <!-- CARD SOGGIORNO -->
         <div class="smart-card" style="opacity: 0.6;">
             <div class="card-top">
                 <div class="icon-box"><i class="fas fa-couch"></i></div>
@@ -139,9 +136,10 @@
                 <p class="card-status">Da configurare</p>
                 <div class="connection-status"><span class="status-dot"></span><span>Offline</span></div>
             </div>
+            <div class="wifi-indicator"><i class="fas fa-wifi"></i></div>
         </div>
 
-        <!-- CARD CUCINA (Fittizia per ora) -->
+        <!-- CARD CUCINA -->
         <div class="smart-card" style="opacity: 0.6;">
             <div class="card-top">
                 <div class="icon-box"><i class="fas fa-utensils"></i></div>
@@ -152,32 +150,34 @@
                 <p class="card-status">Da configurare</p>
                 <div class="connection-status"><span class="status-dot"></span><span>Offline</span></div>
             </div>
+            <div class="wifi-indicator"><i class="fas fa-wifi"></i></div>
         </div>
 
-        <!-- CARD CAMERA LETTO (Fittizia per ora) -->
+        <!-- CARD CAMERA DA LETTO -->
         <div class="smart-card" style="opacity: 0.6;">
             <div class="card-top">
                 <div class="icon-box"><i class="fas fa-bed"></i></div>
                 <div class="power-toggle"><i class="fas fa-power-off"></i></div>
             </div>
             <div class="card-bottom">
-                <h4 class="card-title">Camera</h4>
+                <h4 class="card-title">Camera da letto</h4>
                 <p class="card-status">Da configurare</p>
                 <div class="connection-status"><span class="status-dot"></span><span>Offline</span></div>
             </div>
+            <div class="wifi-indicator"><i class="fas fa-wifi"></i></div>
         </div>
 
     </div>
 
-    <!-- FLOATING BOTTOM NAV (Effetto Vetro) -->
+    <!-- FLOATING BOTTOM NAV -->
     <div class="floating-nav">
-        <a href="#" class="nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="#" class="nav-item"><i class="fas fa-chart-line"></i><span>Statistiche</span></a>
+        <a href="index.html" class="nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
+        <!-- Nuova Tab Statistiche -->
+        <a href="statistiche.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Statistiche</span></a>
         <a href="#" class="nav-item"><i class="fas fa-cog"></i><span>Impostazioni</span></a>
         <a href="#" class="nav-item" onclick="esci()"><i class="fas fa-sign-out-alt"></i><span>Esci</span></a>
     </div>
 
-    <!-- Firebase Auth per l'accesso protetto -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -188,12 +188,10 @@
         window.esci = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); };
     </script>
 
-    <!-- LOGICA MQTT E AGGIORNAMENTO GRAFICA HOME -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
     <script>
         function apriDettagli(stanza) {
-            // Predisposizione per il Multi-Stanza (Passerà il nome nell'URL)
-            if(stanza !== 'cameretta') alert("Questo condizionatore non è ancora stato collegato.");
+            if(stanza !== 'cameretta') alert("Questo condizionatore non è ancora configurato.");
             else window.location.href = `dettaglio.html?stanza=${stanza}`;
         }
 
@@ -205,12 +203,13 @@
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
             clientMQTT.subscribe(baseTopic + "/mode/state");
             clientMQTT.subscribe(baseTopic + "/target_temperature/state");
+            // Sottoscrizione al segnale Wi-Fi della Cameretta
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/sensor/segnale_wifi_cameretta/state");
         });
 
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();
             
-            // STATO ONLINE/OFFLINE
             if (topic.includes("/status")) {
                 const badge = document.getElementById('badge-cameretta');
                 const dot = document.getElementById('dot-cameretta');
@@ -226,20 +225,21 @@
                     dot.className = "status-dot";
                     document.getElementById('global-status-title').innerText = "Dispositivo Offline";
                     document.getElementById('global-status-desc').innerText = "Verifica la connessione in Cameretta.";
+                    // Wi-Fi spento (grigio) se offline
+                    document.getElementById('wifi-icon-cameretta').style.color = "#d1d1d6";
                 }
             }
             
-            // MODALITÀ
-            if (topic.includes("/mode/state")) { 
-                statoAttuale.mode = payload; 
-                aggiornaInterfaccia(); 
-            }
+            if (topic.includes("/mode/state")) { statoAttuale.mode = payload; aggiornaInterfaccia(); }
+            if (topic.includes("/target_temperature/state")) { const t = parseFloat(payload); if(!isNaN(t)) statoAttuale.temp = t; aggiornaInterfaccia(); }
             
-            // TEMPERATURA
-            if (topic.includes("/target_temperature/state")) { 
-                const t = parseFloat(payload); 
-                if(!isNaN(t)) statoAttuale.temp = t; 
-                aggiornaInterfaccia(); 
+            // LETTURA SEGNALE WI-FI
+            if (topic.includes("/segnale_wifi_cameretta/state") && statoAttuale.online) {
+                const dbm = parseInt(payload);
+                const wifiIcon = document.getElementById('wifi-icon-cameretta');
+                if (dbm > -65) { wifiIcon.style.color = 'var(--success-color)'; }      // Forte (Verde)
+                else if (dbm > -80) { wifiIcon.style.color = 'var(--warning-color)'; } // Medio (Arancio)
+                else { wifiIcon.style.color = 'var(--error-color)'; }                  // Debole (Rosso)
             }
         });
 
@@ -248,11 +248,11 @@
             const testo = document.getElementById('status-text-cameretta');
             const icona = document.getElementById('icon-cameretta');
             
-            // Resetta colori variabili css per la singola card
             if (statoAttuale.mode === "off") { 
                 card.classList.remove('is-on'); 
                 testo.innerText = "Spento";
-                icona.className = "fas fa-power-off";
+                // Quando è spento, mostra l'icona della stanza (il Razzo)
+                icona.className = "fas fa-rocket";
             }
             else {
                 card.classList.add('is-on');
@@ -264,16 +264,15 @@
                 if(statoAttuale.mode === "fan_only") { modeIta = "Ventola"; color = "#8e8e93"; bg = "#f2f2f7"; iconClass = "fas fa-fan"; }
                 if(statoAttuale.mode === "auto") { modeIta = "Auto"; color = "#34c759"; bg = "#ebf9ee"; iconClass = "fas fa-magic"; }
                 
-                // Applica colori dinamici alla scheda tramite CSS variables
                 card.style.setProperty('--accent-color', color);
                 card.style.setProperty('--accent-bg', bg);
                 
+                // Quando è acceso, mostra l'icona della modalità (es. Fiocco di neve)
                 icona.className = iconClass;
                 testo.innerText = `${modeIta} • ${statoAttuale.temp}°C`;
             }
         }
 
-        // Accensione / Spegnimento rapido dalla Home
         window.togglePowerHome = function() {
             if(!statoAttuale.online) { alert("Il condizionatore è Offline!"); return; }
             clientMQTT.publish(baseTopic + "/mode/command", (statoAttuale.mode === "off") ? "cool" : "off");
