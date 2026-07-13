@@ -40,10 +40,11 @@
         .section-header { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 24px; margin-bottom: 15px; }
         .section-title { font-size: 18px; font-weight: 700; margin: 0; }
 
-        /* GRIGLIA STANZE PRONTA AL DRAG & DROP */
+        /* GRIGLIA STANZE */
         .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 24px; position: relative; }
         
-        .smart-card { background-color: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1.15; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 1px solid rgba(0,0,0,0.02); cursor: grab; touch-action: none; }
+        .smart-card { background-color: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1.15; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 1px solid rgba(0,0,0,0.02); cursor: pointer; touch-action: none; }
+        .smart-card:active:not(.dragging) { transform: scale(0.95); }
         .smart-card.dragging { opacity: 0.5; transform: scale(1.05); box-shadow: 0 15px 30px rgba(0,0,0,0.1); cursor: grabbing; z-index: 999; }
         
         .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
@@ -64,14 +65,13 @@
         .smart-card.is-on .power-toggle { background: var(--accent-color); color: white; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3); }
         .smart-card.is-on .card-status { color: var(--accent-color); }
 
-        /* PANNELLO PROFILO AVANZATO (BOTTOM SHEET) */
+        /* PANNELLO PROFILO AVANZATO */
         .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sheet-overlay.show { opacity: 1; pointer-events: all; }
         .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 25px 25px 40px 25px; box-sizing: border-box; text-align: center;}
         .bottom-sheet.open { bottom: 0; }
         .sheet-handle { width: 40px; height: 5px; background: #e0e0e0; border-radius: 5px; margin: 0 auto 20px auto; }
         
-        /* Contenitore Foto Profilo Edificabile */
         .profile-pic-container { position: relative; width: 80px; height: 70px; margin: 0 auto 10px auto; cursor: pointer; }
         .profile-pic-large { width: 70px; height: 70px; border-radius: 35px; background: var(--accent-bg); color: var(--accent-color); font-size: 30px; display: flex; align-items: center; justify-content: center; margin: 0 auto; overflow: hidden; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .profile-pic-large img { width: 100%; height: 100%; object-fit: cover; }
@@ -107,7 +107,7 @@
             <div class="summary-icon"><i class="fas fa-home"></i></div>
             <div class="summary-text">
                 <h3>Smart Clima Cloud</h3>
-                <p>Tieni premuto e trascina una stanza per riordinarla.</p>
+                <p>Tocca per aprire. Tieni premuto per riordinare.</p>
             </div>
         </div>
     </div>
@@ -118,6 +118,7 @@
 
     <div class="device-grid" id="device-grid"></div>
 
+    <!-- PANNELLO PROFILO -->
     <div class="sheet-overlay" id="sheet-overlay" onclick="closeProfile()"></div>
     <div class="bottom-sheet" id="sheet-profile">
         <div class="sheet-handle"></div>
@@ -158,9 +159,9 @@
         let currentUser = null;
         let base64PhotoStr = "";
         window.stanzeState = {};
-        window.stanzeRawConfig = {}; // Contiene i dati puri di Firebase per salvare l'ordine
+        window.stanzeRawConfig = {};
+        window.isDragging = false; // Flag vitale per distinguere Click e Drag
 
-        // 1. GESTIONE SESSIONE UTENTE E PROFILO PERSONALIZZATO
         onAuthStateChanged(auth, (user) => { 
             if (!user) {
                 window.location.href = "login.html"; 
@@ -168,7 +169,6 @@
                 currentUser = user;
                 document.getElementById('user-email-display').innerText = user.email;
                 
-                // Ascolta i dati del profilo utente (Nome + Foto) in Realtime
                 onSnapshot(doc(db, "utenti", user.uid), (userSnap) => {
                     if (userSnap.exists()) {
                         const uData = userSnap.data();
@@ -189,19 +189,16 @@
             }
         });
 
-        // Azioni Profilo
         window.openProfile = function() { document.getElementById('sheet-overlay').classList.add('show'); document.getElementById('sheet-profile').classList.add('open'); }
         window.closeProfile = function() { document.getElementById('sheet-overlay').classList.remove('show'); document.getElementById('sheet-profile').classList.remove('open'); }
         window.esciApp = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); }
         window.triggerPhotoSelect = function() { document.getElementById('photo-file-input').click(); }
         
-        // Conversione Foto caricata in Base64 leggera
         window.loadPhotoLocal = function(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
-                // Ottimizzazione client-side tramite canvas per non appesantire Firestore
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
@@ -212,7 +209,7 @@
                     canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    base64PhotoStr = canvas.toDataURL('image/jpeg', 0.7); // Formato leggerissimo compressato
+                    base64PhotoStr = canvas.toDataURL('image/jpeg', 0.7); 
                     document.getElementById('sheet-avatar-view').innerHTML = `<img src="${base64PhotoStr}">`;
                 };
                 img.src = e.target.result;
@@ -220,7 +217,6 @@
             reader.readAsDataURL(file);
         }
 
-        // Salvataggio Profilo su Firebase
         window.saveProfileCloud = function() {
             if(!currentUser) return;
             const btn = document.getElementById('btn-save-profile');
@@ -234,9 +230,13 @@
                 });
         }
 
-        window.apriDettagli = function(stanzaId) { window.location.href = `dettaglio.html?stanza=${stanzaId}`; }
+        // --- FUNZIONE CLICK INTELLIGENTE ---
+        window.apriDettagli = function(stanzaId) {
+            // Se la variabile "isDragging" è vera, blocchiamo il click perché l'utente stava trascinando!
+            if (window.isDragging) return;
+            window.location.href = `dettaglio.html?stanza=${stanzaId}`;
+        }
 
-        // --- 2. CONFIGURAZIONE INTERFACCIA STANZE E MQTT BROKER ---
         const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_home_" + Math.random().toString(16).substring(2, 10), clean: true });
 
         clientMQTT.on('connect', function () {
@@ -253,7 +253,6 @@
             }
         }
 
-        // Lettura Struttura Stanze con Ordinamento Cloud
         const docRef = doc(db, "impostazioni", "stanze_config");
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
@@ -261,7 +260,6 @@
                 const grid = document.getElementById('device-grid');
                 grid.innerHTML = '';
                 
-                // Mappa in array e ordina in base al parametro .ordine
                 const sortedRooms = Object.entries(window.stanzeRawConfig).map(([id, data]) => ({ id, ...data }));
                 sortedRooms.forEach((r, idx) => { if(r.ordine === undefined) r.ordine = idx; });
                 sortedRooms.sort((a, b) => a.ordine - b.ordine);
@@ -277,8 +275,9 @@
                         window.stanzeState[id].topic = room.topic;
                     }
 
+                    // QUI È TORNATO L'ONCLICK RISOLUTIVO: onclick="apriDettagli('${id}')"
                     const cardHTML = `
-                    <div class="smart-card" id="card-${id}" data-id="${id}" draggable="true">
+                    <div class="smart-card" id="card-${id}" data-id="${id}" draggable="true" onclick="apriDettagli('${id}')">
                         <div class="card-top">
                             <div class="icon-box" id="icon-box-${id}"><i class="fas ${room.icon}" id="icon-${id}"></i></div>
                             <div class="power-toggle" id="btn-power-${id}" onclick="event.stopPropagation(); togglePowerHome('${id}')">
@@ -297,7 +296,7 @@
                     window.updateRoomStatusDOM(id);
                 });
                 
-                initDragAndDropLogic(); // Attiva i gestori fisici del drag drop
+                initDragAndDropLogic(); 
             } else {
                 const defaultStanze = {
                     cameretta: { nome: "Cameretta", icon: "fa-rocket", topic: "haier_tundra_cameretta", ordine: 0 },
@@ -309,25 +308,27 @@
             }
         });
 
-        // --- 3. MOTORE COMPLETO DRAG & DROP (DESKTOP + TOUCH SMARTPHONE) ---
+        // --- MOTORE DRAG & DROP PROTETTO ---
         function initDragAndDropLogic() {
             const cards = document.querySelectorAll('.smart-card');
             const grid = document.getElementById('device-grid');
             
             cards.forEach(card => {
-                // Eventi standard Desktop
-                card.addEventListener('dragstart', () => card.classList.add('dragging'));
+                // Desktop
+                card.addEventListener('dragstart', () => { window.isDragging = true; card.classList.add('dragging'); });
                 card.addEventListener('dragend', () => {
                     card.classList.remove('dragging');
                     salvaNuovoOrdineCloud();
+                    setTimeout(() => window.isDragging = false, 100); // Disabilita il blocco clic dopo 100ms
                 });
 
-                // Gestione Touch evoluta per Smartphone (Long Press + Drag)
+                // Smartphone Touch
                 let touchTimer;
                 card.addEventListener('touchstart', (e) => {
                     touchTimer = setTimeout(() => {
+                        window.isDragging = true; // Inizia il trascinamento reale
                         card.classList.add('dragging');
-                    }, 350); // Attiva dopo 350ms di pressione continua
+                    }, 350); 
                 });
 
                 card.addEventListener('touchmove', (e) => {
@@ -352,11 +353,11 @@
                     if (card.classList.contains('dragging')) {
                         card.classList.remove('dragging');
                         salvaNuovoOrdineCloud();
+                        setTimeout(() => window.isDragging = false, 100);
                     }
                 });
             });
 
-            // Gestore trascinamento standard Desktop
             grid.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 const draggingCard = grid.querySelector('.dragging');
@@ -369,7 +370,6 @@
             });
         }
 
-        // Funzione che compila la nuova sequenza e la spinge in Cloud su Firebase
         function salvaNuovoOrdineCloud() {
             const currentCards = [...document.querySelectorAll('.smart-card')];
             let modificato = false;
@@ -382,12 +382,9 @@
                 }
             });
 
-            if (modificato) {
-                setDoc(docRef, window.stanzeRawConfig); // Spinge l'ordine globale su Firebase
-            }
+            if (modificato) setDoc(docRef, window.stanzeRawConfig);
         }
 
-        // Sincronizzazione visiva parametri MQTT (Invariati)
         window.updateRoomStatusDOM = function(id) {
             const s = window.stanzeState[id]; if (!s) return;
             const badge = document.getElementById(`badge-${id}`); const dot = document.getElementById(`dot-${id}`);
