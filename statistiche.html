@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Statistiche - Smart Home Clima</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Libreria Chart.js per i grafici -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root { 
+            --bg-color: #f0f5fa; 
+            --card-bg: #ffffff; 
+            --text-main: #1c1c1e; 
+            --text-muted: #8e8e93; 
+            --accent-color: #007aff; 
+            --accent-bg: #e5f1ff;
+        }
+        
+        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 110px; overflow-x: hidden; }
+        
+        .header { display: flex; justify-content: space-between; align-items: flex-start; padding: 30px 24px 20px 24px; }
+        .greeting-box { display: flex; flex-direction: column; gap: 4px; }
+        .greeting { font-size: 28px; font-weight: 900; letter-spacing: -0.5px; margin: 0; }
+        .subtitle { font-size: 14px; font-weight: 500; color: var(--text-muted); margin: 0; }
+
+        /* KPI Cards in alto */
+        .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 24px; margin-bottom: 25px; }
+        .kpi-card { background: var(--card-bg); border-radius: 20px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(0,0,0,0.02);}
+        .kpi-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .kpi-value { font-size: 24px; font-weight: 900; color: var(--text-main); margin: 0; }
+        .kpi-value span { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+        .kpi-trend { font-size: 11px; font-weight: 700; color: #34c759; display: flex; align-items: center; gap: 4px; }
+
+        /* Contenitori Grafici */
+        .chart-section { padding: 0 24px; margin-bottom: 25px; }
+        .chart-card { background: var(--card-bg); border-radius: 24px; padding: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02);}
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .chart-title { font-size: 16px; font-weight: 700; margin: 0; }
+        
+        .chart-container { position: relative; height: 200px; width: 100%; }
+        .chart-container-doughnut { position: relative; height: 220px; width: 100%; display: flex; justify-content: center;}
+
+        /* Fasce Orarie Legenda */
+        .legend-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .legend-item { display: flex; flex-direction: column; align-items: center; text-align: center; background: #f8f9fa; padding: 10px; border-radius: 12px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 50%; margin-bottom: 5px; }
+        .legend-label { font-size: 11px; font-weight: 700; color: var(--text-main); }
+        .legend-time { font-size: 9px; color: var(--text-muted); }
+
+        /* BOTTOM NAV FLOATING (Come la Home) */
+        .floating-nav { position: fixed; bottom: 25px; left: 24px; right: 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 12px 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.4); z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; text-decoration: none; padding: 8px 15px; border-radius: 20px; transition: 0.3s; }
+        .nav-item i { font-size: 22px; }
+        .nav-item.active { color: var(--accent-color); background: var(--accent-bg); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="greeting-box">
+            <h1 class="greeting">Statistiche</h1>
+            <p class="subtitle">Consumi e Fasce Orarie (Dati Simulati)</p>
+        </div>
+    </div>
+
+    <!-- Indicatori Rapidi (KPI) -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-title">Oggi</div>
+            <div class="kpi-value">2.4 <span>kWh</span></div>
+            <div class="kpi-trend"><i class="fas fa-arrow-down"></i> 12% rispetto a ieri</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Fascia Attuale</div>
+            <div class="kpi-value" style="color: #ff9500;">F2</div>
+            <div class="kpi-trend" style="color: var(--text-muted);"><i class="fas fa-clock"></i> Fino alle 19:00</div>
+        </div>
+    </div>
+
+    <!-- Grafico 1: Consumo Settimanale a Barre -->
+    <div class="chart-section">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h2 class="chart-title">Consumo Settimanale</h2>
+                <i class="fas fa-bolt" style="color: var(--warning-color);"></i>
+            </div>
+            <div class="chart-container">
+                <canvas id="weeklyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grafico 2: Ripartizione Fasce Orarie ad Anello -->
+    <div class="chart-section">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h2 class="chart-title">Ripartizione Costi</h2>
+                <i class="fas fa-euro-sign" style="color: var(--success-color);"></i>
+            </div>
+            <div class="chart-container-doughnut">
+                <canvas id="fasceChart"></canvas>
+            </div>
+            
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff3b30;"></div>
+                    <div class="legend-label">F1 (Punta)</div>
+                    <div class="legend-time">Lun-Ven 8-19</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff9500;"></div>
+                    <div class="legend-label">F2 (Interm.)</div>
+                    <div class="legend-time">Mattino/Sera</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #34c759;"></div>
+                    <div class="legend-label">F3 (Notte)</div>
+                    <div class="legend-time">Notte e Festivi</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING BOTTOM NAV -->
+    <div class="floating-nav">
+        <!-- Ritorno alla Home -->
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <!-- Statistiche Attivo -->
+        <a href="statistiche.html" class="nav-item active"><i class="fas fa-chart-line"></i><span>Statistiche</span></a>
+        <a href="#" class="nav-item"><i class="fas fa-cog"></i><span>Impostazioni</span></a>
+        <a href="#" class="nav-item" onclick="esci()"><i class="fas fa-sign-out-alt"></i><span>Esci</span></a>
+    </div>
+
+    <!-- Firebase Auth Protection -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
+        window.esci = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); };
+    </script>
+
+    <!-- Renderizzazione Grafici con Chart.js -->
+    <script>
+        // Grafico a Barre (Consumi Giornalieri)
+        const ctxBar = document.getElementById('weeklyChart').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'],
+                datasets: [{
+                    label: 'Consumo (kWh)',
+                    data: [1.2, 2.5, 3.8, 2.1, 4.0, 5.5, 3.2],
+                    backgroundColor: '#007aff',
+                    borderRadius: 8, // Rende le barre arrotondate!
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false } // Nasconde la legenda default
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false } },
+                    x: { grid: { display: false }, border: { display: false } }
+                }
+            }
+        });
+
+        // Grafico ad Anello (Fasce Orarie)
+        const ctxDoughnut = document.getElementById('fasceChart').getContext('2d');
+        new Chart(ctxDoughnut, {
+            type: 'doughnut',
+            data: {
+                labels: ['F1 (Punta)', 'F2 (Intermedia)', 'F3 (Notturna)'],
+                datasets: [{
+                    data: [35, 20, 45], // Percentuali di consumo simulato
+                    backgroundColor: [
+                        '#ff3b30', // Rosso per F1 (Più costosa)
+                        '#ff9500', // Arancio per F2
+                        '#34c759'  // Verde per F3 (Più economica)
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%', // Rende l'anello molto sottile ed elegante
+                plugins: {
+                    legend: { display: false } // Usiamo la nostra legenda HTML custom sotto
+                }
+            }
+        });
+    </script>
+</body>
+</html>
