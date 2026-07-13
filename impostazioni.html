@@ -79,6 +79,7 @@
                 <div class="item-right"><i class="fas fa-chevron-right"></i></div>
             </div>
 
+            <!-- MODIFICA NOMI -->
             <div class="settings-item" onclick="openRenameSheet()">
                 <div class="item-left">
                     <div class="item-icon" style="background: var(--accent-bg); color: var(--accent-color);"><i class="fas fa-edit"></i></div>
@@ -92,6 +93,7 @@
         </div>
     </div>
 
+    <!-- PANNELLO: AGGIUNGI STANZA -->
     <div class="sheet-overlay" id="sheet-overlay" onclick="closeAllSheets()"></div>
     <div class="bottom-sheet" id="sheet-add">
         <div class="sheet-handle"></div>
@@ -119,6 +121,7 @@
         <button class="btn-action" id="btn-salva-nuova" onclick="creaNuovaStanza()">Crea Stanza</button>
     </div>
 
+    <!-- PANNELLO: RINOMINA STANZE -->
     <div class="bottom-sheet" id="sheet-rename">
         <div class="sheet-handle"></div>
         <div class="sheet-title">Modifica Nomi</div>
@@ -187,7 +190,7 @@
             });
         }
 
-        // RISOLTO: Caricamento sincrono perfetto della lista nomi
+        // --- RISOLTO IL BUG DEL CARICAMENTO NOMI ---
         window.openRenameSheet = function() {
             const container = document.getElementById('rename-container');
             container.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Connessione Cloud...</div>';
@@ -198,18 +201,18 @@
                     databaseStanze = docSnap.data();
                     container.innerHTML = '';
                     
-                    // Ordina la lista per rendere la rinomina coerente visivamente
-                    const sortedRooms = Object.entries(databaseStanze).map(([id, d]) => ({ id, ...data }));
+                    // Ordina coerentemente per non sballare l'elenco
+                    const sortedRooms = Object.entries(databaseStanze).map(([id, dataObj]) => ({ id, ...dataObj }));
                     sortedRooms.sort((a,b) => (a.ordine || 0) - (b.ordine || 0));
 
-                    for (const [id, config] of Object.entries(databaseStanze)) {
+                    sortedRooms.forEach((config) => {
                         const row = `
                         <div class="rename-row">
                             <div class="rename-icon"><i class="fas ${config.icon}"></i></div>
-                            <input type="text" class="form-input rename-input" data-id="${id}" value="${config.nome}" style="margin-top:0;">
+                            <input type="text" class="form-input rename-input" data-id="${config.id}" value="${config.nome}" style="margin-top:0;">
                         </div>`;
                         container.insertAdjacentHTML('beforeend', row);
-                    }
+                    });
                 } else {
                     container.innerHTML = 'Nessuna stanza trovata.';
                 }
