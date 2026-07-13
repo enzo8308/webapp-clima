@@ -8,18 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { 
-            --bg-color: #f0f5fa; 
-            --card-bg: #ffffff; 
-            --text-main: #1c1c1e; 
-            --text-muted: #8e8e93; 
-            --accent-color: #007aff; 
-            --accent-bg: #e5f1ff;
-            --success-color: #34c759; 
-            --warning-color: #ff9500;
-            --error-color: #ff3b30;
-        }
-        
+        :root { --bg-color: #f0f5fa; --card-bg: #ffffff; --text-main: #1c1c1e; --text-muted: #8e8e93; --accent-color: #007aff; --accent-bg: #e5f1ff; --success-color: #34c759; --warning-color: #ff9500; --error-color: #ff3b30; }
         body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 110px; overflow-x: hidden; }
         
         .header { display: flex; justify-content: space-between; align-items: flex-start; padding: 30px 24px 15px 24px; }
@@ -27,7 +16,8 @@
         .greeting { font-size: 28px; font-weight: 900; letter-spacing: -0.5px; color: var(--text-main); margin: 0; }
         .subtitle { font-size: 14px; font-weight: 500; color: var(--text-muted); margin: 0; }
         
-        .profile-btn { width: 44px; height: 44px; border-radius: 22px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--accent-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; }
+        .profile-btn { width: 44px; height: 44px; border-radius: 22px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--accent-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s;}
+        .profile-btn:active { transform: scale(0.9); }
 
         .summary-scroll { padding: 0 24px; margin-bottom: 25px; }
         .summary-widget { background: linear-gradient(135deg, #007aff, #0056b3); border-radius: 24px; padding: 20px; color: white; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 20px rgba(0, 122, 255, 0.2); }
@@ -40,36 +30,42 @@
 
         .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 24px; }
         
-        /* CARD BASE (BLOCCATA DI DEFAULT) */
-        .smart-card { background-color: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1.15; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: 1px solid rgba(0,0,0,0.02); 
-            opacity: 0.5; pointer-events: none; /* Bloccata finché Firebase non dà l'OK */
-        }
-        .smart-card.unlocked { opacity: 1; pointer-events: all; cursor: pointer; }
-        .smart-card.unlocked:active { transform: scale(0.95); }
+        /* CARD CSS (Generata da JS) */
+        .smart-card { background-color: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1.15; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: 1px solid rgba(0,0,0,0.02); cursor: pointer; }
+        .smart-card:active { transform: scale(0.95); }
         
         .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .icon-box { width: 44px; height: 44px; border-radius: 22px; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.4s; }
         
-        .power-toggle { width: 34px; height: 34px; border-radius: 17px; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.3s; z-index: 10; display: none; }
-        .smart-card.unlocked .power-toggle { display: flex; }
+        .power-toggle { width: 34px; height: 34px; border-radius: 17px; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.3s; z-index: 10; }
         
         .card-bottom { display: flex; flex-direction: column; gap: 4px; margin-top: auto;}
-        .card-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin: 0; letter-spacing: -0.3px;}
+        .card-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin: 0; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .card-status { font-size: 12px; font-weight: 600; color: var(--text-muted); margin: 0; transition: 0.3s;}
         
         .connection-status { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-top: 8px; color: var(--text-muted);}
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--error-color); }
         .status-dot.online { background: var(--success-color); box-shadow: 0 0 6px rgba(52, 199, 89, 0.5); }
-        .wifi-indicator { position: absolute; bottom: 18px; right: 18px; font-size: 13px; color: #d1d1d6; transition: color 0.3s; display: none; }
-        .smart-card.unlocked .wifi-indicator { display: block; }
+        .wifi-indicator { position: absolute; bottom: 18px; right: 18px; font-size: 13px; color: #d1d1d6; transition: color 0.3s; }
 
-        /* MODIFICHE CARD ACCESE */
         .smart-card.is-on .icon-box { background: var(--accent-bg); color: var(--accent-color); }
         .smart-card.is-on .power-toggle { background: var(--accent-color); color: white; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3); }
         .smart-card.is-on .card-status { color: var(--accent-color); }
 
+        /* PANNELLO PROFILO A COMPARSA */
+        .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .sheet-overlay.show { opacity: 1; pointer-events: all; }
+        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 20px 25px 40px 25px; box-sizing: border-box; text-align: center;}
+        .bottom-sheet.open { bottom: 0; }
+        .sheet-handle { width: 40px; height: 5px; background: #e0e0e0; border-radius: 5px; margin: 0 auto 20px auto; }
+        
+        .profile-pic-large { width: 70px; height: 70px; border-radius: 35px; background: var(--accent-bg); color: var(--accent-color); font-size: 30px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; }
+        .profile-email { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 25px; }
+        .btn-logout { width: 100%; background: #ffebe9; color: var(--error-color); border: none; padding: 16px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s;}
+        .btn-logout:active { transform: scale(0.95); }
+
         /* FLOATING BOTTOM NAV */
-        .floating-nav { position: fixed; bottom: 25px; left: 24px; right: 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 12px 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.4); z-index: 1000; }
+        .floating-nav { position: fixed; bottom: 25px; left: 24px; right: 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 12px 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.4); z-index: 900; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; text-decoration: none; padding: 8px 15px; border-radius: 20px; transition: 0.3s; }
         .nav-item i { font-size: 22px; }
         .nav-item.active { color: var(--accent-color); background: var(--accent-bg); }
@@ -80,9 +76,10 @@
     <div class="header">
         <div class="greeting-box">
             <h1 class="greeting">Casa</h1>
-            <p class="subtitle">Bentornato, Vincenzo</p>
+            <p class="subtitle">Bentornato!</p>
         </div>
-        <div class="profile-btn"><i class="fas fa-user-circle"></i></div>
+        <!-- Omino Attivo -->
+        <div class="profile-btn" onclick="openProfile()"><i class="fas fa-user-circle"></i></div>
     </div>
 
     <div class="summary-scroll">
@@ -99,80 +96,30 @@
         <h2 class="section-title">Le tue Stanze</h2>
     </div>
 
-    <div class="device-grid">
-        
-        <div class="smart-card unlocked" id="card-cameretta" onclick="apriDettagli('cameretta')">
-            <div class="card-top">
-                <div class="icon-box" id="icon-box-cameretta"><i class="fas fa-rocket" id="icon-cameretta"></i></div>
-                <div class="power-toggle" id="btn-power-cameretta" onclick="event.stopPropagation(); togglePowerHome('cameretta')">
-                    <i class="fas fa-power-off"></i>
-                </div>
-            </div>
-            <div class="card-bottom">
-                <h4 class="card-title">Cameretta</h4>
-                <p class="card-status" id="status-text-cameretta">Connessione...</p>
-                <div class="connection-status"><span class="status-dot" id="dot-cameretta"></span><span id="badge-cameretta">Offline</span></div>
-            </div>
-            <div class="wifi-indicator"><i class="fas fa-wifi" id="wifi-icon-cameretta"></i></div>
-        </div>
+    <!-- GRIGLIA STANZE VUOTA: SI RIEMPIRÀ DA SOLA -->
+    <div class="device-grid" id="device-grid">
+        <!-- Generato da Firebase -->
+    </div>
 
-        <div class="smart-card" id="card-soggiorno" onclick="apriDettagli('soggiorno')">
-            <div class="card-top">
-                <div class="icon-box" id="icon-box-soggiorno"><i class="fas fa-couch" id="icon-soggiorno"></i></div>
-                <div class="power-toggle" id="btn-power-soggiorno" onclick="event.stopPropagation(); togglePowerHome('soggiorno')">
-                    <i class="fas fa-power-off"></i>
-                </div>
-            </div>
-            <div class="card-bottom">
-                <h4 class="card-title">Soggiorno</h4>
-                <p class="card-status" id="status-text-soggiorno">Non configurato</p>
-                <div class="connection-status"><span class="status-dot" id="dot-soggiorno"></span><span id="badge-soggiorno">Offline</span></div>
-            </div>
-            <div class="wifi-indicator"><i class="fas fa-wifi" id="wifi-icon-soggiorno"></i></div>
-        </div>
-
-        <div class="smart-card" id="card-cucina" onclick="apriDettagli('cucina')">
-            <div class="card-top">
-                <div class="icon-box" id="icon-box-cucina"><i class="fas fa-utensils" id="icon-cucina"></i></div>
-                <div class="power-toggle" id="btn-power-cucina" onclick="event.stopPropagation(); togglePowerHome('cucina')">
-                    <i class="fas fa-power-off"></i>
-                </div>
-            </div>
-            <div class="card-bottom">
-                <h4 class="card-title">Cucina</h4>
-                <p class="card-status" id="status-text-cucina">Non configurato</p>
-                <div class="connection-status"><span class="status-dot" id="dot-cucina"></span><span id="badge-cucina">Offline</span></div>
-            </div>
-            <div class="wifi-indicator"><i class="fas fa-wifi" id="wifi-icon-cucina"></i></div>
-        </div>
-
-        <div class="smart-card" id="card-camera" onclick="apriDettagli('camera')">
-            <div class="card-top">
-                <div class="icon-box" id="icon-box-camera"><i class="fas fa-bed" id="icon-camera"></i></div>
-                <div class="power-toggle" id="btn-power-camera" onclick="event.stopPropagation(); togglePowerHome('camera')">
-                    <i class="fas fa-power-off"></i>
-                </div>
-            </div>
-            <div class="card-bottom">
-                <h4 class="card-title">Camera da letto</h4>
-                <p class="card-status" id="status-text-camera">Non configurato</p>
-                <div class="connection-status"><span class="status-dot" id="dot-camera"></span><span id="badge-camera">Offline</span></div>
-            </div>
-            <div class="wifi-indicator"><i class="fas fa-wifi" id="wifi-icon-camera"></i></div>
-        </div>
-
+    <!-- PANNELLO PROFILO E LOGOUT -->
+    <div class="sheet-overlay" id="sheet-overlay" onclick="closeProfile()"></div>
+    <div class="bottom-sheet" id="sheet-profile">
+        <div class="sheet-handle"></div>
+        <div class="profile-pic-large"><i class="fas fa-user"></i></div>
+        <div class="profile-email" id="user-email-display">caricamento...</div>
+        <button class="btn-logout" onclick="esciApp()"><i class="fas fa-sign-out-alt"></i> Esci dall'App</button>
     </div>
 
     <div class="floating-nav">
         <a href="index.html" class="nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
         <a href="impostazioni.html" class="nav-item"><i class="fas fa-cog"></i><span>Impostazioni</span></a>
-        <a href="#" class="nav-item" onclick="esci()"><i class="fas fa-sign-out-alt"></i><span>Esci</span></a>
     </div>
 
+    <!-- FIREBASE & MQTT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
         
@@ -180,117 +127,138 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
-        window.esci = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); };
+        // Profilo
+        onAuthStateChanged(auth, (user) => { 
+            if (!user) window.location.href = "login.html"; 
+            else document.getElementById('user-email-display').innerText = user.email;
+        });
 
-        // METTE L'APP IN ASCOLTO DELLE STANZE ATTIVATE SU CLOUD
-        const docRef = doc(db, "impostazioni", "stanze");
+        window.openProfile = function() { document.getElementById('sheet-overlay').classList.add('show'); document.getElementById('sheet-profile').classList.add('open'); }
+        window.closeProfile = function() { document.getElementById('sheet-overlay').classList.remove('show'); document.getElementById('sheet-profile').classList.remove('open'); }
+        window.esciApp = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); }
+        window.apriDettagli = function(stanzaId) { window.location.href = `dettaglio.html?stanza=${stanzaId}`; }
+
+        // --- SISTEMA DINAMICO STANZE E MQTT ---
+        const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_home_" + Math.random().toString(16).substring(2, 10), clean: true });
+        
+        // Struttura in ram delle stanze
+        window.stanzeState = {}; 
+
+        const docRef = doc(db, "impostazioni", "stanze_config");
+        
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
-                const stanzeAttive = docSnap.data();
-                // Sblocca o Blocca le card in base a Firebase
-                toggleCardUnlock('soggiorno', stanzeAttive.soggiorno);
-                toggleCardUnlock('cucina', stanzeAttive.cucina);
-                toggleCardUnlock('camera', stanzeAttive.camera);
+                const stanzeDb = docSnap.data();
+                const grid = document.getElementById('device-grid');
+                grid.innerHTML = ''; // Svuota la griglia
+                
+                for (const [id, config] of Object.entries(stanzeDb)) {
+                    // Crea o aggiorna lo stato in ram
+                    if(!window.stanzeState[id]) {
+                        window.stanzeState[id] = { online: false, mode: "off", temp: 24, topic: config.topic, icon: config.icon, nome: config.nome };
+                        // Iscriviti ai nuovi topic MQTT
+                        if(clientMQTT.connected) {
+                            clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${config.topic}/mode/state`);
+                            clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${config.topic}/target_temperature/state`);
+                        }
+                    } else {
+                        // Se ha solo cambiato nome o icona, aggiorna l'oggetto
+                        window.stanzeState[id].nome = config.nome;
+                        window.stanzeState[id].icon = config.icon;
+                    }
+
+                    // Genera HTML della singola card
+                    const cardHTML = `
+                    <div class="smart-card" id="card-${id}" onclick="apriDettagli('${id}')">
+                        <div class="card-top">
+                            <div class="icon-box" id="icon-box-${id}"><i class="fas ${config.icon}" id="icon-${id}"></i></div>
+                            <div class="power-toggle" id="btn-power-${id}" onclick="event.stopPropagation(); togglePowerHome('${id}')">
+                                <i class="fas fa-power-off"></i>
+                            </div>
+                        </div>
+                        <div class="card-bottom">
+                            <h4 class="card-title">${config.nome}</h4>
+                            <p class="card-status" id="status-text-${id}">Connessione...</p>
+                            <div class="connection-status"><span class="status-dot" id="dot-${id}"></span><span id="badge-${id}">Offline</span></div>
+                        </div>
+                        <div class="wifi-indicator"><i class="fas fa-wifi" id="wifi-icon-${id}"></i></div>
+                    </div>`;
+                    grid.insertAdjacentHTML('beforeend', cardHTML);
+                    aggiornaUIStanza(id); // Applica lo stato visivo (Acceso/Spento)
+                }
+            } else {
+                // Se non c'è il database, crea la Cameretta di default
+                const defaultStanza = { cameretta: { nome: "Cameretta", icon: "fa-rocket", topic: "haier_tundra_cameretta" } };
+                setDoc(docRef, defaultStanza);
             }
         });
 
-        function toggleCardUnlock(id, isUnlocked) {
-            const card = document.getElementById(`card-${id}`);
-            const statusText = document.getElementById(`status-text-${id}`);
-            if(isUnlocked) {
-                card.classList.add('unlocked');
-                if(statusText.innerText === "Non configurato") statusText.innerText = "Spento";
-            } else {
-                card.classList.remove('unlocked');
-                statusText.innerText = "Non configurato";
-            }
-        }
-    </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
-    <script>
-        function apriDettagli(stanza) {
-            window.location.href = `dettaglio.html?stanza=${stanza}`;
-        }
-
-        const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_index_" + Math.random().toString(16).substring(2, 10), clean: true });
-        
-        // Struttura dati per gestire tutte le stanze dinamicamente
-        let stanze = {
-            cameretta: { online: false, mode: "off", temp: 24, topic: "haier_tundra_cameretta", icon: "fa-rocket" },
-            soggiorno: { online: false, mode: "off", temp: 24, topic: "haier_tundra_soggiorno", icon: "fa-couch" },
-            cucina: { online: false, mode: "off", temp: 24, topic: "haier_tundra_cucina", icon: "fa-utensils" },
-            camera: { online: false, mode: "off", temp: 24, topic: "haier_tundra_camera", icon: "fa-bed" }
-        };
-
+        // GESTIONE MQTT
         clientMQTT.on('connect', function () {
-            // Canali di stato generali e specifici delle stanze
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
-            Object.keys(stanze).forEach(s => {
-                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${stanze[s].topic}/mode/state`);
-                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${stanze[s].topic}/target_temperature/state`);
+            // Sottoscrivi a tutte le stanze caricate
+            Object.keys(window.stanzeState).forEach(id => {
+                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${window.stanzeState[id].topic}/mode/state`);
+                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${window.stanzeState[id].topic}/target_temperature/state`);
             });
-            clientMQTT.subscribe("vincenzo_clima_segreto_7788/sensor/segnale_wifi_cameretta/state");
         });
 
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();
             
-            // Gestione Online Generale (Per ora agganciato allo status master)
+            // ONLINE GLOBALE
             if (topic.includes("/status")) {
                 const isOnline = (payload === "online");
-                Object.keys(stanze).forEach(s => {
-                    stanze[s].online = isOnline;
-                    document.getElementById(`badge-${s}`).innerText = isOnline ? "Online" : "Offline";
-                    document.getElementById(`dot-${s}`).className = isOnline ? "status-dot online" : "status-dot";
+                Object.keys(window.stanzeState).forEach(id => {
+                    window.stanzeState[id].online = isOnline;
+                    const badge = document.getElementById(`badge-${id}`);
+                    const dot = document.getElementById(`dot-${id}`);
+                    if(badge) badge.innerText = isOnline ? "Online" : "Offline";
+                    if(dot) dot.className = isOnline ? "status-dot online" : "status-dot";
                 });
             }
             
-            // Smistamento dinamico dei messaggi MQTT alle singole card
-            Object.keys(stanze).forEach(s => {
-                if (topic.includes(stanze[s].topic + "/mode/state")) { stanze[s].mode = payload; aggiornaUIStanza(s); }
-                if (topic.includes(stanze[s].topic + "/target_temperature/state")) { const t = parseFloat(payload); if(!isNaN(t)) stanze[s].temp = t; aggiornaUIStanza(s); }
+            // SMISTAMENTO A OGNI STANZA
+            Object.keys(window.stanzeState).forEach(id => {
+                const top = window.stanzeState[id].topic;
+                if (topic.includes(`${top}/mode/state`)) { window.stanzeState[id].mode = payload; aggiornaUIStanza(id); }
+                if (topic.includes(`${top}/target_temperature/state`)) { const t = parseFloat(payload); if(!isNaN(t)) window.stanzeState[id].temp = t; aggiornaUIStanza(id); }
             });
-
-            // Wi-Fi Cameretta Master
-            if (topic.includes("/segnale_wifi_cameretta/state") && stanze.cameretta.online) {
-                const dbm = parseInt(payload); const wifiIcon = document.getElementById('wifi-icon-cameretta');
-                if (dbm > -65) wifiIcon.style.color = 'var(--success-color)';
-                else if (dbm > -80) wifiIcon.style.color = 'var(--warning-color)';
-                else wifiIcon.style.color = 'var(--error-color)';
-            }
         });
 
-        function aggiornaUIStanza(s) {
-            const card = document.getElementById(`card-${s}`); 
-            const testo = document.getElementById(`status-text-${s}`);
-            const icona = document.getElementById(`icon-${s}`);
+        window.aggiornaUIStanza = function(id) {
+            const card = document.getElementById(`card-${id}`); 
+            if(!card) return; // Se la card non è ancora renderizzata
             
-            if (stanze[s].mode === "off") { 
+            const testo = document.getElementById(`status-text-${id}`);
+            const icona = document.getElementById(`icon-${id}`);
+            const s = window.stanzeState[id];
+
+            if (s.mode === "off") { 
                 card.classList.remove('is-on'); 
                 testo.innerText = "Spento";
-                icona.className = `fas ${stanze[s].icon}`; // Torna all'icona della stanza
+                icona.className = `fas ${s.icon}`;
             } else {
                 card.classList.add('is-on');
                 let modeIta = "Fresco"; let color = "#007aff"; let bg = "#e5f1ff"; let iconClass = "fas fa-snowflake";
                 
-                if(stanze[s].mode === "heat") { modeIta = "Caldo"; color = "#ff3b30"; bg = "#ffebe9"; iconClass = "fas fa-sun"; }
-                if(stanze[s].mode === "dry") { modeIta = "Deumid."; color = "#5ac8fa"; bg = "#eef9ff"; iconClass = "fas fa-tint"; }
-                if(stanze[s].mode === "fan_only") { modeIta = "Ventola"; color = "#8e8e93"; bg = "#f2f2f7"; iconClass = "fas fa-fan"; }
-                if(stanze[s].mode === "auto") { modeIta = "Auto"; color = "#34c759"; bg = "#ebf9ee"; iconClass = "fas fa-magic"; }
+                if(s.mode === "heat") { modeIta = "Caldo"; color = "#ff3b30"; bg = "#ffebe9"; iconClass = "fas fa-sun"; }
+                if(s.mode === "dry") { modeIta = "Deumid."; color = "#5ac8fa"; bg = "#eef9ff"; iconClass = "fas fa-tint"; }
+                if(s.mode === "fan_only") { modeIta = "Ventola"; color = "#8e8e93"; bg = "#f2f2f7"; iconClass = "fas fa-fan"; }
+                if(s.mode === "auto") { modeIta = "Auto"; color = "#34c759"; bg = "#ebf9ee"; iconClass = "fas fa-magic"; }
                 
                 card.style.setProperty('--accent-color', color);
                 card.style.setProperty('--accent-bg', bg);
-                icona.className = iconClass; // Diventa l'icona del clima attivo
-                testo.innerText = `${modeIta} • ${stanze[s].temp}°C`;
+                icona.className = iconClass;
+                testo.innerText = `${modeIta} • ${s.temp}°C`;
             }
         }
 
-        window.togglePowerHome = function(s) {
-            if(!stanze[s].online) { alert("Il condizionatore è Offline!"); return; }
-            const nextMode = (stanze[s].mode === "off") ? "cool" : "off";
-            clientMQTT.publish(`vincenzo_clima_segreto_7788/climate/${stanze[s].topic}/mode/command`, nextMode);
+        window.togglePowerHome = function(id) {
+            const s = window.stanzeState[id];
+            if(!s.online) { alert("Il condizionatore è Offline!"); return; }
+            const nextMode = (s.mode === "off") ? "cool" : "off";
+            clientMQTT.publish(`vincenzo_clima_segreto_7788/climate/${s.topic}/mode/command`, nextMode);
         };
     </script>
 </body>
