@@ -8,7 +8,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --bg-color: #f0f5fa; --card-bg: #ffffff; --text-main: #1c1c1e; --text-muted: #8e8e93; --accent-color: #007aff; --accent-bg: #e5f1ff; --success-color: #34c759; --warning-color: #ff9500; --error-color: #ff3b30; }
+        :root { 
+            --bg-color: #f0f5fa; 
+            --card-bg: #ffffff; 
+            --text-main: #1c1c1e; 
+            --text-muted: #8e8e93; 
+            --accent-color: #007aff; 
+            --accent-bg: #e5f1ff; 
+            --success-color: #34c759; 
+            --warning-color: #ff9500; 
+            --error-color: #ff3b30; 
+        }
         body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 110px; overflow-x: hidden; }
         
         .header { display: flex; justify-content: space-between; align-items: flex-start; padding: 30px 24px 15px 24px; }
@@ -84,8 +94,8 @@
         <div class="summary-widget">
             <div class="summary-icon"><i class="fas fa-home"></i></div>
             <div class="summary-text">
-                <h3 id="global-status-title">Smart Clima Cloud</h3>
-                <p id="global-status-desc">Seleziona una stanza per regolarne il comfort.</p>
+                <h3>Smart Clima Cloud</h3>
+                <p>Seleziona una stanza per regolarne il comfort.</p>
             </div>
         </div>
     </div>
@@ -94,8 +104,7 @@
         <h2 class="section-title">Le tue Stanze</h2>
     </div>
 
-    <div class="device-grid" id="device-grid">
-        </div>
+    <div class="device-grid" id="device-grid"></div>
 
     <div class="sheet-overlay" id="sheet-overlay" onclick="closeProfile()"></div>
     <div class="bottom-sheet" id="sheet-profile">
@@ -110,6 +119,8 @@
         <a href="impostazioni.html" class="nav-item"><i class="fas fa-cog"></i><span>Impostazioni</span></a>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -121,39 +132,58 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Stato in RAM unico per evitare sfasamenti
+        window.stanzeState = {};
+
+        // Controllo Sessione Utente
         onAuthStateChanged(auth, (user) => { 
             if (!user) window.location.href = "login.html"; 
             else document.getElementById('user-email-display').innerText = user.email;
         });
 
+        // Gestione Finestra Profilo
         window.openProfile = function() { document.getElementById('sheet-overlay').classList.add('show'); document.getElementById('sheet-profile').classList.add('open'); }
         window.closeProfile = function() { document.getElementById('sheet-overlay').classList.remove('show'); document.getElementById('sheet-profile').classList.remove('open'); }
         window.esciApp = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); }
         window.apriDettagli = function(stanzaId) { window.location.href = `dettaglio.html?stanza=${stanzaId}`; }
 
+        // --- INIZIALIZZAZIONE UNICA MQTT ---
         const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_home_" + Math.random().toString(16).substring(2, 10), clean: true });
-        window.stanzeState = {}; 
 
+        clientMQTT.on('connect', function () {
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
+            // Sottoscrizione immediata se ci sono stanze già caricate
+            Object.keys(window.stanzeState).forEach(id => subscribeStanzaMQTT(window.stanzeState[id].topic));
+        });
+
+        function subscribeStanzaMQTT(topic) {
+            if (clientMQTT && clientMQTT.connected) {
+                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/mode/state`);
+                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/target_temperature/state`);
+            }
+        }
+
+        // --- ASCOLTO FIREBASE CLOUD REALTIME ---
         const docRef = doc(db, "impostazioni", "stanze_config");
         
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
                 const stanzeDb = docSnap.data();
                 const grid = document.getElementById('device-grid');
-                grid.innerHTML = '';
+                grid.innerHTML = ''; // Svuota lo schermo prima del disegno
                 
                 for (const [id, config] of Object.entries(stanzeDb)) {
+                    // Se la stanza è nuova, la salva in ram e attiva MQTT
                     if(!window.stanzeState[id]) {
                         window.stanzeState[id] = { online: false, mode: "off", temp: 24, topic: config.topic, icon: config.icon, nome: config.nome };
-                        if(clientMQTT.connected) {
-                            clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${config.topic}/mode/state`);
-                            clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${config.topic}/target_temperature/state`);
-                        }
+                        subscribeStanzaMQTT(config.topic);
                     } else {
                         window.stanzeState[id].nome = config.nome;
                         window.stanzeState[id].icon = config.icon;
+                        window.stanzeState[id].topic = config.topic;
                     }
 
+                    // Iniezione HTML pulita
                     const cardHTML = `
                     <div class="smart-card" id="card-${id}" onclick="apriDettagli('${id}')">
                         <div class="card-top">
@@ -170,10 +200,10 @@
                         <div class="wifi-indicator"><i class="fas fa-wifi" id="wifi-icon-${id}"></i></div>
                     </div>`;
                     grid.insertAdjacentHTML('beforeend', cardHTML);
-                    aggiornaUIStanza(id);
+                    window.aggiornaUIStanza(id); // Aggiorna l'aspetto visivo
                 }
             } else {
-                // Inizializzazione Cloud automatica completa
+                // Se Firebase è vuoto, autoseppellisce subito le 4 stanze storiche perfette!
                 const defaultStanze = {
                     cameretta: { nome: "Cameretta", icon: "fa-rocket", topic: "haier_tundra_cameretta" },
                     soggiorno: { nome: "Soggiorno", icon: "fa-couch", topic: "haier_tundra_soggiorno" },
@@ -184,18 +214,11 @@
             }
         });
 
-        // GESTIONE MQTT
-        clientMQTT.on('connect', function () {
-            clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
-            Object.keys(window.stanzeState).forEach(id => {
-                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${window.stanzeState[id].topic}/mode/state`);
-                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${window.stanzeState[id].topic}/target_temperature/state`);
-            });
-        });
-
+        // --- ASCOLTO MESSAGGI IN ARRIVO DA MQTT ---
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();
             
+            // ONLINE GENERALE
             if (topic.includes("/status")) {
                 const isOnline = (payload === "online");
                 Object.keys(window.stanzeState).forEach(id => {
@@ -204,20 +227,33 @@
                     const dot = document.getElementById(`dot-${id}`);
                     if(badge) badge.innerText = isOnline ? "Online" : "Offline";
                     if(dot) dot.className = isOnline ? "status-dot online" : "status-dot";
+                    window.aggiornaUIStanza(id);
                 });
             }
             
+            // FILTRAGGIO INTELLIGENTE PER OGNI STANZA
             Object.keys(window.stanzeState).forEach(id => {
                 const top = window.stanzeState[id].topic;
-                if (topic.includes(`${top}/mode/state`)) { window.stanzeState[id].mode = payload; aggiornaUIStanza(id); }
-                if (topic.includes(`${top}/target_temperature/state`)) { const t = parseFloat(payload); if(!isNaN(t)) window.stanzeState[id].temp = t; aggiornaUIStanza(id); }
+                if (topic.includes(`${top}/mode/state`)) { window.stanzeState[id].mode = payload; window.aggiornaUIStanza(id); }
+                if (topic.includes(`${top}/target_temperature/state`)) { const t = parseFloat(payload); if(!isNaN(t)) window.stanzeState[id].temp = t; window.aggiornaUIStanza(id); }
             });
+
+            // WI-FI CAMERETTA MASTER
+            if (topic.includes("/sensor/segnale_wifi_cameretta/state") && window.stanzeState.cameretta) {
+                const dbm = parseInt(payload); const wifiIcon = document.getElementById('wifi-icon-cameretta');
+                if (wifiIcon && window.stanzeState.cameretta.online) {
+                    if (dbm > -65) wifiIcon.style.color = 'var(--success-color)';
+                    else if (dbm > -80) wifiIcon.style.color = 'var(--warning-color)';
+                    else wifiIcon.style.color = 'var(--error-color)';
+                }
+            }
         });
 
+        // --- MOTORE DI AGGIORNAMENTO GRAFICO CARD (RISOLTO!) ---
         window.aggiornaUIStanza = function(id) {
-            // FIXATO: Adesso usa correttamente i backtick per cercare l'ID dell'elemento HTML!
+            // RISOLTO: Ora usa i backtick corretti per l'interpolazione della variabile id
             const card = document.getElementById(`card-${id}`); 
-            if(!card) return;
+            if(!card) return; 
             
             const testo = document.getElementById(`status-text-${id}`);
             const icona = document.getElementById(`icon-${id}`);
@@ -241,10 +277,16 @@
                 icona.className = iconClass;
                 testo.innerText = `${modeIta} • ${s.temp}°C`;
             }
+
+            // Colore Wi-Fi dinamico base
+            const wifiIcon = document.getElementById(`wifi-icon-${id}`);
+            if(wifiIcon) wifiIcon.style.color = s.online ? 'var(--success-color)' : '#d1d1d6';
         }
 
+        // TASTO POWER RAPIDO DALLA HOME
         window.togglePowerHome = function(id) {
             const s = window.stanzeState[id];
+            if(!s) return;
             if(!s.online) { alert("Il condizionatore è Offline!"); return; }
             const nextMode = (s.mode === "off") ? "cool" : "off";
             clientMQTT.publish(`vincenzo_clima_segreto_7788/climate/${s.topic}/mode/command`, nextMode);
