@@ -132,58 +132,60 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Stato in RAM unico per evitare sfasamenti
         window.stanzeState = {};
 
-        // Controllo Sessione Utente
         onAuthStateChanged(auth, (user) => { 
             if (!user) window.location.href = "login.html"; 
             else document.getElementById('user-email-display').innerText = user.email;
         });
 
-        // Gestione Finestra Profilo
         window.openProfile = function() { document.getElementById('sheet-overlay').classList.add('show'); document.getElementById('sheet-profile').classList.add('open'); }
         window.closeProfile = function() { document.getElementById('sheet-overlay').classList.remove('show'); document.getElementById('sheet-profile').classList.remove('open'); }
         window.esciApp = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); }
         window.apriDettagli = function(stanzaId) { window.location.href = `dettaglio.html?stanza=${stanzaId}`; }
 
-        // --- INIZIALIZZAZIONE UNICA MQTT ---
         const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_home_" + Math.random().toString(16).substring(2, 10), clean: true });
 
         clientMQTT.on('connect', function () {
+            // Sottoscrizione stato Cameretta originale
             clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
-            // Sottoscrizione immediata se ci sono stanze già caricate
-            Object.keys(window.stanzeState).forEach(id => subscribeStanzaMQTT(window.stanzeState[id].topic));
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/sensor/segnale_wifi_cameretta/state");
+            
+            // Sottoscrizione per le altre stanze caricate in memoria
+            Object.keys(window.stanzeState).forEach(id => {
+                subscribeStanzaMQTT(id, window.stanzeState[id].topic);
+            });
         });
 
-        function subscribeStanzaMQTT(topic) {
+        function subscribeStanzaMQTT(id, topic) {
             if (clientMQTT && clientMQTT.connected) {
                 clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/mode/state`);
                 clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/target_temperature/state`);
+                // Le stanze nuove si sottoscrivono al proprio stato autonomo
+                if (id !== 'cameretta') {
+                    clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${id}/status`);
+                }
             }
         }
 
-        // --- ASCOLTO FIREBASE CLOUD REALTIME ---
         const docRef = doc(db, "impostazioni", "stanze_config");
         
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
                 const stanzeDb = docSnap.data();
                 const grid = document.getElementById('device-grid');
-                grid.innerHTML = ''; // Svuota lo schermo prima del disegno
+                grid.innerHTML = '';
                 
                 for (const [id, config] of Object.entries(stanzeDb)) {
-                    // Se la stanza è nuova, la salva in ram e attiva MQTT
                     if(!window.stanzeState[id]) {
                         window.stanzeState[id] = { online: false, mode: "off", temp: 24, topic: config.topic, icon: config.icon, nome: config.nome };
-                        subscribeStanzaMQTT(config.topic);
+                        subscribeStanzaMQTT(id, config.topic);
                     } else {
                         window.stanzeState[id].nome = config.nome;
                         window.stanzeState[id].icon = config.icon;
                         window.stanzeState[id].topic = config.topic;
                     }
 
-                    // Iniezione HTML pulita
                     const cardHTML = `
                     <div class="smart-card" id="card-${id}" onclick="apriDettagli('${id}')">
                         <div class="card-top">
@@ -200,10 +202,10 @@
                         <div class="wifi-indicator"><i class="fas fa-wifi" id="wifi-icon-${id}"></i></div>
                     </div>`;
                     grid.insertAdjacentHTML('beforeend', cardHTML);
-                    window.aggiornaUIStanza(id); // Aggiorna l'aspetto visivo
+                    window.aggiornaUIStanza(id);
+                    window.updateRoomStatusDOM(id);
                 }
             } else {
-                // Se Firebase è vuoto, autoseppellisce subito le 4 stanze storiche perfette!
                 const defaultStanze = {
                     cameretta: { nome: "Cameretta", icon: "fa-rocket", topic: "haier_tundra_cameretta" },
                     soggiorno: { nome: "Soggiorno", icon: "fa-couch", topic: "haier_tundra_soggiorno" },
@@ -214,31 +216,43 @@
             }
         });
 
-        // --- ASCOLTO MESSAGGI IN ARRIVO DA MQTT ---
+        window.updateRoomStatusDOM = function(id) {
+            const s = window.stanzeState[id];
+            if (!s) return;
+            const badge = document.getElementById(`badge-${id}`);
+            const dot = document.getElementById(`dot-${id}`);
+            if(badge) badge.innerText = s.online ? "Online" : "Offline";
+            if(dot) dot.className = s.online ? "status-dot online" : "status-dot";
+            window.aggiornaUIStanza(id);
+        }
+
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();
             
-            // ONLINE GENERALE
-            if (topic.includes("/status")) {
-                const isOnline = (payload === "online");
-                Object.keys(window.stanzeState).forEach(id => {
-                    window.stanzeState[id].online = isOnline;
-                    const badge = document.getElementById(`badge-${id}`);
-                    const dot = document.getElementById(`dot-${id}`);
-                    if(badge) badge.innerText = isOnline ? "Online" : "Offline";
-                    if(dot) dot.className = isOnline ? "status-dot online" : "status-dot";
-                    window.aggiornaUIStanza(id);
-                });
+            // Cameretta Stato Master
+            if (topic === "vincenzo_clima_segreto_7788/status") {
+                if (window.stanzeState.cameretta) {
+                    window.stanzeState.cameretta.online = (payload === "online");
+                    window.updateRoomStatusDOM('cameretta');
+                }
             }
             
-            // FILTRAGGIO INTELLIGENTE PER OGNI STANZA
+            // Altre stanze (rispondono solo al proprio canale dedicato)
+            Object.keys(window.stanzeState).forEach(id => {
+                if (topic === `vincenzo_clima_segreto_7788/${id}/status`) {
+                    window.stanzeState[id].online = (payload === "online");
+                    window.updateRoomStatusDOM(id);
+                }
+            });
+            
+            // Regolazione parametri
             Object.keys(window.stanzeState).forEach(id => {
                 const top = window.stanzeState[id].topic;
                 if (topic.includes(`${top}/mode/state`)) { window.stanzeState[id].mode = payload; window.aggiornaUIStanza(id); }
                 if (topic.includes(`${top}/target_temperature/state`)) { const t = parseFloat(payload); if(!isNaN(t)) window.stanzeState[id].temp = t; window.aggiornaUIStanza(id); }
             });
 
-            // WI-FI CAMERETTA MASTER
+            // Segnale Wi-Fi Cameretta
             if (topic.includes("/sensor/segnale_wifi_cameretta/state") && window.stanzeState.cameretta) {
                 const dbm = parseInt(payload); const wifiIcon = document.getElementById('wifi-icon-cameretta');
                 if (wifiIcon && window.stanzeState.cameretta.online) {
@@ -249,9 +263,7 @@
             }
         });
 
-        // --- MOTORE DI AGGIORNAMENTO GRAFICO CARD (RISOLTO!) ---
         window.aggiornaUIStanza = function(id) {
-            // RISOLTO: Ora usa i backtick corretti per l'interpolazione della variabile id
             const card = document.getElementById(`card-${id}`); 
             if(!card) return; 
             
@@ -278,12 +290,10 @@
                 testo.innerText = `${modeIta} • ${s.temp}°C`;
             }
 
-            // Colore Wi-Fi dinamico base
             const wifiIcon = document.getElementById(`wifi-icon-${id}`);
             if(wifiIcon) wifiIcon.style.color = s.online ? 'var(--success-color)' : '#d1d1d6';
         }
 
-        // TASTO POWER RAPIDO DALLA HOME
         window.togglePowerHome = function(id) {
             const s = window.stanzeState[id];
             if(!s) return;
