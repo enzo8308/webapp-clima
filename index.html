@@ -64,7 +64,7 @@
         .btn-logout:active { transform: scale(0.95); }
 
         /* FLOATING NAV */
-        .floating-nav { position: fixed; bottom: 25px; left: 24px; right: 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 12px 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.4); z-index: 900; }
+        .floating-nav { position: fixed; bottom: 25px; left: 24px; right: 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 12px 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255, 255, 255, 0.4); z-index: 900; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; text-decoration: none; padding: 8px 15px; border-radius: 20px; transition: 0.3s; }
         .nav-item i { font-size: 22px; }
         .nav-item.active { color: var(--accent-color); background: var(--accent-bg); }
@@ -173,7 +173,7 @@
                     aggiornaUIStanza(id);
                 }
             } else {
-                // SE IL DATABASE È VUOTO, LO INIZIALIZZIAMO SUBITO CON TUTTE E 4 LE TUE STANZE STORICHE!
+                // Inizializzazione Cloud automatica completa
                 const defaultStanze = {
                     cameretta: { nome: "Cameretta", icon: "fa-rocket", topic: "haier_tundra_cameretta" },
                     soggiorno: { nome: "Soggiorno", icon: "fa-couch", topic: "haier_tundra_soggiorno" },
@@ -215,7 +215,8 @@
         });
 
         window.aggiornaUIStanza = function(id) {
-            const card = document.getElementById('card-${id}'); 
+            // FIXATO: Adesso usa correttamente i backtick per cercare l'ID dell'elemento HTML!
+            const card = document.getElementById(`card-${id}`); 
             if(!card) return;
             
             const testo = document.getElementById(`status-text-${id}`);
