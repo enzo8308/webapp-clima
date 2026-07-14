@@ -19,13 +19,14 @@
             --warning-color: #ff9500; 
             --error-color: #ff3b30; 
         }
-        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
+        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 110px; overflow-x: hidden; user-select: none; -webkit-user-select: none; }
         
         .header { display: flex; justify-content: space-between; align-items: flex-start; padding: 30px 24px 15px 24px; }
         .greeting-box { display: flex; flex-direction: column; gap: 4px; }
         .greeting { font-size: 28px; font-weight: 900; letter-spacing: -0.5px; color: var(--text-main); margin: 0; }
         .subtitle { font-size: 14px; font-weight: 500; color: var(--text-muted); margin: 0; }
         
+        /* Avatar omino circolare */
         .profile-btn { width: 44px; height: 44px; border-radius: 22px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--accent-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; overflow: hidden; border: 2px solid white; }
         .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
         .profile-btn:active { transform: scale(0.9); }
@@ -39,24 +40,16 @@
         .section-header { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 24px; margin-bottom: 15px; }
         .section-title { font-size: 18px; font-weight: 700; margin: 0; }
 
-        /* GRIGLIA CON SPAZIO ADATTATIVO INFERIORE INTEGRATO */
-        .device-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 16px; 
-            padding: 0 24px 160px 24px; /* Crea lo spazio vuoto perfetto per far salire le card sopra i tasti */
-            position: relative; 
-        }
+        /* GRIGLIA STANZE */
+        .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 24px; position: relative; }
         
-        /* touch-action rimossa da qui per sbloccare lo scorrimento del telefono */
-        .smart-card { background-color: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1.15; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 1px solid rgba(0,0,0,0.02); cursor: pointer; }
+        .smart-card { background-color: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1.15; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 1px solid rgba(0,0,0,0.02); cursor: pointer; touch-action: none; }
         .smart-card:active:not(.dragging) { transform: scale(0.95); }
-        
-        /* touch-action si attiva SOLO ed esclusivamente quando stai trascinando una carta */
-        .smart-card.dragging { opacity: 0.5; transform: scale(1.05); box-shadow: 0 15px 30px rgba(0,0,0,0.1); cursor: grabbing; z-index: 999; touch-action: none; }
+        .smart-card.dragging { opacity: 0.5; transform: scale(1.05); box-shadow: 0 15px 30px rgba(0,0,0,0.1); cursor: grabbing; z-index: 999; }
         
         .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .icon-box { width: 44px; height: 44px; border-radius: 22px; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.4s; }
+        
         .power-toggle { width: 34px; height: 34px; border-radius: 17px; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.3s; z-index: 10; }
         
         .card-bottom { display: flex; flex-direction: column; gap: 4px; margin-top: auto;}
@@ -72,10 +65,10 @@
         .smart-card.is-on .power-toggle { background: var(--accent-color); color: white; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3); }
         .smart-card.is-on .card-status { color: var(--accent-color); }
 
-        /* PANNELLO PROFILO */
-        .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        /* PANNELLO PROFILO AVANZATO */
+        .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sheet-overlay.show { opacity: 1; pointer-events: all; }
-        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2001; padding: 25px 25px 40px 25px; box-sizing: border-box; text-align: center;}
+        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 25px 25px 40px 25px; box-sizing: border-box; text-align: center;}
         .bottom-sheet.open { bottom: 0; }
         .sheet-handle { width: 40px; height: 5px; background: #e0e0e0; border-radius: 5px; margin: 0 auto 20px auto; }
         
@@ -92,8 +85,8 @@
         .btn-logout { width: 100%; background: #ffebe9; color: var(--error-color); border: none; padding: 16px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s;}
         .btn-logout:active { transform: scale(0.95); }
 
-        /* FLOATING NAV STILE IOS fixed */
-        .floating-nav { position: fixed; bottom: 25px; left: 24px; right: 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 12px 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255, 255, 255, 0.4); z-index: 1000; }
+        /* FLOATING NAV */
+        .floating-nav { position: fixed; bottom: 25px; left: 24px; right: 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 12px 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255, 255, 255, 0.4); z-index: 900; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; text-decoration: none; padding: 8px 15px; border-radius: 20px; transition: 0.3s; }
         .nav-item i { font-size: 22px; }
         .nav-item.active { color: var(--accent-color); background: var(--accent-bg); }
@@ -114,7 +107,7 @@
             <div class="summary-icon"><i class="fas fa-home"></i></div>
             <div class="summary-text">
                 <h3>Smart Clima Cloud</h3>
-                <p>Scorri normalmente. Tieni premuto a lungo per riordinare.</p>
+                <p>Tocca per aprire. Tieni premuto per riordinare.</p>
             </div>
         </div>
     </div>
@@ -125,6 +118,7 @@
 
     <div class="device-grid" id="device-grid"></div>
 
+    <!-- PANNELLO PROFILO -->
     <div class="sheet-overlay" id="sheet-overlay" onclick="closeProfile()"></div>
     <div class="bottom-sheet" id="sheet-profile">
         <div class="sheet-handle"></div>
@@ -166,7 +160,7 @@
         let base64PhotoStr = "";
         window.stanzeState = {};
         window.stanzeRawConfig = {};
-        window.isDragging = false; 
+        window.isDragging = false; // Flag vitale per distinguere Click e Drag
 
         onAuthStateChanged(auth, (user) => { 
             if (!user) {
@@ -236,7 +230,9 @@
                 });
         }
 
+        // --- FUNZIONE CLICK INTELLIGENTE ---
         window.apriDettagli = function(stanzaId) {
+            // Se la variabile "isDragging" è vera, blocchiamo il click perché l'utente stava trascinando!
             if (window.isDragging) return;
             window.location.href = `dettaglio.html?stanza=${stanzaId}`;
         }
@@ -279,6 +275,7 @@
                         window.stanzeState[id].topic = room.topic;
                     }
 
+                    // QUI È TORNATO L'ONCLICK RISOLUTIVO: onclick="apriDettagli('${id}')"
                     const cardHTML = `
                     <div class="smart-card" id="card-${id}" data-id="${id}" draggable="true" onclick="apriDettagli('${id}')">
                         <div class="card-top">
@@ -311,41 +308,32 @@
             }
         });
 
-        // --- GESTIONE INPUT ADATTATIVA DRAG / SCROLL ---
+        // --- MOTORE DRAG & DROP PROTETTO ---
         function initDragAndDropLogic() {
             const cards = document.querySelectorAll('.smart-card');
             const grid = document.getElementById('device-grid');
             
             cards.forEach(card => {
-                // Desktop Drag
+                // Desktop
                 card.addEventListener('dragstart', () => { window.isDragging = true; card.classList.add('dragging'); });
                 card.addEventListener('dragend', () => {
                     card.classList.remove('dragging');
                     salvaNuovoOrdineCloud();
-                    setTimeout(() => window.isDragging = false, 100); 
+                    setTimeout(() => window.isDragging = false, 100); // Disabilita il blocco clic dopo 100ms
                 });
 
-                // Mobile Touch (Sbloccato e fluido!)
+                // Smartphone Touch
                 let touchTimer;
                 card.addEventListener('touchstart', (e) => {
-                    // Avvia il timer di pressione lunga (500ms). Se l'utente striscia prima, si cancella e si scorre!
                     touchTimer = setTimeout(() => {
-                        window.isDragging = true; 
+                        window.isDragging = true; // Inizia il trascinamento reale
                         card.classList.add('dragging');
-                        if(navigator.vibrate) navigator.vibrate(40); // Feedback tattile di aggancio
-                    }, 500); 
-                }, { passive: true });
+                    }, 350); 
+                });
 
                 card.addEventListener('touchmove', (e) => {
-                    if (!card.classList.contains('dragging')) { 
-                        // Se muovi il dito prima dei 500ms, annulla il drag. Significa che l'utente VUOLE SCORRERE LA PAGINA!
-                        clearTimeout(touchTimer); 
-                        return; 
-                    }
-                    
-                    // Se siamo in modalità drag attivo, blocca lo scorrimento della pagina
-                    if (e.cancelable) e.preventDefault();
-                    
+                    if (!card.classList.contains('dragging')) { clearTimeout(touchTimer); return; }
+                    e.preventDefault();
                     const touch = e.touches[0];
                     const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
                     const currentCardOver = targetEl ? targetEl.closest('.smart-card') : null;
@@ -358,7 +346,7 @@
                         });
                         grid.insertBefore(card, nextEl);
                     }
-                }, { passive: false }); // Permette il blocco dello scorrimento solo a drag attivo
+                });
 
                 card.addEventListener('touchend', () => {
                     clearTimeout(touchTimer);
@@ -385,6 +373,7 @@
         function salvaNuovoOrdineCloud() {
             const currentCards = [...document.querySelectorAll('.smart-card')];
             let modificato = false;
+            
             currentCards.forEach((card, index) => {
                 const id = card.getAttribute('data-id');
                 if (window.stanzeRawConfig[id] && window.stanzeRawConfig[id].ordine !== index) {
@@ -392,6 +381,7 @@
                     modificato = true;
                 }
             });
+
             if (modificato) setDoc(docRef, window.stanzeRawConfig);
         }
 
