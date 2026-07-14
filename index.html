@@ -118,7 +118,6 @@
 
     <div class="device-grid" id="device-grid"></div>
 
-    <!-- PANNELLO PROFILO -->
     <div class="sheet-overlay" id="sheet-overlay" onclick="closeProfile()"></div>
     <div class="bottom-sheet" id="sheet-profile">
         <div class="sheet-handle"></div>
@@ -160,7 +159,7 @@
         let base64PhotoStr = "";
         window.stanzeState = {};
         window.stanzeRawConfig = {};
-        window.isDragging = false; // Flag vitale per distinguere Click e Drag
+        window.isDragging = false; 
 
         onAuthStateChanged(auth, (user) => { 
             if (!user) {
@@ -230,9 +229,7 @@
                 });
         }
 
-        // --- FUNZIONE CLICK INTELLIGENTE ---
         window.apriDettagli = function(stanzaId) {
-            // Se la variabile "isDragging" è vera, blocchiamo il click perché l'utente stava trascinando!
             if (window.isDragging) return;
             window.location.href = `dettaglio.html?stanza=${stanzaId}`;
         }
@@ -275,7 +272,6 @@
                         window.stanzeState[id].topic = room.topic;
                     }
 
-                    // QUI È TORNATO L'ONCLICK RISOLUTIVO: onclick="apriDettagli('${id}')"
                     const cardHTML = `
                     <div class="smart-card" id="card-${id}" data-id="${id}" draggable="true" onclick="apriDettagli('${id}')">
                         <div class="card-top">
@@ -308,25 +304,22 @@
             }
         });
 
-        // --- MOTORE DRAG & DROP PROTETTO ---
         function initDragAndDropLogic() {
             const cards = document.querySelectorAll('.smart-card');
             const grid = document.getElementById('device-grid');
             
             cards.forEach(card => {
-                // Desktop
                 card.addEventListener('dragstart', () => { window.isDragging = true; card.classList.add('dragging'); });
                 card.addEventListener('dragend', () => {
                     card.classList.remove('dragging');
                     salvaNuovoOrdineCloud();
-                    setTimeout(() => window.isDragging = false, 100); // Disabilita il blocco clic dopo 100ms
+                    setTimeout(() => window.isDragging = false, 100); 
                 });
 
-                // Smartphone Touch
                 let touchTimer;
                 card.addEventListener('touchstart', (e) => {
                     touchTimer = setTimeout(() => {
-                        window.isDragging = true; // Inizia il trascinamento reale
+                        window.isDragging = true; 
                         card.classList.add('dragging');
                     }, 350); 
                 });
