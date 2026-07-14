@@ -24,6 +24,11 @@
         
         body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 40px; overflow-x: hidden; }
         
+        /* OVERLAY DI CARICAMENTO INIZIALE (Aggiunto per non far vedere i dati vecchi mentre scarica) */
+        #loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
+        .spinner { border: 4px solid rgba(0,0,0,0.1); border-left-color: var(--theme-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px 10px 20px; background-color: var(--bg-color); }
         .back-btn { color: var(--text-main); text-decoration: none; font-size: 20px; cursor: pointer; }
@@ -106,7 +111,6 @@
         .smart-tile.light-on .tile-icon { background: var(--theme-color); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .smart-tile.light-on .tile-value { color: var(--theme-color); }
 
-
         /* ==================== PANNELLI A COMPARSA (iOS BOTTOM SHEETS) ==================== */
         .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sheet-overlay.show { opacity: 1; pointer-events: all; }
@@ -131,10 +135,15 @@
 </head>
 <body>
 
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div style="font-weight: 700; color: var(--text-muted);">Sincronizzazione Cloud...</div>
+    </div>
+
     <div class="header">
         <a href="index.html" class="back-btn"><i class="fas fa-chevron-left"></i></a>
         <div class="header-title">
-            Condizionatore camer... <span id="status-badge" class="status-badge offline">Offline</span>
+            <span id="room-name-display">Caricamento...</span> <span id="status-badge" class="status-badge offline">Offline</span>
         </div>
         <i class="fas fa-wifi" style="color: var(--success-color); font-size: 14px;"></i>
     </div>
@@ -233,7 +242,7 @@
                 
                 <div class="pro-gauge-info">
                     <div class="badge-eco"><i class="fas fa-tree"></i> ECO</div>
-                    <div class="info-title testo-stato-title">Condizionatore e Eco</div>
+                    <div class="info-title testo-stato-title">Condizionatore Spento</div>
                     <div class="info-temp valore-temp">24</div>
                     <div class="info-current">Attualmente <span class="current-temp-val">--</span> °C</div>
                 </div>
@@ -321,66 +330,88 @@
         </div>
     </div>
 
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
         const firebaseConfig = { apiKey: "AIzaSyDicCAPn-jBqZzX5SWvxFkTyjeO5VItxUo", authDomain: "smartclima-casa.firebaseapp.com", projectId: "smartclima-casa", storageBucket: "smartclima-casa.firebasestorage.app", messagingSenderId: "1075389846823", appId: "1:1075389846823:web:02fbdc2d55fdbddde84502" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
-    </script>
+        const db = getFirestore(app);
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
-    <script>
-        // Gestione Vista BASE/PRO
-        function toggleView() {
-            const isPro = document.getElementById('view-toggle-checkbox').checked;
-            document.getElementById('view-base').style.display = isPro ? 'none' : 'block';
-            document.getElementById('view-pro').style.display = isPro ? 'block' : 'none';
-            
-            // Colora i testi dei Toggle
-            document.getElementById('lbl-classica').className = isPro ? '' : 'active-text';
-            document.getElementById('lbl-pro').className = isPro ? 'active-text' : '';
-            
-            localStorage.setItem('climaViewPreference', isPro ? 'PRO' : 'BASE');
-        }
-        
-        window.onload = () => {
-            if(localStorage.getItem('climaViewPreference') === 'PRO') {
-                document.getElementById('view-toggle-checkbox').checked = true; toggleView();
-            }
-        };
+        // VARIABILI GLOBALI DI SISTEMA
+        let topicBaseMQTT = ""; 
+        const urlParams = new URLSearchParams(window.location.search);
+        const idStanzaURL = urlParams.get('stanza') || 'cameretta'; // Cerca '?stanza=soggiorno'
 
-        // Gestione Bottom Sheets
-        function openSheet(id) {
-            document.getElementById('sheet-overlay').classList.add('show');
-            document.getElementById(id).classList.add('open');
-        }
-        function closeAllSheets() {
-            document.getElementById('sheet-overlay').classList.remove('show');
-            document.querySelectorAll('.bottom-sheet').forEach(sheet => sheet.classList.remove('open'));
-        }
-
-        const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_dett_" + Math.random().toString(16).substring(2, 10), clean: true });
-        const baseTopic = "vincenzo_clima_segreto_7788/climate/haier_tundra_cameretta";
-        
         let climaAcceso = false; let gradiAttuali = 24; let isOnline = false; let luceAccesa = false;
+        const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_det_" + Math.random().toString(16).substring(2, 10), clean: true });
 
-        clientMQTT.on('connect', function () {
-            clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
-            clientMQTT.subscribe(baseTopic + "/mode/state");
-            clientMQTT.subscribe(baseTopic + "/target_temperature/state");
-            clientMQTT.subscribe(baseTopic + "/current_temperature/state");
-            clientMQTT.subscribe(baseTopic + "/fan_mode/state");
-            clientMQTT.subscribe(baseTopic + "/swing_mode/state");
-            clientMQTT.subscribe("vincenzo_clima_segreto_7788/switch/luce_display/state");
+        // CONTROLLO ACCESSO E AVVIO
+        onAuthStateChanged(auth, (user) => { 
+            if (!user) window.location.href = "login.html"; 
+            else inizializzaStanzaCloud();
         });
 
+        // 1. SCARICA I DATI DELLA STANZA DA FIREBASE
+        function inizializzaStanzaCloud() {
+            const docRef = doc(db, "impostazioni", "stanze_config");
+            getDoc(docRef).then((docSnap) => {
+                if (docSnap.exists()) {
+                    const datiStanze = docSnap.data();
+                    const miaStanza = datiStanze[idStanzaURL];
+                    
+                    if (miaStanza) {
+                        document.getElementById('room-name-display').innerText = miaStanza.nome;
+                        topicBaseMQTT = `vincenzo_clima_segreto_7788/climate/${miaStanza.topic}`;
+                        
+                        // Avvia la connessione MQTT con il nuovo topic
+                        avviaConnessioneMQTT();
+                        
+                        // Nasconde la schermata di caricamento fluido
+                        setTimeout(() => {
+                            document.getElementById('loading-overlay').style.opacity = '0';
+                            setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 500);
+                        }, 300);
+                    } else {
+                        alert("Stanza non trovata nel database!");
+                        window.location.href = "index.html";
+                    }
+                }
+            });
+        }
+
+        // 2. ISCRIVITI AI CANALI MQTT GIUSTI
+        function avviaConnessioneMQTT() {
+            if(clientMQTT.connected) eseguiIscrizioni();
+            else clientMQTT.on('connect', eseguiIscrizioni);
+        }
+
+        function eseguiIscrizioni() {
+            // Stato Online specifico o master
+            if (idStanzaURL === 'cameretta') {
+                clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
+            } else {
+                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${idStanzaURL}/status`);
+            }
+            
+            // Comandi clima specifici
+            clientMQTT.subscribe(topicBaseMQTT + "/mode/state");
+            clientMQTT.subscribe(topicBaseMQTT + "/target_temperature/state");
+            clientMQTT.subscribe(topicBaseMQTT + "/current_temperature/state");
+            clientMQTT.subscribe(topicBaseMQTT + "/fan_mode/state");
+            clientMQTT.subscribe(topicBaseMQTT + "/swing_mode/state");
+            clientMQTT.subscribe("vincenzo_clima_segreto_7788/switch/luce_display/state");
+        }
+
+        // 3. GESTISCI I MESSAGGI IN ARRIVO
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();
             
-            if (topic.includes("/status")) {
+            // ONLINE / OFFLINE
+            if (topic.endsWith("/status")) {
                 const badge = document.getElementById('status-badge');
                 if (payload === "online") {
                     isOnline = true; badge.innerText = "ONLINE"; badge.className = "status-badge online";
@@ -389,8 +420,9 @@
                 }
             }
             
+            // MODALITÀ (Freddo, Caldo, Spento)
             else if (topic.includes("/mode/state")) {
-                syncActiveButtons('.btn-mode', payload);
+                window.syncActiveButtons('.btn-mode', payload);
                 
                 if (payload === "off") {
                     climaAcceso = false; 
@@ -406,10 +438,8 @@
                     document.querySelectorAll('.icona-stato').forEach(i => i.className = "fas fa-power-off icona-stato");
                     document.querySelectorAll('.testo-stato-title').forEach(t => t.innerText = "Condizionatore Spento");
                     
-                    // Disattiva il colore delle Tiles se spento
                     document.querySelectorAll('.smart-tile.theme-active').forEach(t => t.style.opacity = '0.5');
-                    
-                    aggiornaTermostato(gradiAttuali, true); 
+                    window.aggiornaTermostato(gradiAttuali, true); 
                 } else {
                     climaAcceso = true; 
                     document.getElementById('base-power-btn').classList.remove('off');
@@ -417,7 +447,6 @@
                     document.getElementById('lbl-off').className = "";
                     document.getElementById('lbl-on').className = "active-text";
                     
-                    // Riattiva l'opacità delle tiles
                     document.querySelectorAll('.smart-tile.theme-active').forEach(t => t.style.opacity = '1');
                     
                     let color = '#007bff'; let bg = '#eaf4ff'; let testo = 'Fresco'; let icona = 'fas fa-snowflake';
@@ -434,36 +463,36 @@
                     document.querySelectorAll('.icona-stato').forEach(i => i.className = icona + " icona-stato");
                     document.querySelectorAll('.testo-stato-title').forEach(t => t.innerText = "Condizionatore e Eco");
                     
-                    aggiornaTermostato(gradiAttuali, false);
+                    window.aggiornaTermostato(gradiAttuali, false);
                 }
             } 
             
+            // TEMPERATURA TARGET E CORRENTE
             else if (topic.includes("/target_temperature/state")) {
                 const tempVal = parseFloat(payload);
                 gradiAttuali = isNaN(tempVal) ? 24 : tempVal;
                 document.querySelectorAll('.valore-temp').forEach(el => el.innerText = gradiAttuali);
                 document.querySelectorAll('.valore-temp-testo').forEach(el => el.innerText = gradiAttuali + " °C");
-                aggiornaTermostato(gradiAttuali, !climaAcceso);
+                window.aggiornaTermostato(gradiAttuali, !climaAcceso);
             }
-
             else if (topic.includes("/current_temperature/state")) {
                 const currTemp = parseFloat(payload);
                 document.querySelectorAll('.current-temp-val').forEach(el => el.innerText = isNaN(currTemp) ? "--" : currTemp);
             }
             
+            // VENTOLA E ALETTE E LUCE
             else if (topic.includes("/fan_mode/state")) { 
-                syncActiveButtons('.btn-fan', payload); 
+                window.syncActiveButtons('.btn-fan', payload); 
                 let lbl = "Auto";
                 if(payload === "low") lbl = "Bassa"; if(payload === "medium") lbl = "Media"; if(payload === "high") lbl = "Alta";
                 document.getElementById('lbl-tile-fan').innerText = lbl;
             }
             else if (topic.includes("/swing_mode/state")) { 
-                syncActiveButtons('.btn-vane', payload);
+                window.syncActiveButtons('.btn-vane', payload);
                 let lbl = "Ferma";
                 if(payload === "vertical") lbl = "Oscilla"; if(payload === "horizontal") lbl = "Extra Su"; if(payload === "vertical_down") lbl = "Extra Giù";
                 document.getElementById('lbl-tile-swing').innerText = lbl;
             }
-
             else if (topic.includes("/luce_display/state")) {
                 luceAccesa = (payload === "on");
                 const btnBase = document.querySelector('.control-btn-base.btn-light');
@@ -472,23 +501,70 @@
                 if(luceAccesa) { 
                     btnBase.classList.add('active'); 
                     btnBase.style.backgroundColor = "var(--theme-bg)"; 
-                    
-                    // Colora e attiva la tile PRO
                     tileLight.classList.add('light-on');
                     document.getElementById('lbl-tile-light').innerText = "Accesa";
-                } 
-                else { 
+                } else { 
                     btnBase.classList.remove('active'); 
                     btnBase.style.backgroundColor = "#e2e3e5"; 
-                    
-                    // Spegni la tile PRO
                     tileLight.classList.remove('light-on');
                     document.getElementById('lbl-tile-light').innerText = "Spenta";
                 }
             }
         });
 
-        function aggiornaTermostato(temp, isEmpty) {
+        // ================= FUNZIONI DI COMANDO DA ESPORTARE NEL DOM =================
+        window.inviaComando = function(suffixTopic, messaggio) {
+            if (!isOnline) { alert("Condizionatore Offline!"); return; }
+            if (clientMQTT && clientMQTT.connected) { 
+                clientMQTT.publish(topicBaseMQTT + suffixTopic, messaggio.toString()); 
+            }
+        }
+
+        window.toggleAccensione = function() { window.inviaComando("/mode/command", climaAcceso ? "off" : "cool"); }
+        window.cambiaModalita = function(modalita) { window.inviaComando("/mode/command", modalita); closeAllSheets(); }
+        window.cambiaVentola = function(velocita) { window.inviaComando("/fan_mode/command", velocita); closeAllSheets(); }
+        window.cambiaDirezione = function(direzione) { window.inviaComando("/swing_mode/command", direzione); closeAllSheets(); }
+        window.cambiaTemperatura = function(delta) {
+            if (!isOnline) return;
+            gradiAttuali += delta; if(gradiAttuali < 16) gradiAttuali = 16; if(gradiAttuali > 30) gradiAttuali = 30;
+            document.querySelectorAll('.valore-temp').forEach(el => el.innerText = gradiAttuali);
+            document.querySelectorAll('.valore-temp-testo').forEach(el => el.innerText = gradiAttuali + " °C");
+            window.aggiornaTermostato(gradiAttuali, !climaAcceso);
+            window.inviaComando("/target_temperature/command", gradiAttuali);
+        }
+
+        // Caso isolato per la luce (è uno switch a parte, non dentro climate)
+        window.toggleLuce = function() { 
+            if (!isOnline) return;
+            clientMQTT.publish("vincenzo_clima_segreto_7788/switch/luce_display/command", luceAccesa ? "OFF" : "ON"); 
+        }
+
+        // ================= FUNZIONI GRAFICHE =================
+        window.toggleView = function() {
+            const isPro = document.getElementById('view-toggle-checkbox').checked;
+            document.getElementById('view-base').style.display = isPro ? 'none' : 'block';
+            document.getElementById('view-pro').style.display = isPro ? 'block' : 'none';
+            document.getElementById('lbl-classica').className = isPro ? '' : 'active-text';
+            document.getElementById('lbl-pro').className = isPro ? 'active-text' : '';
+            localStorage.setItem('climaViewPreference', isPro ? 'PRO' : 'BASE');
+        }
+        
+        window.onload = () => {
+            if(localStorage.getItem('climaViewPreference') === 'PRO') {
+                document.getElementById('view-toggle-checkbox').checked = true; window.toggleView();
+            }
+        };
+
+        window.openSheet = function(id) {
+            document.getElementById('sheet-overlay').classList.add('show');
+            document.getElementById(id).classList.add('open');
+        }
+        window.closeAllSheets = function() {
+            document.getElementById('sheet-overlay').classList.remove('show');
+            document.querySelectorAll('.bottom-sheet').forEach(sheet => sheet.classList.remove('open'));
+        }
+
+        window.aggiornaTermostato = function(temp, isEmpty) {
             const minT = 16; const maxT = 30;
             let val = temp; if(val < minT) val = minT; if(val > maxT) val = maxT;
             const progress = (val - minT) / (maxT - minT);
@@ -500,45 +576,11 @@
             document.getElementById('pro-arc-thumb').style.transform = `rotate(${angle}deg)`;
         }
 
-        function syncActiveButtons(selectorClass, activeValue) {
+        window.syncActiveButtons = function(selectorClass, activeValue) {
             document.querySelectorAll(selectorClass).forEach(btn => {
                 if(btn.dataset.val === activeValue) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
-        }
-
-        function inviaComando(topic, messaggio) {
-            if (!isOnline) { alert("Condizionatore Offline!"); return; }
-            if (clientMQTT && clientMQTT.connected) { clientMQTT.publish(topic, messaggio.toString()); }
-        }
-
-        // Comandi che chiudono i pannelli automaticamente
-        function toggleAccensione() { 
-            inviaComando(baseTopic + "/mode/command", climaAcceso ? "off" : "cool"); 
-        }
-        function cambiaModalita(modalita) { 
-            inviaComando(baseTopic + "/mode/command", modalita); 
-            closeAllSheets(); 
-        }
-        function cambiaVentola(velocita) { 
-            inviaComando(baseTopic + "/fan_mode/command", velocita); 
-            closeAllSheets(); 
-        }
-        function cambiaDirezione(direzione) { 
-            inviaComando(baseTopic + "/swing_mode/command", direzione); 
-            closeAllSheets(); 
-        }
-        function toggleLuce() { 
-            inviaComando("vincenzo_clima_segreto_7788/switch/luce_display/command", luceAccesa ? "OFF" : "ON"); 
-        }
-
-        function cambiaTemperatura(delta) {
-            if (!isOnline) return;
-            gradiAttuali += delta; if(gradiAttuali < 16) gradiAttuali = 16; if(gradiAttuali > 30) gradiAttuali = 30;
-            document.querySelectorAll('.valore-temp').forEach(el => el.innerText = gradiAttuali);
-            document.querySelectorAll('.valore-temp-testo').forEach(el => el.innerText = gradiAttuali + " °C");
-            aggiornaTermostato(gradiAttuali, !climaAcceso);
-            inviaComando(baseTopic + "/target_temperature/command", gradiAttuali);
         }
     </script>
 </body>
