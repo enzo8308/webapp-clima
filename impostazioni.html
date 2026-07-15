@@ -61,21 +61,6 @@
 </head>
 <body>
 
-    <div class="summary-scroll">
-    <div class="summary-widget">
-        <div class="summary-icon"><i class="fas fa-home"></i></div>
-        <div class="summary-text">
-            <h3>HAIER - Smart Clima Casa Avagliano</h3>
-            <p>Impostazioni di sistema</p>
-        </div>
-    </div>
-    </div>
-
-    <div class="header">
-    <a href="index.html" style="color: #1c1c1e; text-decoration: none; font-size: 20px;"><i class="fas fa-chevron-left"></i></a>
-    <div style="font-size: 16px; font-weight: 700;">Impostazioni</div>
-    <div style="width: 20px;"></div> </div>
-
     <div class="header">
         <div class="greeting-box">
             <h1 class="greeting">Impostazioni</h1>
@@ -149,7 +134,10 @@
 
     <div class="toast" id="toast-success"><i class="fas fa-check-circle" style="margin-right: 6px;"></i> Fatto!</div>
 
-
+    <div class="floating-nav">
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="impostazioni.html" class="nav-item active"><i class="fas fa-cog"></i><span>Impostazioni</span></a>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
