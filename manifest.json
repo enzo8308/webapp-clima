@@ -1,23 +1,16 @@
 {
-  name Smart Clima Avagliano,
-  short_name Smart Clima,
-  start_url .index.html,
-  display standalone,
-  background_color #f0f5fa,
-  theme_color #061b30,
-  orientation portrait-primary,
-  icons [
+  "name": "Smart Clima Avagliano",
+  "short_name": "Smart Clima",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f0f5fa",
+  "theme_color": "#061b30",
+  "orientation": "portrait-primary",
+  "icons": [
     {
-      src logo.png,
-      sizes 192x192,
-      type imagepng,
-      purpose any maskable
-    },
-    {
-      src logo.png,
-      sizes 512x512,
-      type imagepng,
-      purpose any maskable
+      "src": "logo.png",
+      "sizes": "any",
+      "type": "image/png"
     }
   ]
 }
