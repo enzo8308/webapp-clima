@@ -18,48 +18,62 @@
             --theme-color: #007bff; 
             --theme-bg: #eaf4ff; 
             
-            --success-color: #28a745; 
-            --error-color: #dc3545;
+            --success-color: #34c759; 
+            --error-color: #ff3b30;
         }
         
-        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 40px; overflow-x: hidden; }
+        body { 
+            margin: 0; padding: 0; 
+            font-family: 'Roboto', sans-serif; 
+            background-color: var(--bg-color); 
+            /* Sfumatura spostata più su: inizia a svanire a 260px e finisce a 390px */
+            background-image: linear-gradient(180deg, #061b30 0%, #0056b3 260px, var(--bg-color) 390px);
+            background-repeat: no-repeat;
+            color: var(--text-main); 
+            overflow-x: hidden; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
         
+        /* Contenitore flessibile per spingere il copyright in basso */
+        .main-content { flex-grow: 1; padding-bottom: 20px; }
+
         /* OVERLAY DI CARICAMENTO INIZIALE */
         #loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
         .spinner { border: 4px solid rgba(0,0,0,0.1); border-left-color: var(--theme-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px;}
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px 10px 20px; background-color: var(--bg-color); }
-        .back-btn { color: var(--text-main); text-decoration: none; font-size: 20px; cursor: pointer; }
-        .header-title { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; }
+        /* HEADER E BARRA SUPERIORE (Testi resi BIANCHI per risaltare sul blu) */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px 10px 20px; background-color: transparent; }
+        .back-btn { color: white; text-decoration: none; font-size: 20px; cursor: pointer; transition: 0.2s;}
+        .back-btn:active { opacity: 0.5; }
+        .header-title { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; color: white;}
         .status-badge { font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-        .status-badge.online { background-color: #d4edda; color: var(--success-color); }
-        .status-badge.offline { background-color: #f8d7da; color: var(--error-color); }
+        .status-badge.online { background-color: rgba(52, 199, 89, 0.2); color: #4cd964; border: 1px solid rgba(52, 199, 89, 0.3);}
+        .status-badge.offline { background-color: rgba(255, 59, 48, 0.2); color: #ff6b22; border: 1px solid rgba(255, 59, 48, 0.3);}
         
-        /* BARRA DEI TOGGLE IN ALTO */
-        .top-bar-controls { display: flex; justify-content: space-between; padding: 0 20px 10px 20px; background-color: var(--bg-color); position: sticky; top: 0; z-index: 100;}
+        .top-bar-controls { display: flex; justify-content: space-between; padding: 0 20px 10px 20px; background-color: transparent; position: relative; z-index: 100;}
         .toggle-wrapper { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .toggle-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-        .toggle-group { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; color: var(--text-muted); }
+        .toggle-label { font-size: 9px; color: rgba(255,255,255,0.7); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .toggle-group { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); }
         
-        /* Switch identici per dimensione */
         .switch-header { position: relative; display: inline-block; width: 46px; height: 26px; }
         .switch-header input { opacity: 0; width: 0; height: 0; }
-        .slider-header { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #d5dbe1; transition: .3s; border-radius: 34px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+        .slider-header { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); backdrop-filter: blur(5px); transition: .3s; border-radius: 34px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
         .slider-header:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
         
-        /* Colori Switch */
         .switch-header input:checked + .slider-header { background-color: var(--theme-color); }
         .switch-header input:checked + .slider-header:before { transform: translateX(20px); }
-        .active-text { color: var(--text-main); }
+        .active-text { color: white; }
 
         /* ==================== VISTA BASE ==================== */
         #view-base { display: block; animation: fadeIn 0.3s; padding-top: 5px;}
         .main-status-base { text-align: center; padding: 0px 20px 30px 20px; }
-        .temperature-display-base { font-size: 72px; font-weight: 700; color: var(--text-main); margin: 0; display: flex; justify-content: center; align-items: flex-start; }
+        .temperature-display-base { font-size: 72px; font-weight: 700; color: white; margin: 0; display: flex; justify-content: center; align-items: flex-start; text-shadow: 0 4px 15px rgba(0,0,0,0.1);}
         .temperature-display-base span { font-size: 32px; margin-top: 15px; }
         .power-big-btn-base { width: 50px; height: 50px; border-radius: 50%; background-color: var(--theme-color); color: white; font-size: 20px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-top: 15px; cursor: pointer; transition: 0.3s; }
+        
         .control-section-base { background-color: var(--card-bg); margin: 0 15px 15px 15px; padding: 15px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
         .section-header-base { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-grid-base { display: flex; justify-content: space-between; gap: 8px; }
@@ -67,6 +81,7 @@
         .control-btn-base i { font-size: 18px; margin-bottom: 8px; color: var(--text-muted); }
         .control-btn-base.active { background-color: var(--theme-bg); border-color: var(--theme-color); color: var(--theme-color); }
         .control-btn-base.active i { color: var(--theme-color); }
+        
         .temp-controls-base { display: flex; justify-content: space-between; align-items: center; background-color: #f8f9fa; border-radius: 12px; padding: 5px; }
         .temp-btn-base { width: 45px; height: 45px; border-radius: 10px; background-color: white; border: 1px solid #ddd; font-size: 20px; color: var(--text-main); cursor: pointer; }
 
@@ -79,18 +94,19 @@
         .pro-gauge-container { width: 100%; height: auto; position: relative; margin-top: 0px; }
         .pro-gauge-svg { width: 100%; height: auto; display: block; overflow: visible; }
         
+        /* Testi interni al termostato (Bianchi) */
         .pro-gauge-info { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 15px; }
-        .badge-eco { background: var(--success-color); color: white; padding: 3px 10px; border-radius: 12px; font-size: 9px; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-bottom: 5px; box-shadow: 0 2px 5px rgba(40,167,69,0.3); }
-        .info-title { font-size: 12px; font-weight: 700; color: var(--theme-color); margin-bottom: 5px; }
-        .info-temp { font-size: 78px; font-weight: 700; color: var(--theme-color); line-height: 1; font-family: 'Roboto', sans-serif; letter-spacing: -2px;}
-        .info-current { font-size: 12px; font-weight: 500; color: #555; margin-top: 10px; }
+        .badge-eco { background: rgba(52, 199, 89, 0.85); color: white; padding: 3px 10px; border-radius: 12px; font-size: 9px; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-bottom: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .info-title { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.9); margin-bottom: 5px; }
+        .info-temp { font-size: 78px; font-weight: 700; color: white; line-height: 1; font-family: 'Roboto', sans-serif; letter-spacing: -2px; text-shadow: 0 4px 15px rgba(0,0,0,0.1);}
+        .info-current { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.7); margin-top: 10px; }
         
-        /* FRECCE SOTTO IL CERCHIO */
+        /* FRECCE SOTTO IL CERCHIO (Vetro satinato) */
         .pro-arrows { display: flex; justify-content: center; gap: 40px; margin-top: -15px; margin-bottom: 25px; z-index: 5; position: relative;}
-        .pro-circle-btn { width: 46px; height: 46px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.06); font-size: 18px; color: #555; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;}
-        .pro-circle-btn:active { transform: scale(0.9); }
+        .pro-circle-btn { width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-size: 18px; color: white; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;}
+        .pro-circle-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.25); }
 
-        /* NUOVA GRIGLIA "SMART TILES" */
+        /* GRIGLIA TABS DELLE FUNZIONI */
         .smart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         
         .smart-tile { background: var(--card-bg); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; min-height: 105px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid rgba(0,0,0,0.02); transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; box-sizing: border-box;}
@@ -102,14 +118,11 @@
         .tile-title { font-size: 13px; font-weight: 700; color: var(--text-main); }
         .tile-value { font-size: 11px; font-weight: 600; color: var(--text-muted); transition: 0.3s; }
 
-        /* Stile Dinamico Tile */
         .smart-tile.theme-active .tile-icon { background: var(--theme-bg); color: var(--theme-color); }
-        
-        /* Tile Luce */
         .smart-tile.light-on .tile-icon { background: var(--theme-color); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .smart-tile.light-on .tile-value { color: var(--theme-color); }
 
-        /* ==================== PANNELLI A COMPARSA ==================== */
+        /* PANNELLI A COMPARSA */
         .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sheet-overlay.show { opacity: 1; pointer-events: all; }
         
@@ -119,7 +132,6 @@
         .sheet-handle { width: 40px; height: 5px; background: #e0e0e0; border-radius: 5px; margin: 0 auto 20px auto; }
         .sheet-title { font-size: 16px; font-weight: 700; margin-bottom: 25px; text-align: center; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px;}
         
-        /* Bottoni dentro i Pannelli */
         .sheet-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 10px; }
         .sheet-opt { background-color: #f8f9fa; border-radius: 16px; padding: 15px 5px; text-align: center; border: 2px solid transparent; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;}
         .sheet-opt i { font-size: 22px; color: var(--text-muted); }
@@ -127,6 +139,9 @@
         
         .sheet-opt.active { background-color: var(--theme-bg); border-color: var(--theme-color); }
         .sheet-opt.active i, .sheet-opt.active span { color: var(--theme-color); }
+
+        /* COPYRIGHT IN BASSO */
+        .copyright-footer { width: 100%; text-align: center; font-size: 10px; font-weight: 600; color: #b0b0b0; letter-spacing: 0.5px; padding: 10px 0; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -138,157 +153,167 @@
         <div style="font-weight: 700; color: var(--text-muted);" id="loading-message">Sincronizzazione Cloud...</div>
     </div>
 
-    <div class="header">
-        <a href="index.html" class="back-btn"><i class="fas fa-chevron-left"></i></a>
-        <div class="header-title">
-            <span id="room-name-display">Caricamento...</span> <span id="status-badge" class="status-badge offline">Offline</span>
-        </div>
-        <i class="fas fa-wifi" style="color: var(--success-color); font-size: 14px;"></i>
-    </div>
-    
-    <div class="top-bar-controls">
-        <div class="toggle-wrapper" onclick="toggleAccensione()" style="cursor: pointer;">
-            <span class="toggle-label">Accensione</span>
-            <div class="toggle-group">
-                <span id="lbl-off" class="active-text">OFF</span>
-                <label class="switch-header" style="pointer-events: none;">
-                    <input type="checkbox" id="top-power-checkbox">
-                    <span class="slider-header power-slider"></span>
-                </label>
-                <span id="lbl-on">ON</span>
-            </div>
-        </div>
-
-        <div class="toggle-wrapper">
-            <span class="toggle-label">Visualizzazione</span>
-            <div class="toggle-group">
-                <span id="lbl-classica" class="active-text">CLASSICA</span>
-                <label class="switch-header">
-                    <input type="checkbox" id="view-toggle-checkbox" onchange="toggleView()">
-                    <span class="slider-header"></span>
-                </label>
-                <span id="lbl-pro">PRO</span>
-            </div>
-        </div>
-    </div>
-
-
-    <div id="view-base">
-        <div class="main-status-base">
-            <div class="temperature-display-base">
-                <span class="valore-temp" style="margin-top: 0; font-size: 72px;">24</span>
-                <span style="font-size: 32px; margin-top: 15px;">°</span>
-            </div>
-            <button class="power-big-btn-base btn-power off" id="base-power-btn" onclick="toggleAccensione()"><i class="fas fa-power-off"></i></button>
-        </div>
-
-        <div class="control-section-base">
-            <div class="section-header-base">MODALITÀ</div>
-            <div class="btn-grid-base">
-                <div class="control-btn-base btn-mode active" data-val="cool" onclick="cambiaModalita('cool')"><i class="fas fa-snowflake"></i> Freddo</div>
-                <div class="control-btn-base btn-mode" data-val="heat" onclick="cambiaModalita('heat')"><i class="fas fa-sun"></i> Caldo</div>
-                <div class="control-btn-base btn-mode" data-val="dry" onclick="cambiaModalita('dry')"><i class="fas fa-tint"></i> Deumid.</div>
-                <div class="control-btn-base btn-mode" data-val="fan_only" onclick="cambiaModalita('fan_only')"><i class="fas fa-fan"></i> Ventola</div>
-                <div class="control-btn-base btn-mode" data-val="auto" onclick="cambiaModalita('auto')"><i class="fas fa-magic"></i> Auto</div>
-            </div>
-        </div>
-
-        <div class="control-section-base">
-            <div class="section-header-base">TEMPERATURA</div>
-            <div class="temp-controls-base">
-                <button class="temp-btn-base" onclick="cambiaTemperatura(-1)"><i class="fas fa-minus"></i></button>
-                <span class="valore-temp-testo" style="font-size: 16px; font-weight: 600;">24 °C</span>
-                <button class="temp-btn-base" onclick="cambiaTemperatura(1)"><i class="fas fa-plus"></i></button>
-            </div>
-        </div>
-
-        <div class="control-section-base">
-            <div class="section-header-base">VELOCITÀ VENTOLA</div>
-            <div class="btn-grid-base">
-                <div class="control-btn-base active btn-fan" data-val="low" onclick="cambiaVentola('low')"><i class="fas fa-signal" style="font-size: 12px;"></i> Bassa</div>
-                <div class="control-btn-base btn-fan" data-val="medium" onclick="cambiaVentola('medium')"><i class="fas fa-signal" style="font-size: 16px;"></i> Media</div>
-                <div class="control-btn-base btn-fan" data-val="high" onclick="cambiaVentola('high')"><i class="fas fa-signal" style="font-size: 20px;"></i> Alta</div>
-                <div class="control-btn-base btn-fan" data-val="auto" onclick="cambiaVentola('auto')"><i class="fas fa-sync"></i> Auto</div>
-            </div>
-        </div>
-
-        <div class="control-section-base">
-            <div class="section-header-base">CONTROLLO ALETTE E DISPLAY</div>
-            <div class="btn-grid-base" style="margin-bottom: 10px;">
-                <div class="control-btn-base btn-vane" data-val="both" onclick="cambiaDirezione('both')"><i class="fas fa-arrows-alt-v"></i> Oscilla</div>
-                <div class="control-btn-base btn-vane" data-val="horizontal" onclick="cambiaDirezione('horizontal')"><i class="fas fa-chevron-up"></i> Extra Su</div>
-                <div class="control-btn-base btn-vane" data-val="vertical" onclick="cambiaDirezione('vertical')"><i class="fas fa-chevron-down"></i> Extra Giù</div>
-            </div>
-            <div class="btn-grid-base">
-                <div class="control-btn-base active btn-vane" data-val="off" onclick="cambiaDirezione('off')"><i class="fas fa-stop"></i> Ferma aletta</div>
-                <div class="control-btn-base btn-light" style="background-color: #e2e3e5;" onclick="toggleLuce()"><i class="fas fa-lightbulb"></i> Luce Display</div>
-            </div>
-        </div>
-    </div>
-
-
-    <div id="view-pro">
+    <!-- MAIN CONTENT SERVE A SPINGERE IL FOOTER IN BASSO -->
+    <div class="main-content">
         
-        <div class="pro-gauge-wrapper">
-            <div class="pro-gauge-container">
-                <svg viewBox="0 0 300 270" class="pro-gauge-svg">
-                    <defs><filter id="shadowThumb"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.15)"/></filter></defs>
-                    <path d="M 51 249 A 140 140 0 1 1 249 249" fill="none" stroke="#d5dbe1" stroke-width="15" stroke-linecap="butt" stroke-dasharray="4 8" />
-                    <path id="pro-arc-path" d="M 51 249 A 140 140 0 1 1 249 249" fill="none" stroke="var(--theme-color)" stroke-width="15" stroke-linecap="round" stroke-dasharray="660" stroke-dashoffset="330" style="transition: stroke-dashoffset 0.4s ease-out, stroke 0.4s;" />
-                    <circle id="pro-arc-thumb" cx="150" cy="10" r="14" fill="#fff" stroke="var(--theme-color)" stroke-width="4" filter="url(#shadowThumb)" style="transform-origin: 150px 150px; transform: rotate(0deg); transition: transform 0.4s ease-out, stroke 0.4s;" />
-                </svg>
-                
-                <div class="pro-gauge-info">
-                    <div class="badge-eco"><i class="fas fa-tree"></i> ECO</div>
-                    <div class="info-title testo-stato-title">Condizionatore Spento</div>
-                    <div class="info-temp valore-temp">24</div>
-                    <div class="info-current">Attualmente <span class="current-temp-val">--</span> °C</div>
+        <div class="header">
+            <a href="index.html" class="back-btn"><i class="fas fa-chevron-left"></i></a>
+            <div class="header-title">
+                <span id="room-name-display">Caricamento...</span> <span id="status-badge" class="status-badge offline">Offline</span>
+            </div>
+            <i class="fas fa-wifi" style="color: rgba(255,255,255,0.5); font-size: 14px;" id="top-wifi-icon"></i>
+        </div>
+        
+        <div class="top-bar-controls">
+            <div class="toggle-wrapper" onclick="toggleAccensione()" style="cursor: pointer;">
+                <span class="toggle-label">Accensione</span>
+                <div class="toggle-group">
+                    <span id="lbl-off" class="active-text">OFF</span>
+                    <label class="switch-header" style="pointer-events: none;">
+                        <input type="checkbox" id="top-power-checkbox">
+                        <span class="slider-header power-slider"></span>
+                    </label>
+                    <span id="lbl-on">ON</span>
                 </div>
             </div>
 
-            <div class="pro-arrows">
-                <button class="pro-circle-btn" onclick="cambiaTemperatura(-1)"><i class="fas fa-chevron-down"></i></button>
-                <button class="pro-circle-btn" onclick="cambiaTemperatura(1)"><i class="fas fa-chevron-up"></i></button>
+            <div class="toggle-wrapper">
+                <span class="toggle-label">Visualizzazione</span>
+                <div class="toggle-group">
+                    <span id="lbl-classica" class="active-text">CLASSICA</span>
+                    <label class="switch-header">
+                        <input type="checkbox" id="view-toggle-checkbox" onchange="toggleView()">
+                        <span class="slider-header"></span>
+                    </label>
+                    <span id="lbl-pro">PRO</span>
+                </div>
             </div>
         </div>
 
-        <div class="smart-grid">
+        <div id="view-base">
+            <div class="main-status-base">
+                <div class="temperature-display-base">
+                    <span class="valore-temp" style="margin-top: 0; font-size: 72px;">24</span>
+                    <span style="font-size: 32px; margin-top: 15px;">°</span>
+                </div>
+                <button class="power-big-btn-base btn-power off" id="base-power-btn" onclick="toggleAccensione()"><i class="fas fa-power-off"></i></button>
+            </div>
+
+            <div class="control-section-base">
+                <div class="section-header-base">MODALITÀ</div>
+                <div class="btn-grid-base">
+                    <div class="control-btn-base btn-mode active" data-val="cool" onclick="cambiaModalita('cool')"><i class="fas fa-snowflake"></i> Freddo</div>
+                    <div class="control-btn-base btn-mode" data-val="heat" onclick="cambiaModalita('heat')"><i class="fas fa-sun"></i> Caldo</div>
+                    <div class="control-btn-base btn-mode" data-val="dry" onclick="cambiaModalita('dry')"><i class="fas fa-tint"></i> Deumid.</div>
+                    <div class="control-btn-base btn-mode" data-val="fan_only" onclick="cambiaModalita('fan_only')"><i class="fas fa-fan"></i> Ventola</div>
+                    <div class="control-btn-base btn-mode" data-val="auto" onclick="cambiaModalita('auto')"><i class="fas fa-magic"></i> Auto</div>
+                </div>
+            </div>
+
+            <div class="control-section-base">
+                <div class="section-header-base">TEMPERATURA</div>
+                <div class="temp-controls-base">
+                    <button class="temp-btn-base" onclick="cambiaTemperatura(-1)"><i class="fas fa-minus"></i></button>
+                    <span class="valore-temp-testo" style="font-size: 16px; font-weight: 600;">24 °C</span>
+                    <button class="temp-btn-base" onclick="cambiaTemperatura(1)"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+
+            <div class="control-section-base">
+                <div class="section-header-base">VELOCITÀ VENTOLA</div>
+                <div class="btn-grid-base">
+                    <div class="control-btn-base active btn-fan" data-val="low" onclick="cambiaVentola('low')"><i class="fas fa-signal" style="font-size: 12px;"></i> Bassa</div>
+                    <div class="control-btn-base btn-fan" data-val="medium" onclick="cambiaVentola('medium')"><i class="fas fa-signal" style="font-size: 16px;"></i> Media</div>
+                    <div class="control-btn-base btn-fan" data-val="high" onclick="cambiaVentola('high')"><i class="fas fa-signal" style="font-size: 20px;"></i> Alta</div>
+                    <div class="control-btn-base btn-fan" data-val="auto" onclick="cambiaVentola('auto')"><i class="fas fa-sync"></i> Auto</div>
+                </div>
+            </div>
+
+            <div class="control-section-base">
+                <div class="section-header-base">CONTROLLO ALETTE E DISPLAY</div>
+                <div class="btn-grid-base" style="margin-bottom: 10px;">
+                    <div class="control-btn-base btn-vane" data-val="both" onclick="cambiaDirezione('both')"><i class="fas fa-arrows-alt-v"></i> Oscilla</div>
+                    <div class="control-btn-base btn-vane" data-val="horizontal" onclick="cambiaDirezione('horizontal')"><i class="fas fa-chevron-up"></i> Extra Su</div>
+                    <div class="control-btn-base btn-vane" data-val="vertical" onclick="cambiaDirezione('vertical')"><i class="fas fa-chevron-down"></i> Extra Giù</div>
+                </div>
+                <div class="btn-grid-base">
+                    <div class="control-btn-base active btn-vane" data-val="off" onclick="cambiaDirezione('off')"><i class="fas fa-stop"></i> Ferma aletta</div>
+                    <div class="control-btn-base btn-light" style="background-color: #e2e3e5;" onclick="toggleLuce()"><i class="fas fa-lightbulb"></i> Luce Display</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-pro">
             
-            <div class="smart-tile theme-active" id="tile-mode" onclick="openSheet('sheet-mode')">
-                <div class="tile-icon"><i class="fas fa-snowflake icona-stato"></i></div>
-                <div class="tile-info">
-                    <div class="tile-title">Modalità</div>
-                    <div class="tile-value testo-stato">Fresco</div>
+            <div class="pro-gauge-wrapper">
+                <div class="pro-gauge-container">
+                    <svg viewBox="0 0 300 270" class="pro-gauge-svg">
+                        <defs><filter id="shadowThumb"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.15)"/></filter></defs>
+                        <!-- Traccia in background semitrasparente invece che grigia -->
+                        <path d="M 51 249 A 140 140 0 1 1 249 249" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="15" stroke-linecap="butt" stroke-dasharray="4 8" />
+                        <!-- Arco colorato -->
+                        <path id="pro-arc-path" d="M 51 249 A 140 140 0 1 1 249 249" fill="none" stroke="var(--theme-color)" stroke-width="15" stroke-linecap="round" stroke-dasharray="660" stroke-dashoffset="330" style="transition: stroke-dashoffset 0.4s ease-out, stroke 0.4s;" />
+                        <!-- Pallino indicatore -->
+                        <circle id="pro-arc-thumb" cx="150" cy="10" r="14" fill="#fff" stroke="var(--theme-color)" stroke-width="4" filter="url(#shadowThumb)" style="transform-origin: 150px 150px; transform: rotate(0deg); transition: transform 0.4s ease-out, stroke 0.4s;" />
+                    </svg>
+                    
+                    <div class="pro-gauge-info">
+                        <div class="badge-eco"><i class="fas fa-tree"></i> ECO</div>
+                        <div class="info-title testo-stato-title">Condizionatore Spento</div>
+                        <div class="info-temp valore-temp">24</div>
+                        <div class="info-current">Attualmente <span class="current-temp-val">--</span> °C</div>
+                    </div>
+                </div>
+
+                <div class="pro-arrows">
+                    <button class="pro-circle-btn" onclick="cambiaTemperatura(-1)"><i class="fas fa-chevron-down"></i></button>
+                    <button class="pro-circle-btn" onclick="cambiaTemperatura(1)"><i class="fas fa-chevron-up"></i></button>
                 </div>
             </div>
 
-            <div class="smart-tile theme-active" id="tile-fan" onclick="openSheet('sheet-fan')">
-                <div class="tile-icon"><i class="fas fa-fan"></i></div>
-                <div class="tile-info">
-                    <div class="tile-title">Ventola</div>
-                    <div class="tile-value" id="lbl-tile-fan">Auto</div>
+            <!-- TABS FUNZIONI (Da qui in poi il background è chiarissimo) -->
+            <div class="smart-grid">
+                
+                <div class="smart-tile theme-active" id="tile-mode" onclick="openSheet('sheet-mode')">
+                    <div class="tile-icon"><i class="fas fa-snowflake icona-stato"></i></div>
+                    <div class="tile-info">
+                        <div class="tile-title">Modalità</div>
+                        <div class="tile-value testo-stato">Fresco</div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="smart-tile theme-active" id="tile-swing" onclick="openSheet('sheet-swing')">
-                <div class="tile-icon"><i id="icon-tile-swing" class="fas fa-arrows-alt-v"></i></div>
-                <div class="tile-info">
-                    <div class="tile-title">Alette</div>
-                    <div class="tile-value" id="lbl-tile-swing">Ferma</div>
+                <div class="smart-tile theme-active" id="tile-fan" onclick="openSheet('sheet-fan')">
+                    <div class="tile-icon"><i class="fas fa-fan"></i></div>
+                    <div class="tile-info">
+                        <div class="tile-title">Ventola</div>
+                        <div class="tile-value" id="lbl-tile-fan">Auto</div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="smart-tile" id="tile-light" onclick="toggleLuce()">
-                <div class="tile-icon"><i class="fas fa-lightbulb"></i></div>
-                <div class="tile-info">
-                    <div class="tile-title">Luce Display</div>
-                    <div class="tile-value" id="lbl-tile-light">Spenta</div>
+                <div class="smart-tile theme-active" id="tile-swing" onclick="openSheet('sheet-swing')">
+                    <div class="tile-icon"><i id="icon-tile-swing" class="fas fa-arrows-alt-v"></i></div>
+                    <div class="tile-info">
+                        <div class="tile-title">Alette</div>
+                        <div class="tile-value" id="lbl-tile-swing">Ferma</div>
+                    </div>
                 </div>
+
+                <div class="smart-tile" id="tile-light" onclick="toggleLuce()">
+                    <div class="tile-icon"><i class="fas fa-lightbulb"></i></div>
+                    <div class="tile-info">
+                        <div class="tile-title">Luce Display</div>
+                        <div class="tile-value" id="lbl-tile-light">Spenta</div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
 
     </div>
+
+    <!-- COPYRIGHT IN BASSO A TUTTO -->
+    <div class="copyright-footer">® Copyright 2026 - Vincenzo Avagliano</div>
 
     <div class="sheet-overlay" id="sheet-overlay" onclick="closeAllSheets()"></div>
 
@@ -339,23 +364,18 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // VARIABILI GLOBALI DI SISTEMA
         let topicBaseMQTT = ""; 
         const urlParams = new URLSearchParams(window.location.search);
         const idStanzaURL = urlParams.get('stanza') || 'cameretta';
 
-        // MODIFICA LUCE: Generazione dinamica del nome del topic per la luce
         let luceSwitchName = idStanzaURL === 'cameretta' ? 'luce_display' : `luce_display_${idStanzaURL}`;
 
         let climaAcceso = false; let gradiAttuali = 24; let isOnline = false; let luceAccesa = false;
         
-        // MQTT Client globale
         const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_det_" + Math.random().toString(16).substring(2, 10), clean: true });
 
-        // CONTROLLO ACCESSO E AVVIO: GESTITO IN MODO SICURO SENZA REPLACE
         onAuthStateChanged(auth, (user) => { 
             if (!user) {
-                console.log("Utente non autenticato. Mostro messaggio.");
                 const loaderMsg = document.getElementById('loading-message');
                 if (loaderMsg) loaderMsg.innerHTML = '<span style="color:red">Sessione scaduta. Torna alla home e fai login.</span>';
             } else {
@@ -363,7 +383,6 @@
             }
         });
 
-        // 1. SCARICA I DATI DELLA STANZA DA FIREBASE
         function inizializzaStanzaCloud() {
             const docRef = doc(db, "impostazioni", "stanze_config");
             getDoc(docRef).then((docSnap) => {
@@ -375,10 +394,8 @@
                         document.getElementById('room-name-display').innerText = miaStanza.nome;
                         topicBaseMQTT = `vincenzo_clima_segreto_7788/climate/${miaStanza.topic}`;
                         
-                        // Avvia la connessione MQTT con il nuovo topic
                         avviaConnessioneMQTT();
                         
-                        // Nasconde la schermata di caricamento fluido
                         setTimeout(() => {
                             const overlay = document.getElementById('loading-overlay');
                             if(overlay) {
@@ -387,54 +404,46 @@
                             }
                         }, 300);
                     } else {
-                        console.error("Stanza non trovata!");
                         document.getElementById('loading-message').innerText = "Errore: stanza inesistente.";
                     }
                 }
-            }).catch((err) => {
-                console.error("Errore Firebase:", err);
             });
         }
 
-        // 2. ISCRIVITI AI CANALI MQTT GIUSTI
         function avviaConnessioneMQTT() {
             if(clientMQTT.connected) eseguiIscrizioni();
             else clientMQTT.on('connect', eseguiIscrizioni);
         }
 
         function eseguiIscrizioni() {
-            // Stato Online specifico o master
             if (idStanzaURL === 'cameretta') {
                 clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
             } else {
                 clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${idStanzaURL}/status`);
             }
-            
-            // Comandi clima specifici
             clientMQTT.subscribe(topicBaseMQTT + "/mode/state");
             clientMQTT.subscribe(topicBaseMQTT + "/target_temperature/state");
             clientMQTT.subscribe(topicBaseMQTT + "/current_temperature/state");
             clientMQTT.subscribe(topicBaseMQTT + "/fan_mode/state");
             clientMQTT.subscribe(topicBaseMQTT + "/swing_mode/state");
-            // Iscrizione dinamica luce
             clientMQTT.subscribe(`vincenzo_clima_segreto_7788/switch/${luceSwitchName}/state`);
         }
 
-        // 3. GESTISCI I MESSAGGI IN ARRIVO
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();
             
-            // ONLINE / OFFLINE
             if (topic.endsWith("/status")) {
                 const badge = document.getElementById('status-badge');
+                const wifiIcon = document.getElementById('top-wifi-icon');
                 if (payload === "online") {
                     isOnline = true; badge.innerText = "ONLINE"; badge.className = "status-badge online";
+                    if(wifiIcon) wifiIcon.style.color = "#4cd964";
                 } else {
                     isOnline = false; badge.innerText = "OFFLINE"; badge.className = "status-badge offline";
+                    if(wifiIcon) wifiIcon.style.color = "rgba(255,255,255,0.5)";
                 }
             }
             
-            // MODALITÀ (Freddo, Caldo, Spento)
             else if (topic.includes("/mode/state")) {
                 window.syncActiveButtons('.btn-mode', payload);
                 
@@ -465,10 +474,10 @@
                     
                     let color = '#007bff'; let bg = '#eaf4ff'; let testo = 'Fresco'; let icona = 'fas fa-snowflake';
 
-                    if (payload === 'heat') { color = '#dc3545'; bg = '#f8d7da'; testo = 'Caldo'; icona = 'fas fa-sun';}
-                    else if (payload === 'dry') { color = '#17a2b8'; bg = '#d1ecf1'; testo = 'Deumid.'; icona = 'fas fa-tint';}
-                    else if (payload === 'fan_only') { color = '#6c757d'; bg = '#e2e3e5'; testo = 'Ventola'; icona = 'fas fa-fan';}
-                    else if (payload === 'auto') { color = '#28a745'; bg = '#d4edda'; testo = 'Auto'; icona = 'fas fa-magic';}
+                    if (payload === 'heat') { color = '#ff3b30'; bg = '#ffebe9'; testo = 'Caldo'; icona = 'fas fa-sun';}
+                    else if (payload === 'dry') { color = '#5ac8fa'; bg = '#eef9ff'; testo = 'Deumid.'; icona = 'fas fa-tint';}
+                    else if (payload === 'fan_only') { color = '#8e8e93'; bg = '#f2f2f7'; testo = 'Ventola'; icona = 'fas fa-fan';}
+                    else if (payload === 'auto') { color = '#34c759'; bg = '#ebf9ee'; testo = 'Auto'; icona = 'fas fa-magic';}
                     
                     document.body.style.setProperty('--theme-color', color);
                     document.body.style.setProperty('--theme-bg', bg);
@@ -481,7 +490,6 @@
                 }
             } 
             
-            // TEMPERATURA TARGET E CORRENTE
             else if (topic.includes("/target_temperature/state")) {
                 const tempVal = parseFloat(payload);
                 gradiAttuali = isNaN(tempVal) ? 24 : tempVal;
@@ -494,7 +502,6 @@
                 document.querySelectorAll('.current-temp-val').forEach(el => el.innerText = isNaN(currTemp) ? "--" : currTemp);
             }
             
-            // VENTOLA E ALETTE E LUCE
             else if (topic.includes("/fan_mode/state")) { 
                 window.syncActiveButtons('.btn-fan', payload); 
                 let lbl = "Auto";
@@ -505,29 +512,16 @@
                 window.syncActiveButtons('.btn-vane', payload);
                 
                 let lbl = "Ferma";
-                let iconClass = "fas fa-stop"; // Icona quadrata di default per quando è ferma
+                let iconClass = "fas fa-stop"; 
 
-                if(payload === "both") { 
-                    lbl = "Oscilla"; 
-                    iconClass = "fas fa-arrows-alt-v"; 
-                } else if(payload === "horizontal") { 
-                    lbl = "Extra Su"; 
-                    iconClass = "fas fa-chevron-up"; 
-                } else if(payload === "vertical") { 
-                    lbl = "Extra Giù"; 
-                    iconClass = "fas fa-chevron-down"; 
-                }
+                if(payload === "both") { lbl = "Oscilla"; iconClass = "fas fa-arrows-alt-v"; } 
+                else if(payload === "horizontal") { lbl = "Extra Su"; iconClass = "fas fa-chevron-up"; } 
+                else if(payload === "vertical") { lbl = "Extra Giù"; iconClass = "fas fa-chevron-down"; }
                 
-                // 1. Aggiorna la scritta sotto (es. "Extra Su")
                 document.getElementById('lbl-tile-swing').innerText = lbl;
-                
-                // 2. Aggiorna il disegno dell'icona nel riquadro
                 const tileIcon = document.getElementById('icon-tile-swing');
-                if (tileIcon) {
-                    tileIcon.className = iconClass;
-                }
+                if (tileIcon) tileIcon.className = iconClass;
             }
-            // Controllo dinamico dello stato della luce
             else if (topic.includes(`/${luceSwitchName}/state`)) {
                 luceAccesa = (payload === "on");
                 const btnBase = document.querySelector('.control-btn-base.btn-light');
@@ -547,7 +541,6 @@
             }
         });
 
-        // ================= FUNZIONI DI COMANDO DA ESPORTARE NEL DOM =================
         window.inviaComando = function(suffixTopic, messaggio) {
             if (!isOnline) { alert("Condizionatore Offline!"); return; }
             if (clientMQTT && clientMQTT.connected) { 
@@ -568,13 +561,11 @@
             window.inviaComando("/target_temperature/command", gradiAttuali);
         }
 
-        // Caso isolato per la luce: utilizza il topic dinamico
         window.toggleLuce = function() { 
             if (!isOnline) return;
             clientMQTT.publish(`vincenzo_clima_segreto_7788/switch/${luceSwitchName}/command`, luceAccesa ? "OFF" : "ON"); 
         }
 
-        // ================= FUNZIONI GRAFICHE =================
         window.toggleView = function() {
             const check = document.getElementById('view-toggle-checkbox');
             if(!check) return;
