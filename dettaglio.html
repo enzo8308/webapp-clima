@@ -24,7 +24,7 @@
         
         body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 40px; overflow-x: hidden; }
         
-        /* OVERLAY DI CARICAMENTO INIZIALE (Aggiunto per non far vedere i dati vecchi mentre scarica) */
+        /* OVERLAY DI CARICAMENTO INIZIALE */
         #loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
         .spinner { border: 4px solid rgba(0,0,0,0.1); border-left-color: var(--theme-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px;}
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -37,7 +37,7 @@
         .status-badge.online { background-color: #d4edda; color: var(--success-color); }
         .status-badge.offline { background-color: #f8d7da; color: var(--error-color); }
         
-        /* BARRA DEI TOGGLE IN ALTO (SIMMETRICA) */
+        /* BARRA DEI TOGGLE IN ALTO */
         .top-bar-controls { display: flex; justify-content: space-between; padding: 0 20px 10px 20px; background-color: var(--bg-color); position: sticky; top: 0; z-index: 100;}
         .toggle-wrapper { display: flex; flex-direction: column; align-items: center; gap: 6px; }
         .toggle-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
@@ -54,7 +54,6 @@
         .switch-header input:checked + .slider-header:before { transform: translateX(20px); }
         .active-text { color: var(--text-main); }
 
-
         /* ==================== VISTA BASE ==================== */
         #view-base { display: block; animation: fadeIn 0.3s; padding-top: 5px;}
         .main-status-base { text-align: center; padding: 0px 20px 30px 20px; }
@@ -70,7 +69,6 @@
         .control-btn-base.active i { color: var(--theme-color); }
         .temp-controls-base { display: flex; justify-content: space-between; align-items: center; background-color: #f8f9fa; border-radius: 12px; padding: 5px; }
         .temp-btn-base { width: 45px; height: 45px; border-radius: 10px; background-color: white; border: 1px solid #ddd; font-size: 20px; color: var(--text-main); cursor: pointer; }
-
 
         /* ==================== VISTA PRO (TRENDY) ==================== */
         #view-pro { display: none; padding: 0 20px; animation: fadeIn 0.3s; }
@@ -92,7 +90,7 @@
         .pro-circle-btn { width: 46px; height: 46px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.06); font-size: 18px; color: #555; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;}
         .pro-circle-btn:active { transform: scale(0.9); }
 
-        /* NUOVA GRIGLIA "SMART TILES" (HOMEKIT STYLE) */
+        /* NUOVA GRIGLIA "SMART TILES" */
         .smart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         
         .smart-tile { background: var(--card-bg); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; min-height: 105px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid rgba(0,0,0,0.02); transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; box-sizing: border-box;}
@@ -104,14 +102,14 @@
         .tile-title { font-size: 13px; font-weight: 700; color: var(--text-main); }
         .tile-value { font-size: 11px; font-weight: 600; color: var(--text-muted); transition: 0.3s; }
 
-        /* Stile Dinamico Tile (Colorato in base al tema) */
+        /* Stile Dinamico Tile */
         .smart-tile.theme-active .tile-icon { background: var(--theme-bg); color: var(--theme-color); }
         
-        /* Tile Luce (Glow dedicato) */
+        /* Tile Luce */
         .smart-tile.light-on .tile-icon { background: var(--theme-color); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .smart-tile.light-on .tile-value { color: var(--theme-color); }
 
-        /* ==================== PANNELLI A COMPARSA (iOS BOTTOM SHEETS) ==================== */
+        /* ==================== PANNELLI A COMPARSA ==================== */
         .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sheet-overlay.show { opacity: 1; pointer-events: all; }
         
@@ -137,7 +135,7 @@
 
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <div style="font-weight: 700; color: var(--text-muted);">Sincronizzazione Cloud...</div>
+        <div style="font-weight: 700; color: var(--text-muted);" id="loading-message">Sincronizzazione Cloud...</div>
     </div>
 
     <div class="header">
@@ -217,9 +215,9 @@
         <div class="control-section-base">
             <div class="section-header-base">CONTROLLO ALETTE E DISPLAY</div>
             <div class="btn-grid-base" style="margin-bottom: 10px;">
-                <div class="control-btn-base btn-vane" data-val="vertical" onclick="cambiaDirezione('vertical')"><i class="fas fa-arrows-alt-v"></i> Oscilla</div>
+                <div class="control-btn-base btn-vane" data-val="both" onclick="cambiaDirezione('both')"><i class="fas fa-arrows-alt-v"></i> Oscilla</div>
                 <div class="control-btn-base btn-vane" data-val="horizontal" onclick="cambiaDirezione('horizontal')"><i class="fas fa-chevron-up"></i> Extra Su</div>
-                <div class="control-btn-base btn-vane" data-val="vertical_down" onclick="cambiaDirezione('vertical')"><i class="fas fa-chevron-down"></i> Extra Giù</div>
+                <div class="control-btn-base btn-vane" data-val="vertical" onclick="cambiaDirezione('vertical')"><i class="fas fa-chevron-down"></i> Extra Giù</div>
             </div>
             <div class="btn-grid-base">
                 <div class="control-btn-base active btn-vane" data-val="off" onclick="cambiaDirezione('off')"><i class="fas fa-stop"></i> Ferma aletta</div>
@@ -321,9 +319,9 @@
         <div class="sheet-handle"></div>
         <div class="sheet-title">Direzione Alette</div>
         <div class="sheet-options" style="margin-bottom: 15px;">
-            <div class="sheet-opt btn-vane" data-val="vertical" onclick="cambiaDirezione('vertical')"><i class="fas fa-arrows-alt-v"></i><span>Oscilla</span></div>
+            <div class="sheet-opt btn-vane" data-val="both" onclick="cambiaDirezione('both')"><i class="fas fa-arrows-alt-v"></i><span>Oscilla</span></div>
             <div class="sheet-opt btn-vane" data-val="horizontal" onclick="cambiaDirezione('horizontal')"><i class="fas fa-chevron-up"></i><span>Extra Su</span></div>
-            <div class="sheet-opt btn-vane" data-val="vertical_down" onclick="cambiaDirezione('vertical')"><i class="fas fa-chevron-down"></i><span>Extra Giù</span></div>
+            <div class="sheet-opt btn-vane" data-val="vertical" onclick="cambiaDirezione('vertical')"><i class="fas fa-chevron-down"></i><span>Extra Giù</span></div>
         </div>
         <div class="sheet-options">
             <div class="sheet-opt btn-vane active" data-val="off" onclick="cambiaDirezione('off')" style="grid-column: span 3;"><i class="fas fa-stop"></i><span>Ferma Aletta in posizione corrente</span></div>
@@ -344,15 +342,25 @@
         // VARIABILI GLOBALI DI SISTEMA
         let topicBaseMQTT = ""; 
         const urlParams = new URLSearchParams(window.location.search);
-        const idStanzaURL = urlParams.get('stanza') || 'cameretta'; // Cerca '?stanza=soggiorno'
+        const idStanzaURL = urlParams.get('stanza') || 'cameretta';
+
+        // MODIFICA LUCE: Generazione dinamica del nome del topic per la luce
+        let luceSwitchName = idStanzaURL === 'cameretta' ? 'luce_display' : `luce_display_${idStanzaURL}`;
 
         let climaAcceso = false; let gradiAttuali = 24; let isOnline = false; let luceAccesa = false;
+        
+        // MQTT Client globale
         const clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_det_" + Math.random().toString(16).substring(2, 10), clean: true });
 
-        // CONTROLLO ACCESSO E AVVIO
+        // CONTROLLO ACCESSO E AVVIO: GESTITO IN MODO SICURO SENZA REPLACE
         onAuthStateChanged(auth, (user) => { 
-            if (!user) window.location.href = "login.html"; 
-            else inizializzaStanzaCloud();
+            if (!user) {
+                console.log("Utente non autenticato. Mostro messaggio.");
+                const loaderMsg = document.getElementById('loading-message');
+                if (loaderMsg) loaderMsg.innerHTML = '<span style="color:red">Sessione scaduta. Torna alla home e fai login.</span>';
+            } else {
+                inizializzaStanzaCloud();
+            }
         });
 
         // 1. SCARICA I DATI DELLA STANZA DA FIREBASE
@@ -372,14 +380,19 @@
                         
                         // Nasconde la schermata di caricamento fluido
                         setTimeout(() => {
-                            document.getElementById('loading-overlay').style.opacity = '0';
-                            setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 500);
+                            const overlay = document.getElementById('loading-overlay');
+                            if(overlay) {
+                                overlay.style.opacity = '0';
+                                setTimeout(() => overlay.style.display = 'none', 500);
+                            }
                         }, 300);
                     } else {
-                        alert("Stanza non trovata nel database!");
-                        window.location.href = "index.html";
+                        console.error("Stanza non trovata!");
+                        document.getElementById('loading-message').innerText = "Errore: stanza inesistente.";
                     }
                 }
+            }).catch((err) => {
+                console.error("Errore Firebase:", err);
             });
         }
 
@@ -403,7 +416,8 @@
             clientMQTT.subscribe(topicBaseMQTT + "/current_temperature/state");
             clientMQTT.subscribe(topicBaseMQTT + "/fan_mode/state");
             clientMQTT.subscribe(topicBaseMQTT + "/swing_mode/state");
-            clientMQTT.subscribe("vincenzo_clima_segreto_7788/switch/luce_display/state");
+            // Iscrizione dinamica luce
+            clientMQTT.subscribe(`vincenzo_clima_segreto_7788/switch/${luceSwitchName}/state`);
         }
 
         // 3. GESTISCI I MESSAGGI IN ARRIVO
@@ -490,10 +504,13 @@
             else if (topic.includes("/swing_mode/state")) { 
                 window.syncActiveButtons('.btn-vane', payload);
                 let lbl = "Ferma";
-                if(payload === "vertical") lbl = "Oscilla"; if(payload === "horizontal") lbl = "Extra Su"; if(payload === "vertical_down") lbl = "Extra Giù";
+                if(payload === "both") lbl = "Oscilla"; 
+                if(payload === "horizontal") lbl = "Extra Su"; 
+                if(payload === "vertical") lbl = "Extra Giù";
                 document.getElementById('lbl-tile-swing').innerText = lbl;
             }
-            else if (topic.includes("/luce_display/state")) {
+            // Controllo dinamico dello stato della luce
+            else if (topic.includes(`/${luceSwitchName}/state`)) {
                 luceAccesa = (payload === "on");
                 const btnBase = document.querySelector('.control-btn-base.btn-light');
                 const tileLight = document.getElementById('tile-light');
@@ -533,15 +550,17 @@
             window.inviaComando("/target_temperature/command", gradiAttuali);
         }
 
-        // Caso isolato per la luce (è uno switch a parte, non dentro climate)
+        // Caso isolato per la luce: utilizza il topic dinamico
         window.toggleLuce = function() { 
             if (!isOnline) return;
-            clientMQTT.publish("vincenzo_clima_segreto_7788/switch/luce_display/command", luceAccesa ? "OFF" : "ON"); 
+            clientMQTT.publish(`vincenzo_clima_segreto_7788/switch/${luceSwitchName}/command`, luceAccesa ? "OFF" : "ON"); 
         }
 
         // ================= FUNZIONI GRAFICHE =================
         window.toggleView = function() {
-            const isPro = document.getElementById('view-toggle-checkbox').checked;
+            const check = document.getElementById('view-toggle-checkbox');
+            if(!check) return;
+            const isPro = check.checked;
             document.getElementById('view-base').style.display = isPro ? 'none' : 'block';
             document.getElementById('view-pro').style.display = isPro ? 'block' : 'none';
             document.getElementById('lbl-classica').className = isPro ? '' : 'active-text';
@@ -551,7 +570,8 @@
         
         window.onload = () => {
             if(localStorage.getItem('climaViewPreference') === 'PRO') {
-                document.getElementById('view-toggle-checkbox').checked = true; window.toggleView();
+                const check = document.getElementById('view-toggle-checkbox');
+                if(check) { check.checked = true; window.toggleView(); }
             }
         };
 
@@ -570,10 +590,12 @@
             const progress = (val - minT) / (maxT - minT);
             
             const dashOffset = isEmpty ? 660 : 660 - (progress * 660);
-            document.getElementById('pro-arc-path').style.strokeDashoffset = dashOffset;
+            const path = document.getElementById('pro-arc-path');
+            if(path) path.style.strokeDashoffset = dashOffset;
             
             const angle = -135 + (progress * 270);
-            document.getElementById('pro-arc-thumb').style.transform = `rotate(${angle}deg)`;
+            const thumb = document.getElementById('pro-arc-thumb');
+            if(thumb) thumb.style.transform = `rotate(${angle}deg)`;
         }
 
         window.syncActiveButtons = function(selectorClass, activeValue) {
