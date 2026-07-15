@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Impostazioni - Smart Home Clima</title>
+    
+    <!-- PWA e Fullscreen -->
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#061b30">
     <meta name="mobile-web-app-capable" content="yes">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Smart Clima">
     <link rel="apple-touch-icon" href="logo.png">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Impostazioni - Smart Home Clima</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -27,38 +29,24 @@
         }
         body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; user-select: none; -webkit-user-select: none; min-height: 100vh; display: flex; flex-direction: column; }
         
-        /* HEADER SFUMATO IDENTICO ALLA HOME */
-        .top-hero { 
-            background: linear-gradient(180deg, #061b30 0%, #0056b3 60%, var(--bg-color) 100%); 
-            padding: 35px 24px 20px 24px; 
-            color: white; 
-        }
-        
-        .hero-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* STESSO STILE, DIMENSIONE E FONT DELLA HOME PAGE */
+        .top-hero { background: linear-gradient(180deg, #061b30 0%, #0056b3 60%, var(--bg-color) 100%); padding: 35px 24px 20px 24px; color: white; }
+        .hero-header-row { display: flex; justify-content: space-between; align-items: center; }
         .hero-brand { display: flex; align-items: center; gap: 12px; }
         .brand-title { color: #ffffff; font-size: 14px; font-weight: 800; line-height: 1.2; letter-spacing: 0.3px; }
         .hero-logo-container { background-color: white; border-radius: 14px; padding: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.2); width: 60px; height: 60px; flex-shrink: 0;}
         .hero-logo { width: 100%; height: 100%; object-fit: contain; }
-
         .hero-user { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 2px;}
         .profile-btn { width: 50px; height: 50px; border-radius: 25px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--accent-color); box-shadow: 0 4px 15px rgba(0,0,0,0.15); transition: 0.2s; overflow: hidden; border: 2px solid white; flex-shrink: 0; }
         .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
         .hero-greeting { font-size: 10px; font-weight: 600; color: white; margin: 0; text-align: center; }
 
-        /* INTESTAZIONE SEZIONE CON FRECCIA SOPRA E TITOLO SOTTO */
         .settings-header { display: flex; flex-direction: column; align-items: flex-start; padding: 10px 24px 15px 24px; gap: 12px;}
         .back-btn { color: var(--text-main); text-decoration: none; font-size: 20px; transition: 0.2s; padding: 5px 0;}
         .back-btn:active { opacity: 0.5; }
         .page-title { font-size: 28px; font-weight: 800; margin: 0; color: var(--text-main); letter-spacing: -0.5px; }
 
-        /* MENU IMPOSTAZIONI */
-        .settings-section { padding: 0 24px; flex-grow: 1; }
+        /* Rimossa espansione automatica, ora il copyright si attacca sotto */
+        .settings-section { padding: 0 24px; margin-bottom: 10px; }
         .settings-title { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px; margin-left: 5px;}
         
         .settings-card { background: var(--card-bg); border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid rgba(0,0,0,0.02); }
@@ -71,7 +59,6 @@
         .item-text h4 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main); }
         .item-text p { margin: 3px 0 0 0; font-size: 12px; color: var(--text-muted); }
 
-        /* PANNELLI A SCOMPARSA (BOTTOM SHEETS) */
         .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sheet-overlay.show { opacity: 1; pointer-events: all; }
         .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 20px 25px 40px 25px; box-sizing: border-box; max-height: 85vh; overflow-y: auto;}
@@ -80,7 +67,6 @@
         .sheet-title-modal { font-size: 18px; font-weight: 900; margin-bottom: 5px; color: var(--text-main); letter-spacing: -0.5px;}
         .sheet-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 25px; font-weight: 500;}
 
-        /* FORM ELEMENTS */
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
         .form-input, .form-select { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid #e0e0e0; background: #f8f9fa; font-size: 15px; font-weight: 600; color: var(--text-main); outline: none; box-sizing: border-box; font-family: 'Roboto', sans-serif;}
@@ -94,7 +80,6 @@
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(52, 199, 89, 0.95); color: white; padding: 12px 24px; border-radius: 20px; font-weight: 700; font-size: 14px; z-index: 3000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 20px rgba(52, 199, 89, 0.2);}
         .toast.show { transform: translateX(-50%) translateY(0); }
 
-        /* COPYRIGHT */
         .copyright-footer { width: 100%; text-align: center; font-size: 10px; font-weight: 600; color: #b0b0b0; letter-spacing: 0.5px; padding: 20px 0;}
     </style>
 </head>
@@ -102,19 +87,16 @@
 
     <div class="top-hero">
         <div class="hero-header-row">
-            
             <div class="hero-brand">
                 <div class="hero-logo-container">
                     <img src="logo.png" alt="VA Logo" class="hero-logo">
                 </div>
                 <div class="brand-title">SMART CLIMA<br>Avagliano's HOME</div>
             </div>
-            
             <div class="hero-user">
                 <div class="profile-btn" id="top-avatar-btn"><i class="fas fa-user"></i></div>
                 <div class="hero-greeting" id="greeting-text">Ciao...</div>
             </div>
-
         </div>
     </div>
 
@@ -126,7 +108,6 @@
     <div class="settings-section">
         <div class="settings-title">La tua Casa</div>
         <div class="settings-card">
-            
             <div class="settings-item" onclick="openSheet('sheet-add')">
                 <div class="item-left">
                     <div class="item-icon" style="background: #eafaf1; color: var(--success-color);"><i class="fas fa-plus"></i></div>
@@ -137,7 +118,6 @@
                 </div>
                 <div class="item-right" style="color: var(--text-muted);"><i class="fas fa-chevron-right"></i></div>
             </div>
-
             <div class="settings-item" onclick="openRenameSheet()">
                 <div class="item-left">
                     <div class="item-icon" style="background: var(--accent-bg); color: var(--accent-color);"><i class="fas fa-edit"></i></div>
@@ -148,9 +128,10 @@
                 </div>
                 <div class="item-right" style="color: var(--text-muted);"><i class="fas fa-chevron-right"></i></div>
             </div>
-
         </div>
     </div>
+
+    <div class="copyright-footer">© Copyright 2026 - Vincenzo Avagliano</div>
 
     <div class="sheet-overlay" id="sheet-overlay" onclick="closeAllSheets()"></div>
     
@@ -158,29 +139,9 @@
         <div class="sheet-handle"></div>
         <div class="sheet-title-modal">Nuova Stanza</div>
         <div class="sheet-desc">Aggiungi un nuovo condizionatore alla tua casa. Verrà creato automaticamente in Cloud.</div>
-        
-        <div class="form-group">
-            <label class="form-label">Nome visualizzato (es. Studio)</label>
-            <input type="text" class="form-input" id="new-name" placeholder="Es. Bagno Piccolo">
-        </div>
-        
-        <div class="form-group">
-            <label class="form-label">Scegli Icona</label>
-            <select class="form-select" id="new-icon">
-                <option value="fa-couch">Divano (Soggiorno)</option>
-                <option value="fa-bed">Letto (Camera)</option>
-                <option value="fa-utensils">Posate (Cucina)</option>
-                <option value="fa-rocket">Razzo (Cameretta)</option>
-                <option value="fa-bath">Vasca (Bagno)</option>
-                <option value="fa-desktop">PC (Studio)</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label class="form-label">Nome Interno Sistema (Topic MQTT)</label>
-            <input type="text" class="form-input" id="new-topic" placeholder="es. haier_tundra_bagno">
-        </div>
-        
+        <div class="form-group"><label class="form-label">Nome visualizzato</label><input type="text" class="form-input" id="new-name" placeholder="Es. Bagno"></div>
+        <div class="form-group"><label class="form-label">Scegli Icona</label><select class="form-select" id="new-icon"><option value="fa-couch">Divano</option><option value="fa-bed">Letto</option><option value="fa-utensils">Posate</option><option value="fa-rocket">Razzo</option><option value="fa-bath">Vasca</option><option value="fa-desktop">PC</option></select></div>
+        <div class="form-group"><label class="form-label">Topic MQTT</label><input type="text" class="form-input" id="new-topic" placeholder="es. haier_tundra_bagno"></div>
         <button class="btn-action" id="btn-salva-nuova" onclick="creaNuovaStanza()">Crea Stanza</button>
     </div>
 
@@ -194,8 +155,7 @@
 
     <div class="toast" id="toast-success"><i class="fas fa-check-circle" style="margin-right: 6px;"></i> Fatto!</div>
 
-    <div class="copyright-footer">© Copyright 2026 - Vincenzo Avagliano</div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -209,43 +169,24 @@
         let databaseStanze = {};
         const docRef = doc(db, "impostazioni", "stanze_config");
 
-        // GESTIONE ACCESSO E CARICAMENTO UTENTE
         onAuthStateChanged(auth, (user) => { 
-            if (!user) {
-                window.location.href = "login.html"; 
-            } else {
-                // Carica la foto e il nome nell'header sfumato
+            if (!user) window.location.href = "login.html"; 
+            else {
                 onSnapshot(doc(db, "utenti", user.uid), (userSnap) => {
                     const gt = document.getElementById('greeting-text');
                     if (userSnap.exists()) {
                         const uData = userSnap.data();
                         if (uData.nome && gt) gt.innerText = `Ciao ${uData.nome}`;
                         else if (gt) gt.innerText = "Ciao Utente";
-                        
-                        if (uData.foto) {
-                            document.getElementById('top-avatar-btn').innerHTML = `<img src="${uData.foto}">`;
-                        }
-                    } else if (gt) {
-                        gt.innerText = "Ciao Utente";
-                    }
+                        if (uData.foto) document.getElementById('top-avatar-btn').innerHTML = `<img src="${uData.foto}">`;
+                    } else if (gt) gt.innerText = "Ciao Utente";
                 });
             }
         });
 
-        window.openSheet = function(id) {
-            document.getElementById('sheet-overlay').classList.add('show');
-            document.getElementById(id).classList.add('open');
-        }
-        window.closeAllSheets = function() {
-            document.getElementById('sheet-overlay').classList.remove('show');
-            document.querySelectorAll('.bottom-sheet').forEach(s => s.classList.remove('open'));
-        }
-        function mostraToast() {
-            closeAllSheets();
-            const toast = document.getElementById('toast-success');
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
+        window.openSheet = function(id) { document.getElementById('sheet-overlay').classList.add('show'); document.getElementById(id).classList.add('open'); }
+        window.closeAllSheets = function() { document.getElementById('sheet-overlay').classList.remove('show'); document.querySelectorAll('.bottom-sheet').forEach(s => s.classList.remove('open')); }
+        function mostraToast() { closeAllSheets(); const toast = document.getElementById('toast-success'); toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
 
         window.creaNuovaStanza = function() {
             const nome = document.getElementById('new-name').value.trim();
@@ -279,43 +220,32 @@
                 if(docSnap.exists()) {
                     databaseStanze = docSnap.data();
                     container.innerHTML = '';
-                    
                     const sortedRooms = Object.entries(databaseStanze).map(([id, d]) => ({ id, ...d }));
                     sortedRooms.sort((a,b) => (a.ordine || 0) - (b.ordine || 0));
-
                     sortedRooms.forEach((room) => {
-                        const row = `
-                        <div class="rename-row">
-                            <div class="rename-icon"><i class="fas ${room.icon}"></i></div>
-                            <input type="text" class="form-input rename-input" data-id="${room.id}" value="${room.nome}" style="margin-top:0;">
-                        </div>`;
+                        const row = `<div class="rename-row"><div class="rename-icon"><i class="fas ${room.icon}"></i></div><input type="text" class="form-input rename-input" data-id="${room.id}" value="${room.nome}" style="margin-top:0;"></div>`;
                         container.insertAdjacentHTML('beforeend', row);
                     });
-                } else {
-                    container.innerHTML = 'Nessuna stanza trovata.';
-                }
-            }).catch(() => {
-                container.innerHTML = 'Errore nel caricamento. Riprova.';
-            });
+                } else container.innerHTML = 'Nessuna stanza trovata.';
+            }).catch(() => container.innerHTML = 'Errore nel caricamento. Riprova.');
         }
 
         window.salvaNomi = function() {
             const btn = document.getElementById('btn-salva-nomi');
             btn.innerText = "Salvataggio Cloud...";
-            const inputs = document.querySelectorAll('.rename-input');
-            
-            inputs.forEach(input => {
+            document.querySelectorAll('.rename-input').forEach(input => {
                 const id = input.getAttribute('data-id');
                 const nuovoNome = input.value.trim();
-                if(nuovoNome && databaseStanze[id]) {
-                    databaseStanze[id].nome = nuovoNome;
-                }
+                if(nuovoNome && databaseStanze[id]) databaseStanze[id].nome = nuovoNome;
             });
-
-            setDoc(docRef, databaseStanze).then(() => {
-                btn.innerText = "Salva Modifiche";
-                mostraToast();
-            });
+            setDoc(docRef, databaseStanze).then(() => { btn.innerText = "Salva Modifiche"; mostraToast(); });
+        }
+    </script>
+    
+    <!-- Attivazione PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.warn('Errore SW', err)); });
         }
     </script>
 </body>
