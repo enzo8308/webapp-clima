@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart Home Clima</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -19,45 +19,38 @@
             --warning-color: #ff9500; 
             --error-color: #ff3b30; 
         }
-        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; user-select: none; -webkit-user-select: none; position: relative; min-height: 100vh; display: flex; flex-direction: column;}
+        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; user-select: none; -webkit-user-select: none; position: relative; min-height: 100vh; }
         
         /* HEADER SFUMATO (HERO SECTION) */
         .top-hero { 
-            background: linear-gradient(180deg, #061b30 0%, #0056b3 60%, var(--bg-color) 100%); 
-            padding: 35px 24px 20px 24px; 
+            /* Sfumatura: blu scuro in alto, azzurro in mezzo, e infine si fonde con lo sfondo della pagina */
+            background: linear-gradient(180deg, #0a2540 0%, #007aff 75%, var(--bg-color) 100%); 
+            padding: 40px 24px 20px 24px; 
             color: white; 
         }
         
-        .hero-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
+        /* RIGA 1: LOGO E TITOLO */
+        .hero-brand { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+        .hero-logo-container { background-color: white; border-radius: 14px; padding: 6px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.15); width: 55px; height: 55px; flex-shrink: 0;}
+        .hero-logo { width: 100%; height: 100%; object-fit: contain; }
+        .hero-title h1 { font-size: 20px; font-weight: 900; margin: 0; letter-spacing: 0.5px; }
+        .hero-title p { font-size: 13px; font-weight: 500; margin: 2px 0 0 0; opacity: 0.9; }
 
-        /* OMINO E SALUTO (SINISTRA) */
-        .hero-user { display: flex; align-items: center; gap: 12px; cursor: pointer; margin-top: 5px;}
-        .profile-btn { width: 50px; height: 50px; border-radius: 25px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--accent-color); box-shadow: 0 4px 15px rgba(0,0,0,0.15); transition: 0.2s; overflow: hidden; border: 2px solid white; flex-shrink: 0; }
+        /* RIGA 2: OMINO E CIAO */
+        .hero-user { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .profile-btn { width: 52px; height: 52px; border-radius: 26px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--accent-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: 0.2s; overflow: hidden; border: 2px solid white; flex-shrink: 0; }
         .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
         .profile-btn:active { transform: scale(0.9); }
-        .hero-user h2 { font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.5px;}
-
-        /* LOGO E TESTO (DESTRA) */
-        .brand-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .hero-logo-container { background-color: white; border-radius: 14px; padding: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.2); width: 60px; height: 60px; flex-shrink: 0;}
-        .hero-logo { width: 100%; height: 100%; object-fit: contain; }
-        
-        .brand-text { text-align: center; }
-        .brand-title { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; margin-bottom: 2px;}
-        .brand-subtitle { font-family: 'Montserrat', sans-serif; font-size: 6px; font-weight: 500; color: rgba(255, 255, 255, 0.8); letter-spacing: 0.5px; }
+        .hero-user h2 { font-size: 24px; font-weight: 700; margin: 0; }
 
         /* SEZIONE STANZE E TASTO IMPOSTAZIONI */
-        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 24px 5px 24px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 24px; margin-bottom: 10px; }
         .section-title { font-size: 18px; font-weight: 700; margin: 0; color: var(--text-main); }
         .settings-btn { width: 36px; height: 36px; border-radius: 18px; background: #fff; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 16px; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.2s;}
         .settings-btn:active { transform: scale(0.9); color: var(--accent-color); }
 
         /* GRIGLIA STANZE */
-        .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 15px 24px 60px 24px; position: relative; flex-grow: 1;}
+        .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 24px 60px 24px; position: relative; }
         
         .smart-card { background-color: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1.15; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 1px solid rgba(0,0,0,0.02); cursor: pointer; }
         .smart-card:active:not(.dragging) { transform: scale(0.95); }
@@ -65,6 +58,7 @@
         
         .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .icon-box { width: 44px; height: 44px; border-radius: 22px; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.4s; }
+        
         .power-toggle { width: 34px; height: 34px; border-radius: 17px; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.3s; z-index: 10; }
         
         .card-bottom { display: flex; flex-direction: column; gap: 4px; margin-top: auto;}
@@ -80,7 +74,7 @@
         .smart-card.is-on .power-toggle { background: var(--accent-color); color: white; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3); }
         .smart-card.is-on .card-status { color: var(--accent-color); }
 
-        /* BOTTOM SHEET PROFILO */
+        /* PANNELLO PROFILO AVANZATO */
         .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sheet-overlay.show { opacity: 1; pointer-events: all; }
         .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 25px 25px 40px 25px; box-sizing: border-box; text-align: center;}
@@ -101,32 +95,32 @@
         .btn-logout:active { transform: scale(0.95); }
 
         /* FOOTER COPYRIGHT */
-        .copyright-footer { width: 100%; text-align: center; font-size: 10px; font-weight: 600; color: #b0b0b0; letter-spacing: 0.5px; padding-bottom: 20px;}
+        .copyright-footer { position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; font-size: 10px; font-weight: 600; color: #b0b0b0; letter-spacing: 0.5px;}
     </style>
 </head>
 <body>
 
+    <!-- HERO SECTION (Sfumatura + Logo + Profilo) -->
     <div class="top-hero">
-        <div class="hero-header-row">
-            
-            <div class="hero-user" onclick="openProfile()">
-                <div class="profile-btn" id="top-avatar-btn"><i class="fas fa-user"></i></div>
-                <h2 id="greeting-text">Ciao...</h2>
+        <!-- Logo e Titolo App -->
+        <div class="hero-brand">
+            <div class="hero-logo-container">
+                <img src="logo.png" alt="Logo" class="hero-logo">
             </div>
-            
-            <div class="brand-wrapper">
-                <div class="hero-logo-container">
-                    <img src="logo.png" alt="VA Logo" class="hero-logo">
-                </div>
-                <div class="brand-text">
-                    <div class="brand-title">ING. VINCENZO AVAGLIANO</div>
-                    <div class="brand-subtitle">INGEGNERIA | INTELLIGENZA ARTIFICIALE</div>
-                </div>
+            <div class="hero-title">
+                <h1>HAIER</h1>
+                <p>Smart Clima Casa Avagliano</p>
             </div>
-
+        </div>
+        
+        <!-- Omino a sinistra, Testo a destra -->
+        <div class="hero-user" onclick="openProfile()">
+            <div class="profile-btn" id="top-avatar-btn"><i class="fas fa-user"></i></div>
+            <h2 id="greeting-text">Ciao, caricamento...</h2>
         </div>
     </div>
 
+    <!-- SEZIONE STANZE -->
     <div class="section-header">
         <h2 class="section-title">Le tue Stanze</h2>
         <a href="impostazioni.html" class="settings-btn"><i class="fas fa-cog"></i></a>
@@ -134,8 +128,7 @@
 
     <div class="device-grid" id="device-grid"></div>
 
-    <div class="copyright-footer">© Copyright 2026 - Vincenzo Avagliano</div>
-
+    <!-- BOTTOM SHEET PROFILO -->
     <div class="sheet-overlay" id="sheet-overlay" onclick="closeProfile()"></div>
     <div class="bottom-sheet" id="sheet-profile">
         <div class="sheet-handle"></div>
@@ -144,6 +137,7 @@
             <div class="profile-pic-large" id="sheet-avatar-view"><i class="fas fa-user"></i></div>
             <div class="photo-edit-badge"><i class="fas fa-camera"></i></div>
         </div>
+        <!-- Attributo capture="user" per usare subito la fotocamera frontale -->
         <input type="file" id="photo-file-input" accept="image/*" capture="user" style="display:none;" onchange="loadPhotoLocal(event)">
         
         <div style="padding: 0 10px;">
@@ -154,6 +148,8 @@
         <button class="btn-action" id="btn-save-profile" onclick="saveProfileCloud()"><i class="fas fa-save"></i> Salva Profilo</button>
         <button class="btn-logout" onclick="esciApp()"><i class="fas fa-sign-out-alt"></i> Esci dall'App</button>
     </div>
+
+    <div class="copyright-footer">© Copyright 2026 - Vincenzo Avagliano</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
 
@@ -176,7 +172,7 @@
 
         onAuthStateChanged(auth, (user) => { 
             if (!user) {
-                window.location.href = "login.html"; 
+                window.location.assign("login.html"); 
             } else {
                 currentUser = user;
                 document.getElementById('user-email-display').innerText = user.email;
@@ -203,7 +199,7 @@
 
         window.openProfile = function() { document.getElementById('sheet-overlay').classList.add('show'); document.getElementById('sheet-profile').classList.add('open'); }
         window.closeProfile = function() { document.getElementById('sheet-overlay').classList.remove('show'); document.getElementById('sheet-profile').classList.remove('open'); }
-        window.esciApp = function() { signOut(auth).then(() => { window.location.href = "login.html"; }); }
+        window.esciApp = function() { signOut(auth).then(() => { window.location.assign("login.html"); }); }
         window.triggerPhotoSelect = function() { document.getElementById('photo-file-input').click(); }
         
         window.loadPhotoLocal = function(event) {
