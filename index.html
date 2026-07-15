@@ -21,39 +21,39 @@
         }
         body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; user-select: none; -webkit-user-select: none; }
         
-        /* HEADER CON LOGO */
-        .header { display: flex; justify-content: space-between; align-items: flex-start; padding: 30px 24px 15px 24px; }
-        .greeting-box { display: flex; flex-direction: column; gap: 4px; }
-        .header-logo { height: 45px; width: auto; margin-bottom: 5px; object-fit: contain; } /* Dimensione del logo regolabile */
-        .subtitle { font-size: 14px; font-weight: 500; color: var(--text-muted); margin: 0; }
-        
-        /* Avatar omino circolare */
-        .profile-btn { width: 44px; height: 44px; border-radius: 22px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--accent-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; overflow: hidden; border: 2px solid white; flex-shrink: 0;}
-        .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-btn:active { transform: scale(0.9); }
-
-        .summary-scroll { padding: 0 24px; margin-bottom: 25px; }
+        /* BARRA BLU SOPRA A TUTTO */
+        .summary-scroll { padding: 20px 24px 10px 24px; }
         .summary-widget { background: linear-gradient(135deg, #007aff, #0056b3); border-radius: 24px; padding: 20px; color: white; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 20px rgba(0, 122, 255, 0.2); }
         .summary-icon { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 20px; }
         .summary-text h3 { margin: 0; font-size: 15px; font-weight: 700; }
         .summary-text p { margin: 2px 0 0 0; font-size: 12px; opacity: 0.9; }
 
-        /* HEADER SEZIONE CON TASTO IMPOSTAZIONI */
-        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 0 24px; margin-bottom: 15px; }
+        /* HEADER SOTTO LA BARRA BLU */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 24px 15px 24px; }
+        .greeting-box { display: flex; flex-direction: column; gap: 4px; }
+        .subtitle { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
+        
+        /* GRUPPO AVATAR + LOGO SOTTO */
+        .profile-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .profile-btn { width: 48px; height: 44px; border-radius: 22px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--accent-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; overflow: hidden; border: 2px solid white; flex-shrink: 0; }
+        .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-btn:active { transform: scale(0.9); }
+        .header-logo { height: 28px; width: auto; object-fit: contain; }
+
+        /* SEZIONE STANZE CON TASTO IMPOSTAZIONI DELOCALIZZATO */
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 24px; margin-bottom: 15px; }
         .section-title { font-size: 18px; font-weight: 700; margin: 0; }
         .settings-btn { width: 36px; height: 36px; border-radius: 18px; background: #fff; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 16px; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.2s;}
         .settings-btn:active { transform: scale(0.9); color: var(--accent-color); }
 
         /* GRIGLIA STANZE */
         .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 24px 60px 24px; position: relative; }
-        
         .smart-card { background-color: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1.15; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 1px solid rgba(0,0,0,0.02); cursor: pointer; }
         .smart-card:active:not(.dragging) { transform: scale(0.95); }
         .smart-card.dragging { opacity: 0.5; transform: scale(1.05); box-shadow: 0 15px 30px rgba(0,0,0,0.1); cursor: grabbing; z-index: 999; touch-action: none; }
         
         .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .icon-box { width: 44px; height: 44px; border-radius: 22px; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.4s; }
-        
         .power-toggle { width: 34px; height: 34px; border-radius: 17px; background: #f0f5fa; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.3s; z-index: 10; }
         
         .card-bottom { display: flex; flex-direction: column; gap: 4px; margin-top: auto;}
@@ -69,7 +69,7 @@
         .smart-card.is-on .power-toggle { background: var(--accent-color); color: white; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3); }
         .smart-card.is-on .card-status { color: var(--accent-color); }
 
-        /* PANNELLO PROFILO AVANZATO */
+        /* BOTTOM SHEET PROFILO */
         .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sheet-overlay.show { opacity: 1; pointer-events: all; }
         .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1001; padding: 25px 25px 40px 25px; box-sizing: border-box; text-align: center;}
@@ -95,21 +95,23 @@
 </head>
 <body>
 
-    <div class="header">
-        <div class="greeting-box">
-            <img src="logo.png" alt="Ing. Vincenzo Avagliano" class="header-logo">
-            <p class="subtitle">Gestione Climatizzatori</p>
-        </div>
-        <div class="profile-btn" id="top-avatar-btn" onclick="openProfile()"><i class="fas fa-user-circle"></i></div>
-    </div>
-
     <div class="summary-scroll">
         <div class="summary-widget">
             <div class="summary-icon"><i class="fas fa-home"></i></div>
             <div class="summary-text">
-                <h3>Smart Clima Cloud</h3>
+                <h3>HAIER - Smart Clima Casa Avagliano</h3>
                 <p>Tocca per aprire. Tieni premuto per riordinare.</p>
             </div>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="greeting-box">
+            <p class="subtitle" id="greeting-text">Ciao, caricamento...</p>
+        </div>
+        <div class="profile-wrapper">
+            <div class="profile-btn" id="top-avatar-btn" onclick="openProfile()"><i class="fas fa-user-circle"></i></div>
+            <img src="logo.png" alt="Ing. Vincenzo Avagliano" class="header-logo">
         </div>
     </div>
 
@@ -142,7 +144,6 @@
     <div class="copyright-footer">© Copyright 2026 - Vincenzo Avagliano</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.2.2/mqtt.min.js"></script>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -171,6 +172,8 @@
                     if (userSnap.exists()) {
                         const uData = userSnap.data();
                         if (uData.nome) {
+                            // AGGIORNAMENTO DINAMICO SULLA SCRITTA CIAO [NOME]
+                            document.getElementById('greeting-text').innerText = `Ciao, ${uData.nome}`;
                             document.getElementById('profile-name-input').value = uData.nome;
                         }
                         if (uData.foto) {
@@ -179,6 +182,8 @@
                             document.getElementById('top-avatar-btn').innerHTML = imgHtml;
                             document.getElementById('sheet-avatar-view').innerHTML = imgHtml;
                         }
+                    } else {
+                        document.getElementById('greeting-text').innerText = "Ciao, Utente";
                     }
                 });
             }
