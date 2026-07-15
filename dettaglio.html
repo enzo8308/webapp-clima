@@ -271,7 +271,7 @@
             </div>
 
             <div class="smart-tile theme-active" id="tile-swing" onclick="openSheet('sheet-swing')">
-                <div class="tile-icon"><i class="fas fa-arrows-alt-v"></i></div>
+                <div class="tile-icon"><i id="icon-tile-swing" class="fas fa-arrows-alt-v"></i></div>
                 <div class="tile-info">
                     <div class="tile-title">Alette</div>
                     <div class="tile-value" id="lbl-tile-swing">Ferma</div>
@@ -503,11 +503,29 @@
             }
             else if (topic.includes("/swing_mode/state")) { 
                 window.syncActiveButtons('.btn-vane', payload);
+                
                 let lbl = "Ferma";
-                if(payload === "both") lbl = "Oscilla"; 
-                if(payload === "horizontal") lbl = "Extra Su"; 
-                if(payload === "vertical") lbl = "Extra Giù";
+                let iconClass = "fas fa-stop"; // Icona quadrata di default per quando è ferma
+
+                if(payload === "both") { 
+                    lbl = "Oscilla"; 
+                    iconClass = "fas fa-arrows-alt-v"; 
+                } else if(payload === "horizontal") { 
+                    lbl = "Extra Su"; 
+                    iconClass = "fas fa-chevron-up"; 
+                } else if(payload === "vertical") { 
+                    lbl = "Extra Giù"; 
+                    iconClass = "fas fa-chevron-down"; 
+                }
+                
+                // 1. Aggiorna la scritta sotto (es. "Extra Su")
                 document.getElementById('lbl-tile-swing').innerText = lbl;
+                
+                // 2. Aggiorna il disegno dell'icona nel riquadro
+                const tileIcon = document.getElementById('icon-tile-swing');
+                if (tileIcon) {
+                    tileIcon.className = iconClass;
+                }
             }
             // Controllo dinamico dello stato della luce
             else if (topic.includes(`/${luceSwitchName}/state`)) {
