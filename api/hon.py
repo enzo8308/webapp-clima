@@ -4,7 +4,6 @@ import asyncio
 import os
 from pyhon import Hon
 
-# Manteniamo in memoria solo la sessione, il loop lo gestiamo localmente
 global_hon_session = None
 
 class handler(BaseHTTPRequestHandler):
@@ -13,9 +12,10 @@ class handler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.end_headers()
-        self.wfile.write(json.dumps({'status': 'Server Vercel Attivo!'}).encode('utf-8'))
+        self.wfile.write(json.dumps({'status': 'Server Attivo'}).encode('utf-8'))
 
     def do_POST(self):
+        global global_hon_session
         try:
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)
@@ -27,15 +27,20 @@ class handler(BaseHTTPRequestHandler):
             email = os.environ.get('HON_EMAIL')
             password = os.environ.get('HON_PASSWORD')
             
-            # Utilizziamo asyncio.run per ogni richiesta (è più lento di 1 secondo, ma non crasha mai)
+            # TENTATIVO 1
             success, message = asyncio.run(self.control_ac(email, password, command, temp))
+            
+            # Se fallisce per sessione scaduta, ci riprova una seconda volta da zero
+            if not success and "Sessione" in message:
+                global_hon_session = None
+                success, message = asyncio.run(self.control_ac(email, password, command, temp))
             
             if success:
                 self.send_success_response(message)
             else:
                 self.send_error_response(message)
         except Exception as e:
-            self.send_error_response(f"Errore di rete: {str(e)}")
+            self.send_error_response(f"Errore critico: {str(e)}")
 
     async def control_ac(self, email, password, command, temp):
         global global_hon_session
@@ -56,9 +61,9 @@ class handler(BaseHTTPRequestHandler):
                         await appliance.commands["turn_off"].send()
                         return True, "Spento"
             return False, "Nessun condizionatore trovato."
-        except Exception:
-            global_hon_session = None # Reset se la sessione scade
-            return False, "Sessione scaduta, riprova."
+        except Exception as e:
+            global_hon_session = None 
+            return False, f"Sessione scaduta o errore: {str(e)}"
 
     def send_success_response(self, message):
         self.send_response(200)
