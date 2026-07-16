@@ -1,66 +1,75 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from http.server import BaseHTTPRequestHandler
+import json
+import asyncio
 import os
 from pyhon import Hon
 
-app = FastAPI()
-
-# Variabile globale: tiene aperta la connessione tra un clic e l'altro!
-global_hon = None
-
-# Struttura dei dati in arrivo dalla tua Web App
-class CommandReq(BaseModel):
-    command: str
-    temperature: int = None
-
-@app.post("/api/hon")
-async def control_ac(req: CommandReq):
-    global global_hon
-    
-    email = os.environ.get('HON_EMAIL')
-    password = os.environ.get('HON_PASSWORD')
-    
-    if not email or not password:
-        return {"error": "Credenziali mancanti su Vercel"}
-
-    try:
-        # 1. Se è il primo clic, facciamo il login lento. 
-        # Altrimenti, usiamo la sessione già aperta in memoria (Veloce!)
-        if global_hon is None:
-            print("Avvio nuova sessione hOn (lenta)...")
-            global_hon = Hon(email, password)
-            await global_hon.setup()
-        else:
-            print("Uso sessione hOn già attiva in memoria (veloce!)...")
+class handler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        try:
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
             
-        # 2. Cerchiamo il condizionatore e mandiamo il comando
-        for appliance in global_hon.appliances:
-            mac = getattr(appliance, 'mac_address', '').replace(":", "-").upper()
+            command = data.get('command')
+            temp = data.get('temperature')
             
-            if mac == "AC-15-18-B7-93-70" or getattr(appliance, 'appliance_type', '') == "AC":
+            email = os.environ.get('HON_EMAIL')
+            password = os.environ.get('HON_PASSWORD')
+            
+            if not email or not password:
+                self.send_error_response("Credenziali mancanti su Vercel")
+                return
+
+            success, message = asyncio.run(self.control_ac(email, password, command, temp))
+            
+            if success:
+                self.send_success_response(message)
+            else:
+                self.send_error_response(message)
                 
-                if req.command == "on" or req.command == "cool":
-                    if req.temperature and "tempSel" in appliance.settings:
-                        appliance.settings["tempSel"].value = str(req.temperature)
+        except Exception as e:
+            self.send_error_response(f"Errore interno: {str(e)}")
+
+    async def control_ac(self, email, password, command, temp):
+        try:
+            async with Hon(email, password) as hon:
+                for appliance in hon.appliances:
+                    mac = getattr(appliance, 'mac_address', '').replace(":", "-").upper()
                     
-                    if "turn_on" in appliance.commands:
-                        await appliance.commands["turn_on"].send()
-                    elif "startProgram" in appliance.commands:
-                        await appliance.commands["startProgram"].send()
-                        
-                    return {"success": True, "message": f"Acceso a {req.temperature}°C"}
-                    
-                elif req.command == "off":
-                    if "turn_off" in appliance.commands:
-                        await appliance.commands["turn_off"].send()
-                    elif "stopProgram" in appliance.commands:
-                        await appliance.commands["stopProgram"].send()
-                        
-                    return {"success": True, "message": "Spento"}
-                    
-        return {"error": "Nessun condizionatore trovato."}
-        
-    except Exception as e:
-        # Se qualcosa va storto (es. Haier disconnette la sessione), resettiamo
-        global_hon = None 
-        return {"error": f"Errore interno: {str(e)}"}
+                    if mac == "AC-15-18-B7-93-70" or getattr(appliance, 'appliance_type', '') == "AC":
+                        if command == "on" or command == "cool":
+                            if temp and "tempSel" in appliance.settings:
+                                appliance.settings["tempSel"].value = str(temp)
+                            
+                            if "turn_on" in appliance.commands:
+                                await appliance.commands["turn_on"].send()
+                            elif "startProgram" in appliance.commands:
+                                await appliance.commands["startProgram"].send()
+                                
+                            return True, f"Condizionatore acceso a {temp}°C"
+                            
+                        elif command == "off":
+                            if "turn_off" in appliance.commands:
+                                await appliance.commands["turn_off"].send()
+                            elif "stopProgram" in appliance.commands:
+                                await appliance.commands["stopProgram"].send()
+                                
+                            return True, "Condizionatore spento"
+                            
+                return False, "Nessun condizionatore trovato nel tuo account hOn."
+                
+        except Exception as e:
+            return False, f"Errore di comunicazione: {str(e)}"
+
+    def send_success_response(self, message):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps({'success': True, 'message': message}).encode('utf-8'))
+
+    def send_error_response(self, error_msg):
+        self.send_response(500)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps({'error': error_msg}).encode('utf-8'))
