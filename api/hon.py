@@ -32,35 +32,47 @@ class handler(BaseHTTPRequestHandler):
                 self.send_error_response(message)
                 
         except Exception as e:
-            self.send_error_response(str(e))
+            self.send_error_response(f"Errore interno: {str(e)}")
 
     async def control_ac(self, email, password, command, temp):
         try:
-            # Login automatico ai server Haier tramite AWS Cognito
+            # Login ai server Haier
             async with Hon(email, password) as hon:
                 
-                # Cerca tra i dispositivi associati all'app hOn
-                for device in hon.devices:
+                # Scorriamo la lista dei tuoi elettrodomestici (appliances)
+                for appliance in hon.appliances:
                     
-                    # Identifica esattamente il 5° Tundra tramite MAC o tipologia
-                    mac = device.mac_address.replace(":", "-").upper()
-                    if mac == "AC-15-18-B7-93-70" or device.appliance_type == "AC":
+                    # Identifica esattamente il 5° Tundra (MAC: AC-15-18-B7-93-70)
+                    mac = getattr(appliance, 'mac_address', '').replace(":", "-").upper()
+                    
+                    if mac == "AC-15-18-B7-93-70" or getattr(appliance, 'appliance_type', '') == "AC":
                         
                         if command == "on" or command == "cool":
-                            # Imposta la temperatura prima di accendere
-                            if temp:
-                                device.settings["tempSel"].value = str(temp)
-                            await device.commands["turn_on"].send()
+                            # Imposta la temperatura (se passata e se presente nelle impostazioni)
+                            if temp and "tempSel" in appliance.settings:
+                                appliance.settings["tempSel"].value = str(temp)
+                            
+                            # Invia comando accensione
+                            if "turn_on" in appliance.commands:
+                                await appliance.commands["turn_on"].send()
+                            elif "startProgram" in appliance.commands:
+                                await appliance.commands["startProgram"].send()
+                                
                             return True, f"Condizionatore acceso a {temp}°C"
                             
                         elif command == "off":
-                            await device.commands["turn_off"].send()
+                            # Invia comando spegnimento
+                            if "turn_off" in appliance.commands:
+                                await appliance.commands["turn_off"].send()
+                            elif "stopProgram" in appliance.commands:
+                                await appliance.commands["stopProgram"].send()
+                                
                             return True, "Condizionatore spento"
                             
-                return False, "Nessun condizionatore compatibile trovato sull'account hOn"
+                return False, "Nessun condizionatore trovato nel tuo account hOn."
                 
         except Exception as e:
-            return False, f"Errore comunicazione hOn: {str(e)}"
+            return False, f"Errore di comunicazione: {str(e)}"
 
     def send_success_response(self, message):
         self.send_response(200)
