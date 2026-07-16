@@ -5,12 +5,9 @@ import os
 import threading
 from pyhon import Hon
 
-# 1. Variabili globali: teniamo in memoria sia la sessione che il motore di rete
 global_hon_session = None
 global_loop = asyncio.new_event_loop()
 
-# 2. Questo è il trucco magico: avviamo il motore di rete in un "binario parallelo" (Thread)
-# In questo modo Vercel NON POTRA' MAI chiuderlo tra un clic e l'altro!
 def start_background_loop(loop):
     asyncio.set_event_loop(loop)
     loop.run_forever()
@@ -21,7 +18,6 @@ threading.Thread(target=start_background_loop, args=(global_loop,), daemon=True)
 class handler(BaseHTTPRequestHandler):
     
     def do_GET(self):
-        # Risposta rapida per lo Svegliarino di cron-job
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.end_headers()
@@ -43,14 +39,22 @@ class handler(BaseHTTPRequestHandler):
                 self.send_error_response("Credenziali mancanti")
                 return
 
-            # 3. Invece di accendere il motore, "passiamo" il comando al Thread in background
+            # --- PRIMO TENTATIVO ---
             future = asyncio.run_coroutine_threadsafe(
                 self.control_ac(email, password, command, temp), 
                 global_loop
             )
-            
-            # Aspettiamo il risultato (massimo 20 secondi per evitare blocchi)
             success, message = future.result(timeout=20)
+            
+            # --- AUTO-RIPARAZIONE INVISIBILE ---
+            # Se la connessione di rete si è spezzata, Python non ti avvisa,
+            # ma fa un secondo clic immediato e invisibile da solo!
+            if not success and "Connessione aggiornata" in message:
+                future = asyncio.run_coroutine_threadsafe(
+                    self.control_ac(email, password, command, temp), 
+                    global_loop
+                )
+                success, message = future.result(timeout=20)
             
             if success:
                 self.send_success_response(message)
@@ -64,7 +68,6 @@ class handler(BaseHTTPRequestHandler):
         global global_hon_session
         
         try:
-            # Login veloce usando la memoria
             if global_hon_session is None:
                 global_hon_session = Hon(email, password)
                 await global_hon_session.setup()
@@ -86,8 +89,7 @@ class handler(BaseHTTPRequestHandler):
             return False, "Nessun condizionatore trovato."
             
         except Exception as e:
-            # Se per qualche motivo estremo cade la connessione, azzeriamo la memoria.
-            # Il messaggio "Riprova ora" ti dirà di rifare clic, e lui ripartirà da zero perfetto.
+            # Azzera la memoria così il tentativo successivo rifà il login pulito
             global_hon_session = None 
             return False, f"Connessione aggiornata, clicca di nuovo. ({str(e)})"
 
