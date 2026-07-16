@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart Home Clima</title>
     
-    <!-- PWA e Fullscreen -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#061b30">
     <meta name="mobile-web-app-capable" content="yes">
@@ -48,7 +47,6 @@
         .settings-btn { width: 36px; height: 36px; border-radius: 18px; background: #fff; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 16px; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.2s;}
         .settings-btn:active { transform: scale(0.9); color: var(--accent-color); }
 
-        /* MODIFICA: row-gap ristretto a 6px per avvicinare le stanze superiori e inferiori */
         .device-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; row-gap: 6px; padding: 15px 24px 15px 24px; position: relative; flex-grow: 1;}
         
         .smart-card { background-color: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1 / 1.15; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 1px solid rgba(0,0,0,0.02); cursor: pointer; }
@@ -197,12 +195,12 @@
         if(clientMQTT) { clientMQTT.on('connect', function () { Object.keys(window.stanzeState).forEach(id => subscribeStanzaMQTT(id, window.stanzeState[id].topic)); }); }
 
         function subscribeStanzaMQTT(id, topic) {
-    if (clientMQTT && clientMQTT.connected) { 
-        clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/mode/state`); 
-        clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/target_temperature/state`); 
-        clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${id}/status`); 
-    }
-}
+            if (clientMQTT && clientMQTT.connected && id !== 'hon_5') { // Ignora MQTT per hOn
+                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/mode/state`); 
+                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/target_temperature/state`); 
+                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${id}/status`); 
+            }
+        }
 
         const docRef = doc(db, "impostazioni", "stanze_config");
         onSnapshot(docRef, (docSnap) => {
@@ -223,12 +221,45 @@
                     </div>`;
                     grid.insertAdjacentHTML('beforeend', cardHTML); window.aggiornaUIStanza(id); window.updateRoomStatusDOM(id);
                 });
+
+                // ==========================================
+                // AGGIUNTA CARD 5° CONDIZIONATORE (hOn CLOUD)
+                // ==========================================
+                const honId = 'hon_5';
+                if(!window.stanzeState[honId]) {
+                    // Stato iniziale del 5° clima (Simuliamo sia sempre online perché via cloud)
+                    window.stanzeState[honId] = { online: true, mode: "off", temp: 24, topic: "cloud_hon", icon: "fa-cloud", nome: "Quinto Clima (hOn)" };
+                }
+                const honCardHTML = `
+                <div class="smart-card" id="card-${honId}" data-id="${honId}" draggable="false" onclick="cambiaTempHon()">
+                    <div class="card-top">
+                        <div class="icon-box" id="icon-box-${honId}"><i class="fas fa-cloud" id="icon-${honId}"></i></div>
+                        <div class="power-toggle" id="btn-power-${honId}" onclick="event.stopPropagation(); togglePowerHon('${honId}')">
+                            <i class="fas fa-power-off"></i>
+                        </div>
+                    </div>
+                    <div class="card-bottom">
+                        <h4 class="card-title">${window.stanzeState[honId].nome}</h4>
+                        <p class="card-status" id="status-text-${honId}">Spento</p>
+                        <div class="connection-status">
+                            <span class="status-dot online" id="dot-${honId}"></span>
+                            <span id="badge-${honId}">Cloud Server</span>
+                        </div>
+                    </div>
+                    <div class="wifi-indicator"><i class="fas fa-cloud" id="wifi-icon-${honId}" style="color: var(--success-color)"></i></div>
+                </div>`;
+                grid.insertAdjacentHTML('beforeend', honCardHTML); 
+                window.aggiornaUIStanza(honId);
+                // ==========================================
+                // FINE AGGIUNTA hOn
+                // ==========================================
+
                 initDragAndDropLogic(); 
             } else { setDoc(docRef, { cameretta: { nome: "Cameretta", icon: "fa-rocket", topic: "haier_tundra_cameretta", ordine: 0 }, soggiorno: { nome: "Soggiorno", icon: "fa-couch", topic: "haier_tundra_soggiorno", ordine: 1 }, cucina: { nome: "Cucina", icon: "fa-utensils", topic: "haier_tundra_cucina", ordine: 2 }, camera: { nome: "Camera da letto", icon: "fa-bed", topic: "haier_tundra_camera", ordine: 3 } }); }
         });
 
         function initDragAndDropLogic() {
-            const cards = document.querySelectorAll('.smart-card'); const grid = document.getElementById('device-grid');
+            const cards = document.querySelectorAll('.smart-card[draggable="true"]'); const grid = document.getElementById('device-grid');
             cards.forEach(card => {
                 card.addEventListener('dragstart', () => { window.isDragging = true; card.classList.add('dragging'); });
                 card.addEventListener('dragend', () => { card.classList.remove('dragging'); salvaNuovoOrdineCloud(); setTimeout(() => window.isDragging = false, 100); });
@@ -236,27 +267,32 @@
                 card.addEventListener('touchstart', (e) => { touchTimer = setTimeout(() => { window.isDragging = true; card.classList.add('dragging'); }, 350); });
                 card.addEventListener('touchmove', (e) => {
                     if (!card.classList.contains('dragging')) { clearTimeout(touchTimer); return; } e.preventDefault();
-                    const touch = e.touches[0]; const targetEl = document.elementFromPoint(touch.clientX, touch.clientY); const currentCardOver = targetEl ? targetEl.closest('.smart-card') : null;
-                    if (currentCardOver && currentCardOver !== card) { const allCards = [...grid.querySelectorAll('.smart-card:not(.dragging)')]; const nextEl = allCards.find(c => { const box = c.getBoundingClientRect(); return touch.clientY < box.top + box.height / 2 && touch.clientX < box.left + box.width / 2; }); grid.insertBefore(card, nextEl); }
+                    const touch = e.touches[0]; const targetEl = document.elementFromPoint(touch.clientX, touch.clientY); const currentCardOver = targetEl ? targetEl.closest('.smart-card[draggable="true"]') : null;
+                    if (currentCardOver && currentCardOver !== card) { const allCards = [...grid.querySelectorAll('.smart-card[draggable="true"]:not(.dragging)')]; const nextEl = allCards.find(c => { const box = c.getBoundingClientRect(); return touch.clientY < box.top + box.height / 2 && touch.clientX < box.left + box.width / 2; }); grid.insertBefore(card, nextEl); }
                 });
                 card.addEventListener('touchend', () => { clearTimeout(touchTimer); if (card.classList.contains('dragging')) { card.classList.remove('dragging'); salvaNuovoOrdineCloud(); setTimeout(() => window.isDragging = false, 100); } });
             });
-            grid.addEventListener('dragover', (e) => { e.preventDefault(); const draggingCard = grid.querySelector('.dragging'); const siblings = [...grid.querySelectorAll('.smart-card:not(.dragging)')]; let nextSibling = siblings.find(sibling => { const box = sibling.getBoundingClientRect(); return e.clientY < box.top + box.height / 2 && e.clientX < box.left + box.width / 2; }); grid.insertBefore(draggingCard, nextSibling); });
+            grid.addEventListener('dragover', (e) => { e.preventDefault(); const draggingCard = grid.querySelector('.dragging'); if(!draggingCard) return; const siblings = [...grid.querySelectorAll('.smart-card[draggable="true"]:not(.dragging)')]; let nextSibling = siblings.find(sibling => { const box = sibling.getBoundingClientRect(); return e.clientY < box.top + box.height / 2 && e.clientX < box.left + box.width / 2; }); grid.insertBefore(draggingCard, nextSibling); });
         }
 
         function salvaNuovoOrdineCloud() {
             let modificato = false;
-            [...document.querySelectorAll('.smart-card')].forEach((card, index) => { const id = card.getAttribute('data-id'); if (window.stanzeRawConfig[id] && window.stanzeRawConfig[id].ordine !== index) { window.stanzeRawConfig[id].ordine = index; modificato = true; } });
+            [...document.querySelectorAll('.smart-card')].forEach((card, index) => { 
+                const id = card.getAttribute('data-id'); 
+                if (id === 'hon_5') return; // Ignoriamo la card hOn per il database
+                if (window.stanzeRawConfig[id] && window.stanzeRawConfig[id].ordine !== index) { window.stanzeRawConfig[id].ordine = index; modificato = true; } 
+            });
             if (modificato) setDoc(docRef, window.stanzeRawConfig);
         }
 
-        window.updateRoomStatusDOM = function(id) { const s = window.stanzeState[id]; if (!s) return; const badge = document.getElementById(`badge-${id}`); const dot = document.getElementById(`dot-${id}`); if(badge) badge.innerText = s.online ? "Online" : "Offline"; if(dot) dot.className = s.online ? "status-dot online" : "status-dot"; window.aggiornaUIStanza(id); }
+        window.updateRoomStatusDOM = function(id) { const s = window.stanzeState[id]; if (!s) return; const badge = document.getElementById(`badge-${id}`); const dot = document.getElementById(`dot-${id}`); if(badge && id !== 'hon_5') badge.innerText = s.online ? "Online" : "Offline"; if(dot) dot.className = s.online ? "status-dot online" : "status-dot"; window.aggiornaUIStanza(id); }
 
         if(clientMQTT) {
             clientMQTT.on('message', function (topic, message) {
                 const payload = message.toString().toLowerCase();
                 if (topic === "vincenzo_clima_segreto_7788/status") { if (window.stanzeState.cameretta) { window.stanzeState.cameretta.online = (payload === "online"); window.updateRoomStatusDOM('cameretta'); } }
                 Object.keys(window.stanzeState).forEach(id => {
+                    if (id === 'hon_5') return; // Saltiamo MQTT per il 5° clima
                     if (topic === `vincenzo_clima_segreto_7788/${id}/status`) { window.stanzeState[id].online = (payload === "online"); window.updateRoomStatusDOM(id); }
                     const top = window.stanzeState[id].topic;
                     if (topic.includes(`${top}/mode/state`)) { window.stanzeState[id].mode = payload; window.aggiornaUIStanza(id); }
@@ -273,13 +309,68 @@
                 if(s.mode === "heat") { modeIta = "Caldo"; color = "#ff3b30"; bg = "#ffebe9"; iconClass = "fas fa-sun"; } if(s.mode === "dry") { modeIta = "Deumid."; color = "#5ac8fa"; bg = "#eef9ff"; iconClass = "fas fa-tint"; } if(s.mode === "fan_only") { modeIta = "Ventola"; color = "#8e8e93"; bg = "#f2f2f7"; iconClass = "fas fa-fan"; } if(s.mode === "auto") { modeIta = "Auto"; color = "#34c759"; bg = "#ebf9ee"; iconClass = "fas fa-magic"; }
                 card.style.setProperty('--accent-color', color); card.style.setProperty('--accent-bg', bg); icona.className = iconClass; testo.innerText = `${modeIta} • ${s.temp}°C`;
             }
-            const wifiIcon = document.getElementById(`wifi-icon-${id}`); if(wifiIcon) wifiIcon.style.color = s.online ? 'var(--success-color)' : '#d1d1d6';
+            const wifiIcon = document.getElementById(`wifi-icon-${id}`); if(wifiIcon && id !== 'hon_5') wifiIcon.style.color = s.online ? 'var(--success-color)' : '#d1d1d6';
         }
 
         window.togglePowerHome = function(id) { const s = window.stanzeState[id]; if(!s) return; if(!s.online) { alert("Il condizionatore è Offline!"); return; } if(clientMQTT && clientMQTT.connected) { clientMQTT.publish(`vincenzo_clima_segreto_7788/climate/${s.topic}/mode/command`, (s.mode === "off") ? "cool" : "off"); } };
+
+        // ==========================================
+        // NUOVE FUNZIONI PER IL 5° CLIMA hOn
+        // ==========================================
+        window.cambiaTempHon = function() {
+            if(window.isDragging) return;
+            const s = window.stanzeState['hon_5'];
+            let nuovaTemp = prompt("Imposta la temperatura per hOn (da 16 a 30):", s.temp);
+            if(nuovaTemp !== null && !isNaN(nuovaTemp)) {
+                s.temp = parseInt(nuovaTemp);
+                window.aggiornaUIStanza('hon_5');
+                // Se era già acceso, ri-invia il comando con la nuova temperatura
+                if(s.mode !== 'off') {
+                    window.togglePowerHon('hon_5', true);
+                }
+            }
+        }
+
+        window.togglePowerHon = async function(id, forceUpdate = false) {
+            const s = window.stanzeState[id];
+            if(!s) return;
+
+            const oldMode = s.mode;
+            let newMode = s.mode;
+            if (!forceUpdate) {
+                newMode = (s.mode === "off") ? "cool" : "off";
+            }
+
+            // UI Feedback immediato (Optimistic UI)
+            s.mode = newMode;
+            window.aggiornaUIStanza(id);
+
+            try {
+                // Chiamata alla cartella "api" di Vercel creata precedentemente
+                const response = await fetch('/api/hon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        command: newMode === "off" ? "off" : "on",
+                        temperature: s.temp
+                    })
+                });
+
+                if(!response.ok) {
+                    const result = await response.json();
+                    alert("Errore hOn Server: " + (result.error || "Errore Sconosciuto"));
+                    s.mode = oldMode; // Revert UI se fallisce
+                    window.aggiornaUIStanza(id);
+                }
+            } catch(error) {
+                alert("Errore di rete! Impossibile raggiungere Vercel.");
+                s.mode = oldMode; // Revert UI se fallisce
+                window.aggiornaUIStanza(id);
+            }
+        };
+        // ==========================================
     </script>
 
-    <!-- Attivazione PWA -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.warn('Errore SW', err)); });
