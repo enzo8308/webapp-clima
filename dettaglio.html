@@ -408,12 +408,8 @@
         }
 
         function eseguiIscrizioni() {
-            if (idStanzaURL === 'cameretta') {
-                clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
-            } else {
-                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${idStanzaURL}/status`);
-            }
-            clientMQTT.subscribe(topicBaseMQTT + "/mode/state");
+    clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${idStanzaURL}/status`);
+    clientMQTT.subscribe(topicBaseMQTT + "/mode/state");
             clientMQTT.subscribe(topicBaseMQTT + "/target_temperature/state");
             clientMQTT.subscribe(topicBaseMQTT + "/current_temperature/state");
             clientMQTT.subscribe(topicBaseMQTT + "/fan_mode/state");

@@ -194,11 +194,15 @@
 
         let clientMQTT; try { clientMQTT = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", { clientId: "webapp_home_" + Math.random().toString(16).substring(2, 10), clean: true }); } catch(e) { console.warn("MQTT non avviato"); }
 
-        if(clientMQTT) { clientMQTT.on('connect', function () { clientMQTT.subscribe("vincenzo_clima_segreto_7788/status"); Object.keys(window.stanzeState).forEach(id => subscribeStanzaMQTT(id, window.stanzeState[id].topic)); }); }
+        if(clientMQTT) { clientMQTT.on('connect', function () { Object.keys(window.stanzeState).forEach(id => subscribeStanzaMQTT(id, window.stanzeState[id].topic)); }); }
 
         function subscribeStanzaMQTT(id, topic) {
-            if (clientMQTT && clientMQTT.connected) { clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/mode/state`); clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/target_temperature/state`); if (id !== 'cameretta') clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${id}/status`); }
-        }
+    if (clientMQTT && clientMQTT.connected) { 
+        clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/mode/state`); 
+        clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/target_temperature/state`); 
+        clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${id}/status`); 
+    }
+}
 
         const docRef = doc(db, "impostazioni", "stanze_config");
         onSnapshot(docRef, (docSnap) => {
