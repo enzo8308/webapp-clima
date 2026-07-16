@@ -2,22 +2,18 @@ from http.server import BaseHTTPRequestHandler
 import json
 import asyncio
 import os
-import threading
 from pyhon import Hon
 
-global_hon_session = None
-global_loop = asyncio.new_event_loop()
-
-def start_background_loop(loop):
-    asyncio.set_event_loop(loop)
-    loop.run_forever()
-
-threading.Thread(target=start_background_loop, args=(global_loop,), daemon=True).start()
-
+# IL TRUCCO RISOLUTIVO: Diciamo a Python di usare la cartella /tmp 
+# (l'unica scrivibile su Vercel) per permettere a pyhOn di salvare la sua cache veloce.
+os.environ["HOME"] = "/tmp"
+os.environ["XDG_CONFIG_HOME"] = "/tmp"
+os.environ["XDG_DATA_HOME"] = "/tmp"
 
 class handler(BaseHTTPRequestHandler):
     
     def do_GET(self):
+        # Risposta rapida per lo svegliarino di cron-job
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.end_headers()
@@ -36,25 +32,11 @@ class handler(BaseHTTPRequestHandler):
             password = os.environ.get('HON_PASSWORD')
             
             if not email or not password:
-                self.send_error_response("Credenziali mancanti")
+                self.send_error_response("Credenziali mancanti su Vercel")
                 return
 
-            # --- PRIMO TENTATIVO ---
-            future = asyncio.run_coroutine_threadsafe(
-                self.control_ac(email, password, command, temp), 
-                global_loop
-            )
-            success, message = future.result(timeout=20)
-            
-            # --- AUTO-RIPARAZIONE INVISIBILE ---
-            # Se la connessione di rete si è spezzata, Python non ti avvisa,
-            # ma fa un secondo clic immediato e invisibile da solo!
-            if not success and "Connessione aggiornata" in message:
-                future = asyncio.run_coroutine_threadsafe(
-                    self.control_ac(email, password, command, temp), 
-                    global_loop
-                )
-                success, message = future.result(timeout=20)
+            # Esecuzione nativa e pulita, senza variabili globali o background thread
+            success, message = asyncio.run(self.control_ac(email, password, command, temp))
             
             if success:
                 self.send_success_response(message)
@@ -62,36 +44,41 @@ class handler(BaseHTTPRequestHandler):
                 self.send_error_response(message)
                 
         except Exception as e:
-            self.send_error_response(f"Errore di invio: {str(e)}")
+            self.send_error_response(f"Errore Vercel: {str(e)}")
 
     async def control_ac(self, email, password, command, temp):
-        global global_hon_session
-        
         try:
-            if global_hon_session is None:
-                global_hon_session = Hon(email, password)
-                await global_hon_session.setup()
-            
-            for appliance in global_hon_session.appliances:
-                mac = getattr(appliance, 'mac_address', '').replace(":", "-").upper()
-                if mac == "AC-15-18-B7-93-70" or getattr(appliance, 'appliance_type', '') == "AC":
+            # L'apertura standard di pyhOn: ora salverà in automatico la sessione in /tmp!
+            async with Hon(email, password) as hon:
+                
+                for appliance in hon.appliances:
+                    mac = getattr(appliance, 'mac_address', '').replace(":", "-").upper()
                     
-                    if command in ["on", "cool"]:
-                        if temp and "tempSel" in appliance.settings:
-                            appliance.settings["tempSel"].value = str(temp)
-                        await appliance.commands["turn_on"].send()
-                        return True, f"Acceso a {temp}°C"
+                    if mac == "AC-15-18-B7-93-70" or getattr(appliance, 'appliance_type', '') == "AC":
                         
-                    elif command == "off":
-                        await appliance.commands["turn_off"].send()
-                        return True, "Spento"
-                        
-            return False, "Nessun condizionatore trovato."
-            
+                        if command in ["on", "cool"]:
+                            if temp and "tempSel" in appliance.settings:
+                                appliance.settings["tempSel"].value = str(temp)
+                                
+                            if "turn_on" in appliance.commands:
+                                await appliance.commands["turn_on"].send()
+                            elif "startProgram" in appliance.commands:
+                                await appliance.commands["startProgram"].send()
+                                
+                            return True, f"Acceso a {temp}°C"
+                            
+                        elif command == "off":
+                            if "turn_off" in appliance.commands:
+                                await appliance.commands["turn_off"].send()
+                            elif "stopProgram" in appliance.commands:
+                                await appliance.commands["stopProgram"].send()
+                                
+                            return True, "Spento"
+                            
+                return False, "Nessun condizionatore trovato nel tuo account hOn."
+                
         except Exception as e:
-            # Azzera la memoria così il tentativo successivo rifà il login pulito
-            global_hon_session = None 
-            return False, f"Connessione aggiornata, clicca di nuovo. ({str(e)})"
+            return False, f"Errore di comunicazione: {str(e)}"
 
     def send_success_response(self, message):
         self.send_response(200)
