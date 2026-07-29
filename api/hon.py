@@ -4,12 +4,11 @@ import asyncio
 import os
 from pyhon import Hon
 
-# Le cartelle temporanee sbloccate per Vercel
+# Memoria temporanea
 os.environ["HOME"] = "/tmp"
 os.environ["XDG_CONFIG_HOME"] = "/tmp"
 os.environ["XDG_DATA_HOME"] = "/tmp"
 
-# La memoria globale
 global_hon_session = None
 global_loop = asyncio.new_event_loop()
 asyncio.set_event_loop(global_loop)
@@ -24,6 +23,7 @@ class handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         global global_hon_session
+        global global_loop
         
         try:
             content_length = int(self.headers.get('Content-Length', 0))
@@ -40,18 +40,30 @@ class handler(BaseHTTPRequestHandler):
                 self.send_error_response("Credenziali mancanti")
                 return
 
+            # Sicurezza: se il motore di rete si è chiuso, lo riapriamo
+            if global_loop.is_closed():
+                global_loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(global_loop)
+
             # --- TENTATIVO PRINCIPALE ---
             try:
                 success, message = global_loop.run_until_complete(self.control_ac(email, password, command, temp))
-            except Exception as network_error:
-                # --- AUTO-RIPARAZIONE ---
-                # Se il comando ha restituito "False" (Falso positivo), scatta questo blocco
-                global_hon_session = None
+            except Exception as e:
+                success = False
+                message = f"Errore: {str(e)}"
+            
+            # --- AUTO-RIPARAZIONE TOTALE ---
+            # Se success è False (per lista vuota, comando rifiutato o qualsiasi altro motivo)
+            if not success:
+                print(f"Rilevata memoria corrotta ({message}). Svuoto e riprovo...")
+                global_hon_session = None # Svuotiamo la RAM difettosa
+                
                 try:
+                    # Secondo tentativo pulito nello stesso clic
                     success, message = global_loop.run_until_complete(self.control_ac(email, password, command, temp))
                 except Exception as final_error:
                     success = False
-                    message = f"Errore reale: {str(final_error)}"
+                    message = f"Errore critico al ripristino: {str(final_error)}"
             
             if success:
                 self.send_success_response(message)
@@ -64,46 +76,50 @@ class handler(BaseHTTPRequestHandler):
     async def control_ac(self, email, password, command, temp):
         global global_hon_session
         
-        if global_hon_session is None:
-            global_hon_session = Hon(email, password)
-            await global_hon_session.setup()
-        
-        for appliance in global_hon_session.appliances:
-            mac = getattr(appliance, 'mac_address', '').replace(":", "-").upper()
+        try:
+            if global_hon_session is None:
+                global_hon_session = Hon(email, password)
+                await global_hon_session.setup()
             
-            if mac == "AC-15-18-B7-93-70" or getattr(appliance, 'appliance_type', '') == "AC":
+            # Controllo anti-lista vuota
+            if not global_hon_session.appliances:
+                return False, "Lista elettrodomestici sparita dalla memoria."
                 
-                res = False # Prepariamo la variabile per la "ricevuta di ritorno"
+            for appliance in global_hon_session.appliances:
+                mac = getattr(appliance, 'mac_address', '').replace(":", "-").upper()
                 
-                if command in ["on", "cool"]:
-                    if temp and "tempSel" in appliance.settings:
-                        appliance.settings["tempSel"].value = str(temp)
+                if mac == "AC-15-18-B7-93-70" or getattr(appliance, 'appliance_type', '') == "AC":
+                    res = False
                     
-                    if "turn_on" in appliance.commands:
-                        res = await appliance.commands["turn_on"].send()
-                    elif "startProgram" in appliance.commands:
-                        res = await appliance.commands["startProgram"].send()
+                    if command in ["on", "cool"]:
+                        if temp and "tempSel" in appliance.settings:
+                            appliance.settings["tempSel"].value = str(temp)
                         
-                    # IL CONTROLLO FONDAMENTALE:
-                    if not res:
-                        # Lanciamo un errore finto per far scattare l'auto-riparazione
-                        raise Exception("Falso positivo: Comando rifiutato dal server")
+                        if "turn_on" in appliance.commands:
+                            res = await appliance.commands["turn_on"].send()
+                        elif "startProgram" in appliance.commands:
+                            res = await appliance.commands["startProgram"].send()
+                            
+                        if not res:
+                            return False, "Comando di accensione rifiutato (Falso Positivo)."
+                            
+                        return True, f"Acceso a {temp}°C"
                         
-                    return True, f"Acceso a {temp}°C"
-                    
-                elif command == "off":
-                    if "turn_off" in appliance.commands:
-                        res = await appliance.commands["turn_off"].send()
-                    elif "stopProgram" in appliance.commands:
-                        res = await appliance.commands["stopProgram"].send()
+                    elif command == "off":
+                        if "turn_off" in appliance.commands:
+                            res = await appliance.commands["turn_off"].send()
+                        elif "stopProgram" in appliance.commands:
+                            res = await appliance.commands["stopProgram"].send()
+                            
+                        if not res:
+                            return False, "Comando di spegnimento rifiutato (Falso Positivo)."
+                            
+                        return True, "Spento"
                         
-                    # IL CONTROLLO FONDAMENTALE:
-                    if not res:
-                        raise Exception("Falso positivo: Comando rifiutato dal server")
-                        
-                    return True, "Spento"
-                    
-        return False, "Nessun condizionatore trovato."
+            return False, "Condizionatore non trovato nella lista."
+            
+        except Exception as e:
+            return False, f"Eccezione interna: {str(e)}"
 
     def send_success_response(self, message):
         self.send_response(200)
