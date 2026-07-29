@@ -2,9 +2,10 @@ from http.server import BaseHTTPRequestHandler
 import json
 import asyncio
 import os
+import shutil
 from pyhon import Hon
 
-# Memoria temporanea
+# La cartella temporanea per i file di cache
 os.environ["HOME"] = "/tmp"
 os.environ["XDG_CONFIG_HOME"] = "/tmp"
 os.environ["XDG_DATA_HOME"] = "/tmp"
@@ -44,25 +45,30 @@ class handler(BaseHTTPRequestHandler):
                 global_loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(global_loop)
 
-            # --- TENTATIVO PRINCIPALE (Veloce se la memoria è intatta) ---
+            # --- TENTATIVO PRINCIPALE ---
             try:
                 success, message = global_loop.run_until_complete(self.control_ac(email, password, command, temp))
             except Exception as e:
                 success = False
-                message = f"Motore corrotto: {str(e)}"
+                message = f"Errore iniziale: {str(e)}"
             
-            # --- AUTO-RIPARAZIONE PROFONDA ---
+            # --- AUTO-RIPARAZIONE PROFONDA CON LANCIAFIAMME ---
             if not success:
+                print("Biglietto o memoria corrotta. Avvio pulizia totale...")
                 
-                # 1. Buttiamo via la memoria dei dispositivi
+                # 1. Distruggiamo la RAM
                 global_hon_session = None 
                 
-                # 2. LA VERA FIX: Buttiamo via il motore di rete rotto e ne montiamo uno nuovo!
+                # 2. Distruggiamo il motore di rete
                 global_loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(global_loop)
                 
+                # 3. IL LANCIAFIAMME: Bruciamo i file temporanei con il token scaduto!
+                for cache_dir in ['/tmp/hon', '/tmp/.hon', '/tmp/pyhon']:
+                    shutil.rmtree(cache_dir, ignore_errors=True)
+                
                 try:
-                    # 3. Secondo tentativo pulito con motore nuovo (ci metterà i soliti 15s)
+                    # 4. Ora la libreria è costretta a chiedere ad Haier un Token NUOVO
                     success, message = global_loop.run_until_complete(self.control_ac(email, password, command, temp))
                 except Exception as final_error:
                     success = False
@@ -85,7 +91,7 @@ class handler(BaseHTTPRequestHandler):
                 await global_hon_session.setup()
             
             if not global_hon_session.appliances:
-                return False, "Lista sparita."
+                return False, "Lista elettrodomestici vuota."
                 
             for appliance in global_hon_session.appliances:
                 mac = getattr(appliance, 'mac_address', '').replace(":", "-").upper()
@@ -103,7 +109,7 @@ class handler(BaseHTTPRequestHandler):
                             res = await appliance.commands["startProgram"].send()
                             
                         if not res:
-                            return False, "Falso Positivo."
+                            return False, "Comando rifiutato (Falso Positivo)."
                             
                         return True, f"Acceso a {temp}°C"
                         
@@ -114,14 +120,13 @@ class handler(BaseHTTPRequestHandler):
                             res = await appliance.commands["stopProgram"].send()
                             
                         if not res:
-                            return False, "Falso Positivo."
+                            return False, "Comando rifiutato (Falso Positivo)."
                             
                         return True, "Spento"
                         
             return False, "Condizionatore non trovato."
             
         except Exception as e:
-            # Stampiamo il nome tecnico esatto dell'errore per sicurezza
             return False, f"Eccezione ({type(e).__name__}): {str(e)}"
 
     def send_success_response(self, message):
