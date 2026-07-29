@@ -40,30 +40,33 @@ class handler(BaseHTTPRequestHandler):
                 self.send_error_response("Credenziali mancanti")
                 return
 
-            # Sicurezza: se il motore di rete si è chiuso, lo riapriamo
             if global_loop.is_closed():
                 global_loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(global_loop)
 
-            # --- TENTATIVO PRINCIPALE ---
+            # --- TENTATIVO PRINCIPALE (Veloce se la memoria è intatta) ---
             try:
                 success, message = global_loop.run_until_complete(self.control_ac(email, password, command, temp))
             except Exception as e:
                 success = False
-                message = f"Errore: {str(e)}"
+                message = f"Motore corrotto: {str(e)}"
             
-            # --- AUTO-RIPARAZIONE TOTALE ---
-            # Se success è False (per lista vuota, comando rifiutato o qualsiasi altro motivo)
+            # --- AUTO-RIPARAZIONE PROFONDA ---
             if not success:
-                print(f"Rilevata memoria corrotta ({message}). Svuoto e riprovo...")
-                global_hon_session = None # Svuotiamo la RAM difettosa
+                
+                # 1. Buttiamo via la memoria dei dispositivi
+                global_hon_session = None 
+                
+                # 2. LA VERA FIX: Buttiamo via il motore di rete rotto e ne montiamo uno nuovo!
+                global_loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(global_loop)
                 
                 try:
-                    # Secondo tentativo pulito nello stesso clic
+                    # 3. Secondo tentativo pulito con motore nuovo (ci metterà i soliti 15s)
                     success, message = global_loop.run_until_complete(self.control_ac(email, password, command, temp))
                 except Exception as final_error:
                     success = False
-                    message = f"Errore critico al ripristino: {str(final_error)}"
+                    message = f"Errore critico ripristino: {str(final_error)}"
             
             if success:
                 self.send_success_response(message)
@@ -81,9 +84,8 @@ class handler(BaseHTTPRequestHandler):
                 global_hon_session = Hon(email, password)
                 await global_hon_session.setup()
             
-            # Controllo anti-lista vuota
             if not global_hon_session.appliances:
-                return False, "Lista elettrodomestici sparita dalla memoria."
+                return False, "Lista sparita."
                 
             for appliance in global_hon_session.appliances:
                 mac = getattr(appliance, 'mac_address', '').replace(":", "-").upper()
@@ -101,7 +103,7 @@ class handler(BaseHTTPRequestHandler):
                             res = await appliance.commands["startProgram"].send()
                             
                         if not res:
-                            return False, "Comando di accensione rifiutato (Falso Positivo)."
+                            return False, "Falso Positivo."
                             
                         return True, f"Acceso a {temp}°C"
                         
@@ -112,14 +114,15 @@ class handler(BaseHTTPRequestHandler):
                             res = await appliance.commands["stopProgram"].send()
                             
                         if not res:
-                            return False, "Comando di spegnimento rifiutato (Falso Positivo)."
+                            return False, "Falso Positivo."
                             
                         return True, "Spento"
                         
-            return False, "Condizionatore non trovato nella lista."
+            return False, "Condizionatore non trovato."
             
         except Exception as e:
-            return False, f"Eccezione interna: {str(e)}"
+            # Stampiamo il nome tecnico esatto dell'errore per sicurezza
+            return False, f"Eccezione ({type(e).__name__}): {str(e)}"
 
     def send_success_response(self, message):
         self.send_response(200)
