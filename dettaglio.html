@@ -408,14 +408,19 @@
         }
 
         function eseguiIscrizioni() {
-    clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${idStanzaURL}/status`);
-    clientMQTT.subscribe(topicBaseMQTT + "/mode/state");
-            clientMQTT.subscribe(topicBaseMQTT + "/target_temperature/state");
-            clientMQTT.subscribe(topicBaseMQTT + "/current_temperature/state");
-            clientMQTT.subscribe(topicBaseMQTT + "/fan_mode/state");
-            clientMQTT.subscribe(topicBaseMQTT + "/swing_mode/state");
-            clientMQTT.subscribe(`vincenzo_clima_segreto_7788/switch/${luceSwitchName}/state`);
-        }
+    // Iscrizione allo stato online/offline del condizionatore
+    clientMQTT.subscribe(`vincenzo_clima_segreto_7788/cameretta/status`);
+    
+    // Iscrizione ai singoli stati del clima (temperatura, modalità, ventola, alette, ecc.)
+    clientMQTT.subscribe(`${topicBaseMQTT}/mode/state`);
+    clientMQTT.subscribe(`${topicBaseMQTT}/target_temperature/state`);
+    clientMQTT.subscribe(`${topicBaseMQTT}/current_temperature/state`);
+    clientMQTT.subscribe(`${topicBaseMQTT}/fan_mode/state`);
+    clientMQTT.subscribe(`${topicBaseMQTT}/swing_mode/state`);
+    
+    // Iscrizione alla luce del display
+    clientMQTT.subscribe(`vincenzo_clima_segreto_7788/switch/${luceSwitchName}/state`);
+}
 
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();

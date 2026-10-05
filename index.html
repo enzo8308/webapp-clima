@@ -198,9 +198,9 @@
 
         function subscribeStanzaMQTT(id, topic) {
     if (clientMQTT && clientMQTT.connected) { 
-        clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/mode/state`); 
-        clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/target_temperature/state`); 
-        clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${id}/status`); 
+        clientMQTT.subscribe(`vincenzo_clima_segreto_7788/status`); 
+        clientMQTT.subscribe(`${topicBaseMQTT}/target_temperature/state`);
+        clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${idStanzaURL}/status`);
     }
 }
 
