@@ -364,7 +364,7 @@
 
         let climaAcceso = false; let gradiAttuali = 24; let isOnline = false; let luceAccesa = false;
         
-        const clientMQTT = mqtt.connect("ws://test.mosquitto.org:8083/mqtt", { clientId: "webapp_det_" + Math.random().toString(16).substring(2, 10), clean: true });
+        const clientMQTT = mqtt.connect("wss://test.mosquitto.org:8083/mqtt", { clientId: "webapp_det_" + Math.random().toString(16).substring(2, 10), clean: true });
 
         onAuthStateChanged(auth, (user) => { 
             if (!user) {

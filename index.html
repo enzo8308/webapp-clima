@@ -192,7 +192,7 @@
 
         window.apriDettagli = function(stanzaId) { if (window.isDragging) return; window.location.href = `dettaglio.html?stanza=${stanzaId}`; }
 
-        let clientMQTT; try { clientMQTT = mqtt.connect("ws://test.mosquitto.org:8083/mqtt", { clientId: "webapp_home_" + Math.random().toString(16).substring(2, 10), clean: true }); } catch(e) { console.warn("MQTT non avviato"); }
+        let clientMQTT; try { clientMQTT = mqtt.connect("wss://test.mosquitto.org:8083/mqtt", { clientId: "webapp_home_" + Math.random().toString(16).substring(2, 10), clean: true }); } catch(e) { console.warn("MQTT non avviato"); }
 
         if(clientMQTT) { clientMQTT.on('connect', function () { Object.keys(window.stanzeState).forEach(id => subscribeStanzaMQTT(id, window.stanzeState[id].topic)); }); }
 
