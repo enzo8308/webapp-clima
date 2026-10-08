@@ -349,10 +349,8 @@
         let climaAcceso = false; let gradiAttuali = 24; let isOnline = false; let luceAccesa = false;
 
 
-        const clientMQTT = mqtt.connect("wss://ta501111.ala.eu-central-1.emqxsl.com:8084/mqtt", {
-    clientId: "webapp_detail_" + Math.random().toString(16).substring(2, 10),
-    username: "vincenzo_clima",
-    password: "S1c9@8r3a_1",
+        const clientMQTT = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
+    clientId: "webapp_detail_" + Math.random().toString(16).substring(2, 14),
     clean: true
 });
 
@@ -374,7 +372,7 @@
                     
                     if (miaStanza) {
                         document.getElementById('room-name-display').innerText = miaStanza.nome;
-                        topicBaseMQTT = `vincenzo_clima_segreto_7788/climate/${miaStanza.topic}`;
+                        topicBaseMQTT = `clima_4xyog5jds3qz1vcf5yf21zdf/climate/${miaStanza.topic}`;
                         
                         // Avvia la connessione MQTT con il nuovo topic
                         avviaConnessioneMQTT();
@@ -401,9 +399,9 @@
         function eseguiIscrizioni() {
             // Stato Online specifico o master
             if (idStanzaURL === 'cameretta') {
-                clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
+                clientMQTT.subscribe("clima_4xyog5jds3qz1vcf5yf21zdf/status");
             } else {
-                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${idStanzaURL}/status`);
+                clientMQTT.subscribe(`clima_4xyog5jds3qz1vcf5yf21zdf/${idStanzaURL}/status`);
             }
             
             // Comandi clima specifici
@@ -412,7 +410,7 @@
             clientMQTT.subscribe(topicBaseMQTT + "/current_temperature/state");
             clientMQTT.subscribe(topicBaseMQTT + "/fan_mode/state");
             clientMQTT.subscribe(topicBaseMQTT + "/swing_mode/state");
-            clientMQTT.subscribe("vincenzo_clima_segreto_7788/switch/luce_display/state");
+            clientMQTT.subscribe("clima_4xyog5jds3qz1vcf5yf21zdf/switch/luce_display/state");
         }
 
         // 3. GESTISCI I MESSAGGI IN ARRIVO
@@ -545,7 +543,7 @@
         // Caso isolato per la luce (è uno switch a parte, non dentro climate)
         window.toggleLuce = function() { 
             if (!isOnline) return;
-            clientMQTT.publish("vincenzo_clima_segreto_7788/switch/luce_display/command", luceAccesa ? "OFF" : "ON"); 
+            clientMQTT.publish("clima_4xyog5jds3qz1vcf5yf21zdf/switch/luce_display/command", luceAccesa ? "OFF" : "ON"); 
         }
 
         // ================= FUNZIONI GRAFICHE =================

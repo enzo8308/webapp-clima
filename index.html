@@ -235,24 +235,22 @@
         }
 
 
-const clientMQTT = mqtt.connect("wss://ta501111.ala.eu-central-1.emqxsl.com:8084/mqtt", {
-    clientId: "webapp_home_" + Math.random().toString(16).substring(2, 10),
-    username: "vincenzo_clima",      // <--- Inserisci lo Username creato su EMQX
-    password: "S1c9@8r3a_1",  // <--- Inserisci la Password creata su EMQX
+const clientMQTT = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
+    clientId: "webapp_home_" + Math.random().toString(16).substring(2, 14),
     clean: true
 });
 
         clientMQTT.on('connect', function () {
-            clientMQTT.subscribe("vincenzo_clima_segreto_7788/status");
-            clientMQTT.subscribe("vincenzo_clima_segreto_7788/sensor/segnale_wifi_cameretta/state");
+            clientMQTT.subscribe("clima_4xyog5jds3qz1vcf5yf21zdf/status");
+            clientMQTT.subscribe("clima_4xyog5jds3qz1vcf5yf21zdf/sensor/segnale_wifi_cameretta/state");
             Object.keys(window.stanzeState).forEach(id => subscribeStanzaMQTT(id, window.stanzeState[id].topic));
         });
 
         function subscribeStanzaMQTT(id, topic) {
             if (clientMQTT && clientMQTT.connected) {
-                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/mode/state`);
-                clientMQTT.subscribe(`vincenzo_clima_segreto_7788/climate/${topic}/target_temperature/state`);
-                if (id !== 'cameretta') clientMQTT.subscribe(`vincenzo_clima_segreto_7788/${id}/status`);
+                clientMQTT.subscribe(`clima_4xyog5jds3qz1vcf5yf21zdf/climate/${topic}/mode/state`);
+                clientMQTT.subscribe(`clima_4xyog5jds3qz1vcf5yf21zdf/climate/${topic}/target_temperature/state`);
+                if (id !== 'cameretta') clientMQTT.subscribe(`clima_4xyog5jds3qz1vcf5yf21zdf/${id}/status`);
             }
         }
 
@@ -394,11 +392,11 @@ const clientMQTT = mqtt.connect("wss://ta501111.ala.eu-central-1.emqxsl.com:8084
 
         clientMQTT.on('message', function (topic, message) {
             const payload = message.toString().toLowerCase();
-            if (topic === "vincenzo_clima_segreto_7788/status") {
+            if (topic === "clima_4xyog5jds3qz1vcf5yf21zdf/status") {
                 if (window.stanzeState.cameretta) { window.stanzeState.cameretta.online = (payload === "online"); window.updateRoomStatusDOM('cameretta'); }
             }
             Object.keys(window.stanzeState).forEach(id => {
-                if (topic === `vincenzo_clima_segreto_7788/${id}/status`) { window.stanzeState[id].online = (payload === "online"); window.updateRoomStatusDOM(id); }
+                if (topic === `clima_4xyog5jds3qz1vcf5yf21zdf/${id}/status`) { window.stanzeState[id].online = (payload === "online"); window.updateRoomStatusDOM(id); }
                 const top = window.stanzeState[id].topic;
                 if (topic.includes(`${top}/mode/state`)) { window.stanzeState[id].mode = payload; window.aggiornaUIStanza(id); }
                 if (topic.includes(`${top}/target_temperature/state`)) { const t = parseFloat(payload); if(!isNaN(t)) window.stanzeState[id].temp = t; window.aggiornaUIStanza(id); }
@@ -427,7 +425,7 @@ const clientMQTT = mqtt.connect("wss://ta501111.ala.eu-central-1.emqxsl.com:8084
 
         window.togglePowerHome = function(id) {
             const s = window.stanzeState[id]; if(!s) return; if(!s.online) { alert("Il condizionatore è Offline!"); return; }
-            clientMQTT.publish(`vincenzo_clima_segreto_7788/climate/${s.topic}/mode/command`, (s.mode === "off") ? "cool" : "off");
+            clientMQTT.publish(`clima_4xyog5jds3qz1vcf5yf21zdf/climate/${s.topic}/mode/command`, (s.mode === "off") ? "cool" : "off");
         };
     </script>
 </body>
