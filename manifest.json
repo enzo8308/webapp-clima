@@ -1,16 +1,33 @@
 {
   "name": "Smart Clima Avagliano",
   "short_name": "Smart Clima",
+  "description": "Gestione climatizzatori di casa",
+  "id": "./index.html",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait-primary",
+  "lang": "it",
   "background_color": "#f0f5fa",
   "theme_color": "#061b30",
-  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "logo.png",
-      "sizes": "any",
-      "type": "image/png"
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

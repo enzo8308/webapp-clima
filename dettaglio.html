@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dettaglio Climatizzatore</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#061b30">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Smart Clima">
+    <link rel="apple-touch-icon" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -347,6 +354,7 @@
         const idStanzaURL = urlParams.get('stanza') || 'cameretta'; // Cerca '?stanza=soggiorno'
 
         let climaAcceso = false; let gradiAttuali = 24; let isOnline = false; let luceAccesa = false;
+        let luceNome = "luce_display"; // switch luce: cameretta = luce_display, altre stanze = luce_display_<stanza>
 
 
         const clientMQTT = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
@@ -373,6 +381,7 @@
                     if (miaStanza) {
                         document.getElementById('room-name-display').innerText = miaStanza.nome;
                         topicBaseMQTT = `clima_4xyog5jds3qz1vcf5yf21zdf/climate/${miaStanza.topic}`;
+                        luceNome = (idStanzaURL === 'cameretta') ? 'luce_display' : 'luce_display_' + String(miaStanza.topic).replace('haier_tundra_', '');
                         
                         // Avvia la connessione MQTT con il nuovo topic
                         avviaConnessioneMQTT();
@@ -410,7 +419,7 @@
             clientMQTT.subscribe(topicBaseMQTT + "/current_temperature/state");
             clientMQTT.subscribe(topicBaseMQTT + "/fan_mode/state");
             clientMQTT.subscribe(topicBaseMQTT + "/swing_mode/state");
-            clientMQTT.subscribe("clima_4xyog5jds3qz1vcf5yf21zdf/switch/luce_display/state");
+            clientMQTT.subscribe(`clima_4xyog5jds3qz1vcf5yf21zdf/switch/${luceNome}/state`);
         }
 
         // 3. GESTISCI I MESSAGGI IN ARRIVO
@@ -500,7 +509,7 @@
                 if(payload === "vertical") lbl = "Oscilla"; if(payload === "horizontal") lbl = "Extra Su"; if(payload === "vertical_down") lbl = "Extra Giù";
                 document.getElementById('lbl-tile-swing').innerText = lbl;
             }
-            else if (topic.includes("/luce_display/state")) {
+            else if (topic.endsWith(`/switch/${luceNome}/state`)) {
                 luceAccesa = (payload === "on");
                 const btnBase = document.querySelector('.control-btn-base.btn-light');
                 const tileLight = document.getElementById('tile-light');
@@ -543,7 +552,7 @@
         // Caso isolato per la luce (è uno switch a parte, non dentro climate)
         window.toggleLuce = function() { 
             if (!isOnline) return;
-            clientMQTT.publish("clima_4xyog5jds3qz1vcf5yf21zdf/switch/luce_display/command", luceAccesa ? "OFF" : "ON"); 
+            clientMQTT.publish(`clima_4xyog5jds3qz1vcf5yf21zdf/switch/${luceNome}/command`, luceAccesa ? "OFF" : "ON"); 
         }
 
         // ================= FUNZIONI GRAFICHE =================
@@ -588,6 +597,13 @@
                 if(btn.dataset.val === activeValue) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
+        }
+    </script>
+
+    <!-- Attivazione PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.warn('Errore SW', err)); });
         }
     </script>
 </body>
