@@ -359,8 +359,20 @@
 
         const clientMQTT = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
     clientId: "webapp_detail_" + Math.random().toString(16).substring(2, 14),
-    clean: true
+    clean: true,
+    keepalive: 20,
+    reconnectPeriod: 1000
 });
+
+        // Dopo ogni riconnessione richiedo di nuovo lo stato (i messaggi "retained" arrivano a ogni iscrizione)
+        clientMQTT.on('connect', function () { if (topicBaseMQTT) eseguiIscrizioni(); });
+        let nascostaDa = 0;
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') { nascostaDa = Date.now(); return; }
+            if (!clientMQTT.connected || (Date.now() - nascostaDa) > 15000) { clientMQTT.reconnect(); }
+            else if (topicBaseMQTT) { eseguiIscrizioni(); }
+        });
+        window.addEventListener('online', function () { clientMQTT.reconnect(); });
 
 
 

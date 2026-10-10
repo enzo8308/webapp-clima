@@ -242,24 +242,20 @@
         }
 
 
-const clientMQTT = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
-    clientId: "webapp_home_" + Math.random().toString(16).substring(2, 14),
-    clean: true
-});
+const PREFIX_MQTT = "clima_4xyog5jds3qz1vcf5yf21zdf";
+        window.mqttCache = {};   // ultimo messaggio ricevuto per ogni topic, anche prima che Firebase abbia caricato le stanze
 
-        clientMQTT.on('connect', function () {
-            clientMQTT.subscribe("clima_4xyog5jds3qz1vcf5yf21zdf/status");
-            clientMQTT.subscribe("clima_4xyog5jds3qz1vcf5yf21zdf/sensor/segnale_wifi_cameretta/state");
-            Object.keys(window.stanzeState).forEach(id => subscribeStanzaMQTT(id, window.stanzeState[id].topic));
+        const clientMQTT = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
+            clientId: "webapp_home_" + Math.random().toString(16).substring(2, 14),
+            clean: true,
+            keepalive: 20,        // si accorge in fretta di una connessione morta (es. dopo il background del telefono)
+            reconnectPeriod: 1000
         });
 
-        function subscribeStanzaMQTT(id, topic) {
-            if (clientMQTT && clientMQTT.connected) {
-                clientMQTT.subscribe(`clima_4xyog5jds3qz1vcf5yf21zdf/climate/${topic}/mode/state`);
-                clientMQTT.subscribe(`clima_4xyog5jds3qz1vcf5yf21zdf/climate/${topic}/target_temperature/state`);
-                if (id !== 'cameretta') clientMQTT.subscribe(`clima_4xyog5jds3qz1vcf5yf21zdf/${id}/status`);
-            }
-        }
+        // Una sola iscrizione a tutto il prefisso: stato e online/offline di tutte le stanze.
+        // Il broker consegna subito i messaggi "retained" a ogni nuova iscrizione.
+        function iscriviTutto() { clientMQTT.subscribe(`${PREFIX_MQTT}/#`); }
+        clientMQTT.on('connect', iscriviTutto);
 
         const docRef = doc(db, "impostazioni", "stanze_config");
         onSnapshot(docRef, (docSnap) => {
@@ -275,8 +271,8 @@ const clientMQTT = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
                 sortedRooms.forEach((room) => {
                     const id = room.id;
                     if(!window.stanzeState[id]) {
-                        window.stanzeState[id] = { online: false, mode: "off", temp: 24, topic: room.topic, icon: room.icon, nome: room.nome };
-                        subscribeStanzaMQTT(id, room.topic);
+                        window.stanzeState[id] = { online: null, mode: "off", temp: 24, topic: room.topic, icon: room.icon, nome: room.nome };
+                        setTimeout(() => { const st = window.stanzeState[id]; if (st && st.online === null) { st.online = false; window.updateRoomStatusDOM(id); } }, 6000);
                     } else {
                         window.stanzeState[id].nome = room.nome;
                         window.stanzeState[id].icon = room.icon;
@@ -304,6 +300,7 @@ const clientMQTT = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
                 });
                 
                 initDragAndDropLogic(); 
+                Object.keys(window.mqttCache).forEach(t => window.applicaMessaggioMQTT(t, window.mqttCache[t]));
             } else {
                 const defaultStanze = {
                     cameretta: { nome: "Cameretta", icon: "fa-rocket", topic: "haier_tundra_cameretta", ordine: 0 },
@@ -392,23 +389,40 @@ const clientMQTT = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
         window.updateRoomStatusDOM = function(id) {
             const s = window.stanzeState[id]; if (!s) return;
             const badge = document.getElementById(`badge-${id}`); const dot = document.getElementById(`dot-${id}`);
-            if(badge) badge.innerText = s.online ? "Online" : "Offline";
-            if(dot) dot.className = s.online ? "status-dot online" : "status-dot";
+            if(badge) badge.innerText = (s.online === true) ? "Online" : (s.online === null ? "Connessione..." : "Offline");
+            if(dot) dot.className = (s.online === true) ? "status-dot online" : "status-dot";
             window.aggiornaUIStanza(id);
         }
 
-        clientMQTT.on('message', function (topic, message) {
-            const payload = message.toString().toLowerCase();
-            if (topic === "clima_4xyog5jds3qz1vcf5yf21zdf/status") {
-                if (window.stanzeState.cameretta) { window.stanzeState.cameretta.online = (payload === "online"); window.updateRoomStatusDOM('cameretta'); }
+        window.applicaMessaggioMQTT = function (topic, payload) {
+            if (topic === `${PREFIX_MQTT}/status`) {      // la cameretta usa il topic di stato "generale"
+                const c = window.stanzeState.cameretta;
+                if (c) { c.online = (payload === "online"); window.updateRoomStatusDOM('cameretta'); }
+                return;
             }
             Object.keys(window.stanzeState).forEach(id => {
-                if (topic === `clima_4xyog5jds3qz1vcf5yf21zdf/${id}/status`) { window.stanzeState[id].online = (payload === "online"); window.updateRoomStatusDOM(id); }
-                const top = window.stanzeState[id].topic;
-                if (topic.includes(`${top}/mode/state`)) { window.stanzeState[id].mode = payload; window.aggiornaUIStanza(id); }
-                if (topic.includes(`${top}/target_temperature/state`)) { const t = parseFloat(payload); if(!isNaN(t)) window.stanzeState[id].temp = t; window.aggiornaUIStanza(id); }
+                const s = window.stanzeState[id];
+                if (topic === `${PREFIX_MQTT}/${id}/status`) { s.online = (payload === "online"); window.updateRoomStatusDOM(id); }
+                if (topic === `${PREFIX_MQTT}/climate/${s.topic}/mode/state`) { s.mode = payload; window.aggiornaUIStanza(id); }
+                if (topic === `${PREFIX_MQTT}/climate/${s.topic}/target_temperature/state`) { const t = parseFloat(payload); if (!isNaN(t)) s.temp = t; window.aggiornaUIStanza(id); }
             });
+        };
+
+        clientMQTT.on('message', function (topic, message) {
+            const payload = message.toString().toLowerCase();
+            window.mqttCache[topic] = payload;
+            window.applicaMessaggioMQTT(topic, payload);
         });
+
+        // Quando l'app torna in primo piano la connessione puo' essere morta: la riapro e chiedo di nuovo
+        // lo stato, cosi' le stanze tornano online subito invece di restare "Offline".
+        let nascostaDa = 0;
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') { nascostaDa = Date.now(); return; }
+            if (!clientMQTT.connected || (Date.now() - nascostaDa) > 15000) { clientMQTT.reconnect(); }
+            else { clientMQTT.unsubscribe(`${PREFIX_MQTT}/#`, function () { iscriviTutto(); }); }
+        });
+        window.addEventListener('online', function () { clientMQTT.reconnect(); });
 
         window.aggiornaUIStanza = function(id) {
             const card = document.getElementById(`card-${id}`); if(!card) return;
@@ -431,7 +445,7 @@ const clientMQTT = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
         }
 
         window.togglePowerHome = function(id) {
-            const s = window.stanzeState[id]; if(!s) return; if(!s.online) { alert("Il condizionatore è Offline!"); return; }
+            const s = window.stanzeState[id]; if(!s) return; if(s.online !== true) { alert(s.online === null ? "Sto ancora cercando il condizionatore, riprova tra un attimo." : "Il condizionatore è Offline!"); return; }
             clientMQTT.publish(`clima_4xyog5jds3qz1vcf5yf21zdf/climate/${s.topic}/mode/command`, (s.mode === "off") ? "cool" : "off");
         };
     </script>
